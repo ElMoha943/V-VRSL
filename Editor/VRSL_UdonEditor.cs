@@ -1,25 +1,11 @@
 using UnityEngine;
-using UnityEngine.UI;
-using System.Threading;
-
-using UdonSharp;
-using VRC.SDKBase;
-using VRC.Udon;
-using VRC.SDKBase.Midi;
-
 #if UNITY_EDITOR && !COMPILER_UDONSHARP
 using UnityEditor;
 using UnityEngine.SceneManagement;
 using System;
-using System.IO;
 using System.Collections.Generic;
-
 using UdonSharpEditor;
-using VRC.Udon.Common;
-using VRC.Udon.Common.Interfaces;
-
 #endif
-
 
 namespace VRSL.EditorScripts
 {
@@ -28,15 +14,73 @@ namespace VRSL.EditorScripts
     public class VRSL_UdonEditor : Editor
     {
         public static Texture logo;
-       // public static string ver = "VR Stage Lighting ver:" + " <b><color=#6a15ce> 2.4</color></b>";
+
         public void OnEnable() 
         {
             logo = Resources.Load("VRStageLighting-Logo") as Texture;
         }
+
+        protected void RegisterFixtureEditor(Action hierarchyChanged)
+        {
+            OnEnable();
+            EditorApplication.hierarchyChanged += hierarchyChanged;
+            SceneView.duringSceneGui += OnSceneGUI;
+        }
+
+        protected void UnregisterFixtureEditor(Action hierarchyChanged)
+        {
+            EditorApplication.hierarchyChanged -= hierarchyChanged;
+            SceneView.duringSceneGui -= OnSceneGUI;
+        }
+
+        protected virtual void OnSceneGUI(SceneView sceneView)
+        {
+        }
+
+        protected void SafeUpdateFixture<TFixture>(TFixture fixture, Action<TFixture> updateFixture)
+            where TFixture : UnityEngine.Object
+        {
+            try
+            {
+                if(fixture != null)
+                {
+                    updateFixture(fixture);
+                }
+            }
+            catch(NullReferenceException e)
+            {
+                e.ToString();
+            }
+        }
+
+        protected void ApplyModifiedPropertiesAndUpdateTargets<TFixture>(Action<TFixture> updateFixture)
+            where TFixture : UnityEngine.Object
+        {
+            serializedObject.ApplyModifiedProperties();
+            foreach(UnityEngine.Object obj in targets)
+            {
+                TFixture fixture = obj as TFixture;
+                if(fixture != null)
+                {
+                    updateFixture(fixture);
+                }
+            }
+        }
+
+        protected static GUIStyle CreateLabelStyle(int fontSize, FontStyle fontStyle, Color textColor)
+        {
+            GUIStyle style = new GUIStyle();
+            style.fontSize = fontSize;
+            style.fontStyle = fontStyle;
+            style.normal.textColor = textColor;
+            return style;
+        }
+
         public static string GetVersion()
         {
             return "3.0.0-Alpha";
         }
+
         public static void DrawLogo()
         {
             Vector2 contentOffset = new Vector2(0f, -2f);
@@ -48,6 +92,7 @@ namespace VRSL.EditorScripts
             var rect = GUILayoutUtility.GetRect(300f, 140f, style);
             GUI.Box(rect, logo,style);
         }
+
         private static Rect DrawShurikenCenteredTitle(string title, Vector2 contentOffset, int HeaderHeight)
         {
             var style = new GUIStyle("ShurikenModuleTitle");
@@ -62,9 +107,52 @@ namespace VRSL.EditorScripts
             GUI.Box(rect, title, style);
             return rect;
         }
+        
         public static void ShurikenHeaderCentered(string title)
         {
             DrawShurikenCenteredTitle(title, new Vector2(0f, -2f), 22);
+        }
+    }
+    #endif
+
+    #if UNITY_EDITOR && !COMPILER_UDONSHARP
+    [CanEditMultipleObjects]
+    public abstract class VRSL_FixtureUdonEditor<TFixture> : VRSL_UdonEditor
+        where TFixture : UnityEngine.Object
+    {
+        public new void OnEnable()
+        {
+            RegisterFixtureEditor(HierarchyChanged);
+            OnFixtureEditorEnabled();
+        }
+
+        void OnDisable()
+        {
+            UnregisterFixtureEditor(HierarchyChanged);
+        }
+
+        protected virtual void OnFixtureEditorEnabled()
+        {
+        }
+
+        void HierarchyChanged()
+        {
+            UpdateSettings(target as TFixture);
+        }
+
+        protected void UpdateSettings(TFixture fixture)
+        {
+            SafeUpdateFixture(fixture, UpdateFixtureProperties);
+        }
+
+        protected abstract void UpdateFixtureProperties(TFixture fixture);
+
+        protected void ApplyChangedPropertiesToTargets()
+        {
+            if(EditorGUI.EndChangeCheck())
+            {
+                ApplyModifiedPropertiesAndUpdateTargets<TFixture>(UpdateSettings);
+            }
         }
     }
     #endif
@@ -73,7 +161,7 @@ namespace VRSL.EditorScripts
     #if !COMPILER_UDONSHARP && UNITY_EDITOR
     [CustomEditor(typeof(VRStageLighting_DMX_Static))]
     [CanEditMultipleObjects]
-    public class VRStageLighting_DMX_Static_Editor : VRSL_UdonEditor
+    public class VRStageLighting_DMX_Static_Editor : VRSL_FixtureUdonEditor<VRStageLighting_DMX_Static>
     {
         GUIStyle l, I;
         GUIContent colorLabel;
@@ -82,42 +170,30 @@ namespace VRSL.EditorScripts
     //  SerializedProperty _globalIntensity;
         public static GUIStyle InfoLabel()
         {
-            GUIStyle g = new GUIStyle();
-            g.fontSize = 13;
-            g.fontStyle = FontStyle.Italic;
-            g.normal.textColor = Color.white;
-            return g;
+            return CreateLabelStyle(13, FontStyle.Italic, Color.white);
         }
 
         public static GUIStyle SectionLabel()
         {
-            GUIStyle g = new GUIStyle();
-            g.fontSize = 15;
-            g.fontStyle = FontStyle.Bold;
-            g.normal.textColor = Color.white;
-            return g;
+            return CreateLabelStyle(15, FontStyle.Bold, Color.white);
         }
-        public new void OnEnable() 
+
+        protected override void OnFixtureEditorEnabled()
         {
-            base.OnEnable();
             l = SectionLabel();
             I = InfoLabel();
             colorLabel = new GUIContent();
             colorLabel.text = "Emission Color";
         //  _globalIntensity = serializedObject.FindProperty("globalIntensity");
-        EditorApplication.hierarchyChanged += HierarchyChanged;
-        SceneView.duringSceneGui += this.OnSceneGUI;
         GetPanel();
         }
-        void OnSceneGUI(SceneView sceneView)
-        {
 
-        }
         string[] GetFixtureOptions(string fixtureDefGUID)
         {
           VRSL_FixtureDefinitions fixDefAsset = (VRSL_FixtureDefinitions) AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(fixtureDefGUID), typeof(VRSL_FixtureDefinitions));
           return fixDefAsset.GetNames();
         }
+
         public void GetPanel()
         {
             List<GameObject> sceneObjects = GetAllObjectsOnlyInScene();
@@ -146,32 +222,11 @@ namespace VRSL.EditorScripts
             return objectsInScene;
         }            
     
-        void OnDisable( )
+        protected override void UpdateFixtureProperties(VRStageLighting_DMX_Static fixture)
         {
-            EditorApplication.hierarchyChanged -= HierarchyChanged;
-            SceneView.duringSceneGui -= this.OnSceneGUI;
+            fixture._SetProps();
+            fixture._UpdateInstancedProperties();
         }
-        private void HierarchyChanged()
-        {
-            VRStageLighting_DMX_Static fixture = (VRStageLighting_DMX_Static)target;
-            UpdateSettings(fixture);
-        }
-        void UpdateSettings(VRStageLighting_DMX_Static fixture)
-        {
-            try{
-                if(fixture != null)
-                {
-                    fixture._SetProps();
-                    fixture._UpdateInstancedProperties();
-                }
-            }
-            catch(NullReferenceException e)
-            {
-                e.ToString();
-            }
-        }
-
-
 
         public override void OnInspectorGUI()
         {
@@ -304,15 +359,143 @@ namespace VRSL.EditorScripts
             
             SerializedProperty meshRends = serializedObject.FindProperty("objRenderers");
             EditorGUILayout.PropertyField(meshRends, true);
-            if(EditorGUI.EndChangeCheck())
+            ApplyChangedPropertiesToTargets();
+        }
+    }
+    #endif
+
+    #if !COMPILER_UDONSHARP && UNITY_EDITOR
+    [CanEditMultipleObjects]
+    public abstract class VRSL_AudioLinkUdonEditor<TFixture> : VRSL_FixtureUdonEditor<TFixture>
+        where TFixture : UnityEngine.Object
+    {
+        protected static GUIStyle SectionLabel()
+        {
+            return CreateLabelStyle(14, FontStyle.Bold, new Color(0.8f, 0.8f, 0.8f));
+        }
+
+        protected void DrawEditorHeader()
+        {
+            DrawLogo();
+            ShurikenHeaderCentered(GetVersion());
+            EditorGUILayout.Space();
+            EditorGUILayout.Space();
+        }
+
+        protected void DrawSection(string title)
+        {
+            EditorGUILayout.Space();
+            DrawGuiLine();
+            EditorGUILayout.Space();
+            EditorGUILayout.LabelField(title, SectionLabel());
+        }
+
+        protected void DrawProperty(string propertyName, string label, string tooltip = "", bool includeChildren = false)
+        {
+            SerializedProperty property = serializedObject.FindProperty(propertyName);
+            if(property == null)
             {
-                serializedObject.ApplyModifiedProperties();
-                foreach(UnityEngine.Object obj in targets)
+                return;
+            }
+
+            EditorGUILayout.PropertyField(property, new GUIContent(label, tooltip), includeChildren);
+        }
+
+        protected SerializedProperty DrawAndGetProperty(string propertyName, string label, string tooltip = "", bool includeChildren = false)
+        {
+            SerializedProperty property = serializedObject.FindProperty(propertyName);
+            if(property == null)
+            {
+                return null;
+            }
+
+            EditorGUILayout.PropertyField(property, new GUIContent(label, tooltip), includeChildren);
+            return property;
+        }
+
+        protected void DrawAudioLinkOptions()
+        {
+            DrawSection("AudioLink Settings");
+            DrawProperty("enableAudioLink", "Enable AudioLink", "Enable or disable AudioLink reaction for this fixture.");
+            DrawProperty("band", "Band", "The frequency band of the spectrum to react to.");
+            DrawProperty("delay", "Delay", "The level of delay to add to the reaction.");
+            DrawProperty("bandMultiplier", "Band Multiplier", "Multiplier for the sensitivity of the reaction.");
+            DrawProperty("enableColorChord", "Enable Color Chord", "Enable ColorChord tinting of the light emission.");
+        }
+
+        protected void DrawGeneralOptions(bool drawComponentIntensityControls)
+        {
+            DrawSection("General Settings");
+            DrawProperty("globalIntensity", "Global Intensity", "Sets the overall intensity of the shader.");
+            DrawFinalIntensityOptions(drawComponentIntensityControls);
+            DrawProperty("lightColorTint", "Emission Color", "The main color of the light.");
+        }
+
+        protected void DrawFinalIntensityOptions(bool drawComponentIntensityControls)
+        {
+            if(drawComponentIntensityControls)
+            {
+                SerializedProperty componentMode = DrawAndGetProperty("finalIntensityComponentMode", "Control Component Intensities", "Choose between setting the final intensity globally or per mesh component.");
+                if(componentMode != null && componentMode.boolValue)
                 {
-                    VRStageLighting_DMX_Static f = (VRStageLighting_DMX_Static)obj;
-                    UpdateSettings(f);
+                    EditorGUI.indentLevel++;
+                    DrawProperty("finalIntensityVolumetric", "Volumetric Intensity", "Sets the maximum brightness for volumetric meshes only.");
+                    DrawProperty("finalIntensityProjection", "Projection Intensity", "Sets the maximum brightness for projection meshes only.");
+                    DrawProperty("finalIntensityFixture", "Fixture/Other Intensity", "Sets the maximum brightness for all other meshes.");
+                    EditorGUI.indentLevel--;
+                    return;
                 }
-            //EditorGUIUtility.LookLikeControls();
+            }
+
+            DrawProperty("finalIntensity", "Final Intensity", "Sets the maximum brightness value of Global Intensity.");
+        }
+
+        protected void DrawColorSamplingOptions()
+        {
+            DrawSection("Color Sampling Settings");
+            SerializedProperty colorSampling = DrawAndGetProperty("enableColorTextureSampling", "Enable Color Texture Sampling", "Sample a separate texture for the light color.");
+            if(colorSampling != null && colorSampling.boolValue)
+            {
+                EditorGUI.indentLevel++;
+                DrawProperty("traditionalColorTextureSampling", "Traditional Color Sampling", "Use traditional color sampling instead of white to black conversion.");
+                DrawProperty("textureSamplingCoordinates", "Texture Sampling Coordinates", "The UV coordinates to sample the color texture from.");
+                EditorGUI.indentLevel--;
+            }
+
+            SerializedProperty themeSampling = DrawAndGetProperty("enableThemeColorSampling", "Enable Theme Color Sampling", "Enable AudioLink theme color sampling.");
+            if(themeSampling != null && themeSampling.boolValue)
+            {
+                EditorGUI.indentLevel++;
+                DrawProperty("themeColorTarget", "Theme Color Target", "Theme color to sample from.");
+                EditorGUI.indentLevel--;
+            }
+        }
+
+        protected void DrawMeshOptions()
+        {
+            DrawSection("Mesh Settings");
+            DrawProperty("objRenderers", "Object Renderers", "The meshes used to make up the light.", true);
+        }
+
+        protected void DrawConeOptions(string sectionTitle)
+        {
+            DrawSection(sectionTitle);
+            DrawProperty("coneWidth", "Cone Width", "Controls the radius of the light cone.");
+            DrawProperty("coneLength", "Cone Length", "Controls the length of the light cone.");
+            DrawProperty("maxConeLength", "Max Cone Length", "Controls the maximum mesh length of the light cone.");
+        }
+
+        private void DrawGuiLine(int height = 1)
+        {
+            try
+            {
+                Rect rect = EditorGUILayout.GetControlRect(false, height);
+                rect.height = height;
+                EditorGUI.DrawRect(rect, new Color(0.5f, 0.5f, 0.5f, 1));
+            }
+            catch(Exception e)
+            {
+                e.GetType();
             }
         }
     }
@@ -321,72 +504,46 @@ namespace VRSL.EditorScripts
     #if !COMPILER_UDONSHARP && UNITY_EDITOR
     [CustomEditor(typeof(VRStageLighting_AudioLink_Laser))]
     [CanEditMultipleObjects]
-    public class VRStageLighting_AudioLink_Laser_Editor : VRSL_UdonEditor
+    public class VRStageLighting_AudioLink_Laser_Editor : VRSL_AudioLinkUdonEditor<VRStageLighting_AudioLink_Laser>
     {
-
-        void OnSceneGUI(SceneView sceneView)
+        protected override void UpdateFixtureProperties(VRStageLighting_AudioLink_Laser fixture)
         {
-
-        }
-
-        new void OnEnable( )
-        {
-            base.OnEnable();
-            EditorApplication.hierarchyChanged += HierarchyChanged;
-            SceneView.duringSceneGui += this.OnSceneGUI;
-        }
-    
-        void OnDisable( )
-        {
-            EditorApplication.hierarchyChanged -= HierarchyChanged;
-            SceneView.duringSceneGui -= this.OnSceneGUI;
-        }
-
-        private void HierarchyChanged( )
-        {
-            VRStageLighting_AudioLink_Laser fixture = (VRStageLighting_AudioLink_Laser)target;
-            UpdateSettings(fixture);
-        }
-
-
-
-        void UpdateSettings(VRStageLighting_AudioLink_Laser fixture)
-        {
-            if(fixture != null)
-            {
-                fixture._SetProps();
-                fixture._UpdateInstancedProperties();
-            }
-        }
-        public static GUIStyle SectionLabel()
-        {
-            GUIStyle g = new GUIStyle();
-            g.fontSize = 15;
-            g.fontStyle = FontStyle.Bold;
-            g.normal.textColor = Color.white;
-            return g;
+            fixture._SetProps();
+            fixture._UpdateInstancedProperties();
         }
 
         public override void OnInspectorGUI()
         {
             if (UdonSharpGUI.DrawDefaultUdonSharpBehaviourHeader(target)) return;
-            DrawLogo();
-            ShurikenHeaderCentered(GetVersion());
-            EditorGUILayout.Space();
-            EditorGUILayout.Space();
-            
-            //EditorGUILayout.Space();
-            VRStageLighting_AudioLink_Laser fixture = (VRStageLighting_AudioLink_Laser)target;
+            DrawEditorHeader();
+
+            serializedObject.Update();
             EditorGUI.BeginChangeCheck();
-            base.OnInspectorGUI();
-            if(EditorGUI.EndChangeCheck())
-            {
-                foreach(UnityEngine.Object obj in targets)
-                {
-                    VRStageLighting_AudioLink_Laser f = (VRStageLighting_AudioLink_Laser)obj;
-                    UpdateSettings(f);
-                }
-            }
+            DrawLaserEditor();
+            ApplyChangedPropertiesToTargets();
+        }
+
+        private void DrawLaserEditor()
+        {
+            DrawAudioLinkOptions();
+            DrawGeneralOptions(false);
+            DrawColorSamplingOptions();
+            DrawLaserOptions();
+            DrawMeshOptions();
+        }
+
+        private void DrawLaserOptions()
+        {
+            DrawSection("Laser Settings");
+            DrawProperty("coneWidth", "Cone Width", "Controls the radius of the laser cone.");
+            DrawProperty("coneLength", "Cone Length", "Controls the length of the laser cone.");
+            DrawProperty("coneFlatness", "Cone Flatness", "Controls how flat or round the cone is.");
+            DrawProperty("coneXRotation", "X Rotation Offset", "X rotation offset for the laser cone.");
+            DrawProperty("coneYRotation", "Y Rotation Offset", "Y rotation offset for the laser cone.");
+            DrawProperty("coneZRotation", "Z Rotation Offset", "Z rotation offset for the laser cone.");
+            DrawProperty("laserCount", "Beam Count", "Number of laser beams in the cone.");
+            DrawProperty("laserThickness", "Beam Thickness", "Controls how thick the laser beams are.");
+            DrawProperty("laserScroll", "Scroll Speed", "Controls the speed of the laser scroll animation.");
         }
     }
     #endif
@@ -395,125 +552,229 @@ namespace VRSL.EditorScripts
     [InitializeOnLoad]
     [CustomEditor(typeof(VRStageLighting_AudioLink_Static))]
     [CanEditMultipleObjects]
-    public class VRStageLighting_AudioLink_Static_Editor : VRSL_UdonEditor
+    public class VRStageLighting_AudioLink_Static_Editor : VRSL_AudioLinkUdonEditor<VRStageLighting_AudioLink_Static>
     {
-
-
-        void OnSceneGUI(SceneView sceneView)
+        protected override void UpdateFixtureProperties(VRStageLighting_AudioLink_Static fixture)
         {
-
+            fixture._SetProps();
+            fixture._UpdateInstancedProperties();
+            fixture._CheckAvailableConstraints(fixture);
         }
-
-        new void OnEnable( )
-        {
-            base.OnEnable();
-            EditorApplication.hierarchyChanged += HierarchyChanged;
-            SceneView.duringSceneGui += this.OnSceneGUI;
-        }
-    
-        void OnDisable( )
-        {
-            EditorApplication.hierarchyChanged -= HierarchyChanged;
-            SceneView.duringSceneGui -= this.OnSceneGUI;
-        }
-
-        void UpdateSettings(VRStageLighting_AudioLink_Static fixture)
-        {
-            try{
-                if(fixture != null)
-                {
-                    fixture._SetProps();
-                    fixture._UpdateInstancedProperties();
-                    fixture._CheckAvailableConstraints(fixture);
-                }
-            }
-            catch(NullReferenceException e)
-            {
-                e.ToString();
-            }
-        }
-    
-        private void HierarchyChanged( )
-        {
-            VRStageLighting_AudioLink_Static fixture = (VRStageLighting_AudioLink_Static)target;
-            UpdateSettings(fixture);
-        }
-        public static GUIStyle SectionLabel()
-        {
-            GUIStyle g = new GUIStyle();
-            g.fontSize = 14;
-            g.fontStyle = FontStyle.Bold;
-            g.normal.textColor = new Color(0.8f, 0.8f, 0.8f);
-            return g;
-        }
-            void GuiLine( int i_height = 1 )
-
-   {
-        try{
-       //GUIStyle g = GUIStyle.none;
-       //g.fixedHeight = 6;
-       Rect rect = EditorGUILayout.GetControlRect(false, i_height);
-
-       rect.height = i_height;
-
-       EditorGUI.DrawRect(rect, new Color ( 0.5f,0.5f,0.5f, 1 ) );
-        }
-        catch(Exception e)
-        {
-            e.GetType();
-        }
-
-   }
 
         public override void OnInspectorGUI()
         {
             if (UdonSharpGUI.DrawDefaultUdonSharpBehaviourHeader(target)) return;
-            DrawLogo();
-            ShurikenHeaderCentered(GetVersion());
-            EditorGUILayout.Space();
-            EditorGUILayout.Space();
+            DrawEditorHeader();
 
             VRStageLighting_AudioLink_Static fixture = (VRStageLighting_AudioLink_Static)target;
-            EditorGUI.BeginChangeCheck();
-            base.OnInspectorGUI();
-
-
-
-
-            EditorGUILayout.Space();
-            GuiLine();
-            EditorGUILayout.Space();
-            EditorGUILayout.LabelField("Fine Intensity Controls", SectionLabel());
             serializedObject.Update();
-            EditorGUILayout.PropertyField( serializedObject.FindProperty("finalIntensityComponentMode"), new GUIContent("Control Component Intensities"));
-            EditorGUI.indentLevel++;
-            if(serializedObject.FindProperty("finalIntensityComponentMode").boolValue){
+            EditorGUI.BeginChangeCheck();
+            DrawFixtureTypeOptions(fixture);
+            DrawFixtureEditor(ResolveFixtureType(fixture));
+            ApplyChangedPropertiesToTargets();
+        }
 
-                serializedObject.FindProperty("finalIntensityVolumetric").floatValue  = EditorGUILayout.Slider(new GUIContent("Volumetric Intensity",
-                "Sets the maximum brightness value of Global Intensity for volumetric meshes only. Good for personalized settings of the max brightness of the shader by other users via UI."), fixture.finalIntensityVolumetric, 0.0f, 1.0f);
-                
-                serializedObject.FindProperty("finalIntensityProjection").floatValue  = EditorGUILayout.Slider(new GUIContent("Projection Intensity",
-                "Sets the maximum brightness value of Global Intensity for projection meshes only. Good for personalized settings of the max brightness of the shader by other users via UI."), fixture.finalIntensityProjection, 0.0f, 1.0f);
-
-                serializedObject.FindProperty("finalIntensityFixture").floatValue  = EditorGUILayout.Slider(new GUIContent("Fixture/Other Intensity",
-                "Sets the maximum brightness value of Global Intensity for everything else. Good for personalized settings of the max brightness of the shader by other users via UI."), fixture.finalIntensityFixture, 0.0f, 1.0f);
-            }
-            else{
-                serializedObject.FindProperty("finalIntensity").floatValue  = EditorGUILayout.Slider(new GUIContent("Final Intensity",
-                "Sets the maximum brightness value of Global Intensity. Good for personalized settings of the max brightness of the shader by other users via UI."), fixture.finalIntensity, 0.0f, 1.0f);
-            }
-
-            if(EditorGUI.EndChangeCheck())
+        private void DrawFixtureTypeOptions(VRStageLighting_AudioLink_Static fixture)
+        {
+            DrawSection("Fixture Editor");
+            SerializedProperty fixtureType = DrawAndGetProperty("fixtureType", "Fixture Type", "Use Auto to infer the editor from the prefab or renderer names.");
+            if(fixtureType != null && !fixtureType.hasMultipleDifferentValues && (AudioLinkFixtureType)fixtureType.enumValueIndex == AudioLinkFixtureType.Auto)
             {
-                serializedObject.ApplyModifiedProperties();
-                foreach(UnityEngine.Object obj in targets)
+                EditorGUI.indentLevel++;
+                EditorGUILayout.LabelField("Detected Type", InferFixtureType(fixture).ToString());
+                EditorGUI.indentLevel--;
+            }
+        }
+
+        private void DrawFixtureEditor(AudioLinkFixtureType fixtureType)
+        {
+            switch(fixtureType)
+            {
+                case AudioLinkFixtureType.Spotlight:
+                    DrawSpotlightEditor();
+                    break;
+                case AudioLinkFixtureType.Washlight:
+                    DrawWashlightEditor();
+                    break;
+                case AudioLinkFixtureType.DiscoBall:
+                    DrawDiscoBallEditor();
+                    break;
+                case AudioLinkFixtureType.Blinder:
+                    DrawBlinderEditor();
+                    break;
+                case AudioLinkFixtureType.LightBar:
+                    DrawLightBarEditor();
+                    break;
+                case AudioLinkFixtureType.Flasher:
+                    DrawFlasherEditor();
+                    break;
+                case AudioLinkFixtureType.Parlight:
+                case AudioLinkFixtureType.Auto:
+                default:
+                    DrawParlightEditor();
+                    break;
+            }
+        }
+
+        private AudioLinkFixtureType ResolveFixtureType(VRStageLighting_AudioLink_Static fixture)
+        {
+            SerializedProperty fixtureType = serializedObject.FindProperty("fixtureType");
+            if(fixtureType != null && !fixtureType.hasMultipleDifferentValues)
+            {
+                AudioLinkFixtureType configuredType = (AudioLinkFixtureType)fixtureType.enumValueIndex;
+                if(configuredType != AudioLinkFixtureType.Auto)
                 {
-                    VRStageLighting_AudioLink_Static f = (VRStageLighting_AudioLink_Static)obj;
-                    UpdateSettings(f);
+                    return configuredType;
                 }
-            //EditorGUIUtility.LookLikeControls();
             }
 
+            return InferFixtureType(fixture);
+        }
+
+        private AudioLinkFixtureType InferFixtureType(VRStageLighting_AudioLink_Static fixture)
+        {
+            string fixtureText = GetFixtureSearchText(fixture);
+            if(fixtureText.Contains("wash"))
+            {
+                return AudioLinkFixtureType.Washlight;
+            }
+            if(fixtureText.Contains("spot"))
+            {
+                return AudioLinkFixtureType.Spotlight;
+            }
+            if(fixtureText.Contains("disco"))
+            {
+                return AudioLinkFixtureType.DiscoBall;
+            }
+            if(fixtureText.Contains("blinder"))
+            {
+                return AudioLinkFixtureType.Blinder;
+            }
+            if(fixtureText.Contains("lightbar") || fixtureText.Contains("light bar"))
+            {
+                return AudioLinkFixtureType.LightBar;
+            }
+            if(fixtureText.Contains("flasher") || fixtureText.Contains("flash"))
+            {
+                return AudioLinkFixtureType.Flasher;
+            }
+            if(fixtureText.Contains("parlight") || fixtureText.Contains("par light") || fixtureText.Contains("par-"))
+            {
+                return AudioLinkFixtureType.Parlight;
+            }
+
+            return AudioLinkFixtureType.Parlight;
+        }
+
+        private string GetFixtureSearchText(VRStageLighting_AudioLink_Static fixture)
+        {
+            if(fixture == null)
+            {
+                return string.Empty;
+            }
+
+            string fixtureText = fixture.name + " " + fixture.gameObject.name;
+            if(fixture.objRenderers != null)
+            {
+                for(int i = 0; i < fixture.objRenderers.Length; i++)
+                {
+                    MeshRenderer renderer = fixture.objRenderers[i];
+                    if(renderer == null)
+                    {
+                        continue;
+                    }
+
+                    fixtureText += " " + renderer.name + " " + renderer.gameObject.name;
+                    if(renderer.sharedMaterial != null)
+                    {
+                        fixtureText += " " + renderer.sharedMaterial.name;
+                    }
+                }
+            }
+
+            return fixtureText.ToLowerInvariant();
+        }
+
+        private void DrawSpotlightEditor()
+        {
+            DrawAudioLinkOptions();
+            DrawGeneralOptions(true);
+            DrawColorSamplingOptions();
+            DrawMovementOptions();
+            DrawGoboOptions();
+            DrawConeOptions("Beam Settings");
+            DrawMeshOptions();
+        }
+
+        private void DrawWashlightEditor()
+        {
+            DrawAudioLinkOptions();
+            DrawGeneralOptions(true);
+            DrawColorSamplingOptions();
+            DrawMovementOptions();
+            DrawConeOptions("Beam Settings");
+            DrawMeshOptions();
+        }
+
+        private void DrawDiscoBallEditor()
+        {
+            DrawAudioLinkOptions();
+            DrawGeneralOptions(true);
+            DrawColorSamplingOptions();
+            DrawMeshOptions();
+        }
+
+        private void DrawBlinderEditor()
+        {
+            DrawAudioLinkOptions();
+            DrawGeneralOptions(true);
+            DrawColorSamplingOptions();
+            DrawConeOptions("Projection Settings");
+            DrawMeshOptions();
+        }
+
+        private void DrawLightBarEditor()
+        {
+            DrawAudioLinkOptions();
+            DrawGeneralOptions(true);
+            DrawColorSamplingOptions();
+            DrawMeshOptions();
+        }
+
+        private void DrawFlasherEditor()
+        {
+            DrawAudioLinkOptions();
+            DrawGeneralOptions(true);
+            DrawColorSamplingOptions();
+            DrawMeshOptions();
+        }
+
+        private void DrawParlightEditor()
+        {
+            DrawAudioLinkOptions();
+            DrawGeneralOptions(true);
+            DrawColorSamplingOptions();
+            DrawConeOptions("Projection Settings");
+            DrawMeshOptions();
+        }
+
+        private void DrawMovementOptions()
+        {
+            DrawSection("Movement Settings");
+            DrawProperty("targetToFollow", "Target To Follow", "The target for this mover to follow.");
+        }
+
+        private void DrawGoboOptions()
+        {
+            DrawSection("Gobo Settings");
+            DrawProperty("selectGOBO", "Projection Gobo Selection", "Use this to change which projection is selected.");
+            SerializedProperty projectionSpin = DrawAndGetProperty("enableAutoSpin", "Enable Projection Spin", "Enable projection spinning.");
+            if(projectionSpin != null && projectionSpin.boolValue)
+            {
+                EditorGUI.indentLevel++;
+                DrawProperty("spinSpeed", "Projection Spin Speed", "Projection spin speed.");
+                EditorGUI.indentLevel--;
+            }
         }
     }
     #endif

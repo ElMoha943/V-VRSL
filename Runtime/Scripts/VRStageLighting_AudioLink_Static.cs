@@ -20,10 +20,35 @@ namespace VRSL
         Treble
     }
 
+    public enum AudioLinkFixtureType
+    {
+        Auto,
+        Spotlight,
+        Washlight,
+        DiscoBall,
+        Blinder,
+        LightBar,
+        Flasher,
+        Parlight
+    }
+
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     public class VRStageLighting_AudioLink_Static : UdonSharpBehaviour
     {
         //////////////////Public Variables////////////////////
+
+        [SerializeField, HideInInspector]
+        private AudioLinkFixtureType fixtureType = AudioLinkFixtureType.Auto;
+
+        #if !COMPILER_UDONSHARP && UNITY_EDITOR
+        public AudioLinkFixtureType EditorFixtureType
+        {
+            get
+            {
+                return fixtureType;
+            }
+        }
+        #endif
 
         [Header("Audio Link Settings")]
         [SerializeField, FieldChangeCallback(nameof(EnableAudioLink)),
