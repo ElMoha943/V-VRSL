@@ -245,10 +245,6 @@ namespace VRSL
         private int previousGOBOSelection;
         [HideInInspector]
         public UnityEngine.Animations.AimConstraint targetConstraint;
-#if !COMPILER_UDONSHARP && UNITY_EDITOR
-        [HideInInspector]
-        public Component vrcTargetConstraint;
-#endif
         [HideInInspector]
         public bool foldout;
 
@@ -885,9 +881,9 @@ namespace VRSL
             }
         }
 
-        bool SetVRChatConstraints(VRStageLighting_AudioLink_Static fixture)
+        bool SetVRChatConstraints(Component vrcTargetConstraint, Transform targetToFollow)
         {
-            if(fixture.vrcTargetConstraint == null || fixture.targetToFollow == null)
+            if(vrcTargetConstraint == null || targetToFollow == null)
             {
                 return false;
             }
@@ -898,8 +894,8 @@ namespace VRSL
                 return false;
             }
 
-            object source = System.Activator.CreateInstance(sourceType, fixture.targetToFollow, 1.0f);
-            object sources = GetPublicMemberValue(fixture.vrcTargetConstraint, "Sources");
+            object source = System.Activator.CreateInstance(sourceType, targetToFollow, 1.0f);
+            object sources = GetPublicMemberValue(vrcTargetConstraint, "Sources");
             if(sources == null)
             {
                 return false;
@@ -915,9 +911,9 @@ namespace VRSL
                 return false;
             }
 
-            SetPublicMemberValue(fixture.vrcTargetConstraint, "IsActive", true);
-            SetPublicMemberValue(fixture.vrcTargetConstraint, "Locked", true);
-            SetPublicMemberValue(fixture.vrcTargetConstraint, "GlobalWeight", 1.0f);
+            SetPublicMemberValue(vrcTargetConstraint, "IsActive", true);
+            SetPublicMemberValue(vrcTargetConstraint, "Locked", true);
+            SetPublicMemberValue(vrcTargetConstraint, "GlobalWeight", 1.0f);
 
             int sourceCount = (int)countProperty.GetValue(sources);
             if(sourceCount <= 0)
@@ -929,8 +925,8 @@ namespace VRSL
                 itemProperty.SetValue(sources, source, new object[] { 0 });
             }
 
-            System.Reflection.MethodInfo applyConfigurationChangesMethod = fixture.vrcTargetConstraint.GetType().GetMethod("ApplyConfigurationChanges");
-            applyConfigurationChangesMethod?.Invoke(fixture.vrcTargetConstraint, null);
+            System.Reflection.MethodInfo applyConfigurationChangesMethod = vrcTargetConstraint.GetType().GetMethod("ApplyConfigurationChanges");
+            applyConfigurationChangesMethod?.Invoke(vrcTargetConstraint, null);
             return true;
         }
 
@@ -958,6 +954,26 @@ namespace VRSL
             return GetPublicMemberValue(source, "SourceTransform") as Transform;
         }
 
+        Component FindVRChatTargetConstraint(VRStageLighting_AudioLink_Static fixture)
+        {
+            System.Type vrcAimConstraintType = GetVRChatAimConstraintType();
+            if(vrcAimConstraintType == null)
+            {
+                return null;
+            }
+
+            Component[] childs = fixture.GetComponentsInChildren(vrcAimConstraintType);
+            foreach(Component x in childs)
+            {
+                if(x.gameObject.name.Contains("Head"))
+                {
+                    return x;
+                }
+            }
+
+            return null;
+        }
+
         bool CheckVRChatConstraints(VRStageLighting_AudioLink_Static fixture)
         {
             if(fixture.targetToFollow == null)
@@ -965,37 +981,15 @@ namespace VRSL
                 return false;
             }
 
-            if(fixture.vrcTargetConstraint == null)
+            Component vrcTargetConstraint = FindVRChatTargetConstraint(fixture);
+            if(vrcTargetConstraint == null)
             {
-                System.Type vrcAimConstraintType = GetVRChatAimConstraintType();
-                if(vrcAimConstraintType == null)
-                {
-                    return false;
-                }
-
-                bool hasConstraint = false;
-                Component[] childs = fixture.GetComponentsInChildren(vrcAimConstraintType);
-                foreach(Component x in childs)
-                {
-                    if(x.gameObject.name.Contains("Head"))
-                    {
-                        fixture.vrcTargetConstraint = x;
-                        hasConstraint = true;
-                        break;
-                    }
-                }
-
-                if(!hasConstraint)
-                {
-                    return false;
-                }
-
-                return SetVRChatConstraints(fixture);
+                return false;
             }
 
-            if(GetVRChatConstraintSourceTransform(fixture.vrcTargetConstraint, 0) != fixture.targetToFollow)
+            if(GetVRChatConstraintSourceTransform(vrcTargetConstraint, 0) != fixture.targetToFollow)
             {
-                return SetVRChatConstraints(fixture);
+                return SetVRChatConstraints(vrcTargetConstraint, fixture.targetToFollow);
             }
 
             return true;
