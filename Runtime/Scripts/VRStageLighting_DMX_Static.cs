@@ -144,7 +144,7 @@ namespace VRSL
 
         void Init()
         {
-            if(objRenderers.Length > 0 && objRenderers[0] != null)
+            if(HasValidRenderers())
             {
                 _SetProps();
                 previousColorTint = lightColorTint;
@@ -266,19 +266,32 @@ namespace VRSL
             #endif
         }
 
+        bool HasValidRenderers()
+        {
+            if(objRenderers == null)
+            {
+                return false;
+            }
+            for(int i = 0; i < objRenderers.Length; i++)
+            {
+                if(objRenderers[i] != null)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         public void _UpdateInstancedProperties()
         {
+            if(!HasValidRenderers())
+            {
+                Debug.Log("Please add atleast one fixture renderer.");
+                return;
+            }
             if(props == null)
             {
-                if(objRenderers.Length > 0 && objRenderers[0] != null)
-                {
-                    _SetProps();
-                }
-                else
-                {
-                    Debug.Log("Please add atleast one fixture renderer.");
-                    return;
-                }
+                _SetProps();
             }
             bool applyDMXProperties = ShouldApplyDMXProperties();
             if(useLegacySectorMode)

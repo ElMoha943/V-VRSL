@@ -631,19 +631,32 @@ namespace VRSL
             #endif
         }
 
+        bool HasValidRenderers()
+        {
+            if(objRenderers == null)
+            {
+                return false;
+            }
+            for(int i = 0; i < objRenderers.Length; i++)
+            {
+                if(objRenderers[i] != null)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         public void _UpdateInstancedProperties()
         {   
+            if(!HasValidRenderers())
+            {
+                Debug.Log("Please add atleast one fixture renderer.");
+                return;
+            }
             if(props == null)
             {
-                if(objRenderers.Length > 0 && objRenderers[0] != null)
-                {
-                    _SetProps();
-                }
-                else
-                {
-                    Debug.Log("Please add atleast one fixture renderer.");
-                    return;
-                }
+                _SetProps();
             }
             bool applyAudioLinkProperties = ShouldApplyAudioLinkProperties();
             //Color Texture Sampling
@@ -678,83 +691,32 @@ namespace VRSL
             props.SetFloat("_FinalIntensity", finalIntensity);
             props.SetFloat("_ConeLength", Mathf.Abs(coneLength - 10.0f));
             props.SetFloat("_MaxConeLength", maxConeLength);
-            // for(int i = 0; i < objRenderers.Length; i++)
-            // {
-            //     objRenderers[i].SetPropertyBlock(props);
-            // }
-            switch(objRenderers.Length)
+            for(int i = 0; i < objRenderers.Length; i++)
             {
-                case 1:
-                    if(objRenderers[0])
-                        objRenderers[0].SetPropertyBlock(_SetFinalIntensityComponents(props, objRenderers[0]));
-                    break;
-                case 2:
-                    if(objRenderers[0])
-                        objRenderers[0].SetPropertyBlock(_SetFinalIntensityComponents(props, objRenderers[0]));
-                    if(objRenderers[1])
-                        objRenderers[1].SetPropertyBlock(_SetFinalIntensityComponents(props, objRenderers[1]));
-                    break;
-                case 3:
-                    if(objRenderers[0])
-                        objRenderers[0].SetPropertyBlock(_SetFinalIntensityComponents(props, objRenderers[0]));
-                    if(objRenderers[1])
-                        objRenderers[1].SetPropertyBlock(_SetFinalIntensityComponents(props, objRenderers[1]));
-                    if(objRenderers[2])
-                        objRenderers[2].SetPropertyBlock(_SetFinalIntensityComponents(props, objRenderers[2]));
-                    break;
-                case 4:
-                    if(objRenderers[0])
-                        objRenderers[0].SetPropertyBlock(_SetFinalIntensityComponents(props, objRenderers[0]));
-                    if(objRenderers[1])
-                        objRenderers[1].SetPropertyBlock(_SetFinalIntensityComponents(props, objRenderers[1]));
-                    if(objRenderers[2])
-                        objRenderers[2].SetPropertyBlock(_SetFinalIntensityComponents(props, objRenderers[2]));
-                    if(objRenderers[3])
-                        objRenderers[3].SetPropertyBlock(_SetFinalIntensityComponents(props, objRenderers[3]));
-                    break;
-                case 5:
-                    if(objRenderers[0])
-                        objRenderers[0].SetPropertyBlock(_SetFinalIntensityComponents(props, objRenderers[0]));
-                    if(objRenderers[1])
-                        objRenderers[1].SetPropertyBlock(_SetFinalIntensityComponents(props, objRenderers[1]));
-                    if(objRenderers[2])
-                        objRenderers[2].SetPropertyBlock(_SetFinalIntensityComponents(props, objRenderers[2]));
-                    if(objRenderers[3])
-                        objRenderers[3].SetPropertyBlock(_SetFinalIntensityComponents(props, objRenderers[3]));
-                    if(objRenderers[4])
-                        objRenderers[4].SetPropertyBlock(_SetFinalIntensityComponents(props, objRenderers[4]));
-                    break;
-                default:
-                    Debug.Log("Too many mesh renderers for this fixture!");
-                    break;        
+                if(objRenderers[i] != null)
+                {
+                    objRenderers[i].SetPropertyBlock(_SetFinalIntensityComponents(props, objRenderers[i]));
+                }
             }
         }
         void Init()
         {
-            if(objRenderers[0] == null)
+            if(!HasValidRenderers())
             {
                 return;
             }
-            if(objRenderers.Length > 0)
-            {
-                _SetProps();
-                previousColorTint = lightColorTint;
-                previousConeWidth = coneWidth;
-                previousConeLength = coneLength;
-                previousMaxConeLength = maxConeLength;
-                previousGOBOSelection = selectGOBO;
-                previousGlobalIntensity = globalIntensity;
-                previousFinalIntensity = finalIntensity;
-                previousFinalIntensityFixture = finalIntensityFixture;
-                previousFinalIntensityProjection = finalIntensityProjection;
-                previousFinalIntensityVolumetric = finalIntensityVolumetric;
-                _UpdateInstancedProperties();
-            }
-            else
-            {
-                Debug.Log("Please add atleast one fixture renderer.");
-                //enableInstancing = false;
-            }
+            _SetProps();
+            previousColorTint = lightColorTint;
+            previousConeWidth = coneWidth;
+            previousConeLength = coneLength;
+            previousMaxConeLength = maxConeLength;
+            previousGOBOSelection = selectGOBO;
+            previousGlobalIntensity = globalIntensity;
+            previousFinalIntensity = finalIntensity;
+            previousFinalIntensityFixture = finalIntensityFixture;
+            previousFinalIntensityProjection = finalIntensityProjection;
+            previousFinalIntensityVolumetric = finalIntensityVolumetric;
+            _UpdateInstancedProperties();
         }
         //EDITOR STUFF
         #if !COMPILER_UDONSHARP && UNITY_EDITOR

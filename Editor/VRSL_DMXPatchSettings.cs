@@ -82,10 +82,23 @@ namespace VRSL.EditorScripts
     {
         public DMXFixtureData_ObjRenderers(MeshRenderer[] objRenderers)
         {
+                if(objRenderers == null)
+                {
+                    objRenderers_name = new string[0];
+                    objRenderers_GlobalObjectId = new string[0];
+                    return;
+                }
                 objRenderers_name = new string[objRenderers.Length];
                 objRenderers_GlobalObjectId = new string[objRenderers.Length];
                 for(int i = 0; i < objRenderers.Length; i++)
                 {
+                    if(objRenderers[i] == null)
+                    {
+                        objRenderers_name[i] = "";
+                        objRenderers_GlobalObjectId[i] = "";
+                        continue;
+                    }
+
                     objRenderers_name[i] = objRenderers[i].name;
                     GlobalObjectId objRenderers_id = GlobalObjectId.GetGlobalObjectIdSlow(objRenderers[i]);
                     objRenderers_GlobalObjectId[i] = objRenderers_id.ToString();

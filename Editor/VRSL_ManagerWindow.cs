@@ -1532,8 +1532,16 @@ public class VRSL_ManagerWindow : EditorWindow {
                     {
                         continue;
                     }
+                    if(fixture.light.objRenderers == null)
+                    {
+                        continue;
+                    }
                     foreach(MeshRenderer rend in fixture.light.objRenderers)
                     {
+                        if(rend == null)
+                        {
+                            continue;
+                        }
                         if(rend.gameObject.name.Contains("Projection"))
                         {
                             if(rend.gameObject.name.Contains("Fixture"))
@@ -1556,12 +1564,24 @@ public class VRSL_ManagerWindow : EditorWindow {
         {
             foreach(AudioLinkListItem fixture in audioLinkLights)
             {
+                if(fixture == null)
+                {
+                    continue;
+                }
                 if(!fixture.isLaser)
                 {
                     if(fixture.light!=null)
                     {
+                        if(fixture.light.objRenderers == null)
+                        {
+                            continue;
+                        }
                         foreach(MeshRenderer rend in fixture.light.objRenderers)
                         {
+                            if(rend == null)
+                            {
+                                continue;
+                            }
                             if(rend.gameObject.name.Contains("Projection"))
                             {
                                 if(rend.gameObject.name.Contains("Fixture"))
@@ -1633,8 +1653,16 @@ public class VRSL_ManagerWindow : EditorWindow {
                     {
                         continue;
                     }
+                    if(fixture.light.objRenderers == null)
+                    {
+                        continue;
+                    }
                     foreach(MeshRenderer rend in fixture.light.objRenderers)
                     {
+                        if(rend == null)
+                        {
+                            continue;
+                        }
                         int type = fixture.light.gameObject.name.Contains("Spot") ? 1 : 0;
                         type = fixture.light.gameObject.name.Contains("Wash") ? 2 : type;
                         if(type > 0)
@@ -1662,8 +1690,16 @@ public class VRSL_ManagerWindow : EditorWindow {
                 {
                     continue;
                 }
+                if(fixture.light.objRenderers == null)
+                {
+                    continue;
+                }
                 foreach(MeshRenderer rend in fixture.light.objRenderers)
                 {
+                    if(rend == null)
+                    {
+                        continue;
+                    }
                     int type = fixture.light.gameObject.name.Contains("Spot") ? 1 : 0;
                     type = fixture.light.gameObject.name.Contains("Wash") ? 2 : type;
                     if(type > 0)

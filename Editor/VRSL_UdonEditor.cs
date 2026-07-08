@@ -159,22 +159,10 @@ namespace VRSL.EditorScripts
         void UpdateSettings(VRStageLighting_DMX_Static fixture)
         {
             try{
-                if(fixture.objRenderers.Length > 0)
+                if(fixture != null)
                 {
-                    bool isEmpty = false;
-                    foreach(MeshRenderer rend in fixture.objRenderers)
-                    {
-                        if(rend == null)
-                        {
-                            isEmpty = true;
-                            break;
-                        }
-                    }
-                    if(!isEmpty)
-                    {
-                        fixture._SetProps();
-                        fixture._UpdateInstancedProperties();
-                    }
+                    fixture._SetProps();
+                    fixture._UpdateInstancedProperties();
                 }
             }
             catch(NullReferenceException e)
@@ -364,23 +352,10 @@ namespace VRSL.EditorScripts
 
         void UpdateSettings(VRStageLighting_AudioLink_Laser fixture)
         {
-            if(fixture.objRenderers.Length > 0)
+            if(fixture != null)
             {
-                bool isEmpty = false;
-                foreach(MeshRenderer rend in fixture.objRenderers)
-                {
-                    if(rend == null)
-                    {
-                        isEmpty = true;
-                        break;
-                    }
-                }
-                if(!isEmpty)
-                {
-                    fixture._SetProps();
-                    fixture._UpdateInstancedProperties();
-
-                }
+                fixture._SetProps();
+                fixture._UpdateInstancedProperties();
             }
         }
         public static GUIStyle SectionLabel()
@@ -445,23 +420,11 @@ namespace VRSL.EditorScripts
         void UpdateSettings(VRStageLighting_AudioLink_Static fixture)
         {
             try{
-                if(fixture.objRenderers.Length > 0)
+                if(fixture != null)
                 {
-                    bool isEmpty = false;
-                    foreach(MeshRenderer rend in fixture.objRenderers)
-                    {
-                        if(rend == null)
-                        {
-                            isEmpty = true;
-                            break;
-                        }
-                    }
-                    if(!isEmpty)
-                    {
-                        fixture._SetProps();
-                        fixture._UpdateInstancedProperties();
-                        fixture._CheckAvailableConstraints(fixture);
-                    }
+                    fixture._SetProps();
+                    fixture._UpdateInstancedProperties();
+                    fixture._CheckAvailableConstraints(fixture);
                 }
             }
             catch(NullReferenceException e)
@@ -632,7 +595,7 @@ namespace VRSL.EditorScripts
                     {
                         foreach(VRStageLighting_AudioLink_Laser fixture in audioLinkLasers)
                         {
-                            if(fixture.objRenderers.Length > 0 && fixture.objRenderers[0] != null)
+                            if(fixture != null)
                             {
                                 fixture._SetProps();
                                 fixture._UpdateInstancedProperties();
@@ -643,7 +606,7 @@ namespace VRSL.EditorScripts
                     {
                         foreach(VRStageLighting_AudioLink_Static fixture in audioLinkLights)
                         {
-                            if(fixture.objRenderers.Length > 0 && fixture.objRenderers[0] != null)
+                            if(fixture != null)
                             {
                                 fixture._SetProps();
                                 fixture._UpdateInstancedProperties();
