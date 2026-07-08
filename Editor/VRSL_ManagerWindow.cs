@@ -1760,14 +1760,7 @@ public class VRSL_ManagerWindow : EditorWindow {
                     }
                 }
                 fixture.light._SetProps();
-                if(Application.isPlaying)
-                {
-                    fixture.light._UpdateInstancedProperties();
-                }
-                else
-                {
-                    fixture.light._UpdateInstancedPropertiesSansDMX();
-                }
+                fixture.light._UpdateInstancedProperties();
             }
             foreach(AudioLinkListItem fixture in audioLinkLights)
             {

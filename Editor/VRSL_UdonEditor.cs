@@ -173,14 +173,7 @@ namespace VRSL.EditorScripts
                     if(!isEmpty)
                     {
                         fixture._SetProps();
-                        if(Application.isPlaying)
-                        {
-                            fixture._UpdateInstancedProperties();
-                        }
-                        else
-                        {
-                            fixture._UpdateInstancedPropertiesSansDMX();
-                        }
+                        fixture._UpdateInstancedProperties();
                     }
                 }
             }
@@ -631,14 +624,7 @@ namespace VRSL.EditorScripts
                         foreach(VRStageLighting_DMX_Static fixture in dmxLights)
                         {
                             fixture._SetProps();
-                            if(Application.isPlaying)
-                            {
-                                fixture._UpdateInstancedProperties();
-                            }
-                            else
-                            {
-                                fixture._UpdateInstancedPropertiesSansDMX();
-                            }
+                            fixture._UpdateInstancedProperties();
                         }
                     }
 

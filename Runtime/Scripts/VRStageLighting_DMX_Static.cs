@@ -139,10 +139,10 @@ namespace VRSL
 
         void Start()
         {
-            Init(true);
+            Init();
         }
 
-        void Init(bool withDMX)
+        void Init()
         {
             if(objRenderers.Length > 0 && objRenderers[0] != null)
             {
@@ -157,14 +157,7 @@ namespace VRSL
                 previousFinalIntensityFixture = finalIntensityFixture;
                 previousFinalIntensityProjection = finalIntensityProjection;
                 previousFinalIntensityVolumetric = finalIntensityVolumetric;
-                if(withDMX)
-                {
-                    _UpdateInstancedProperties();
-                }
-                else
-                {
-                    _UpdateInstancedPropertiesSansDMX();
-                }
+                _UpdateInstancedProperties();
             }
             else
             {
@@ -263,6 +256,16 @@ namespace VRSL
                 }
             return props;
         }
+
+        bool ShouldApplyDMXProperties()
+        {
+            #if !COMPILER_UDONSHARP && UNITY_EDITOR
+            return Application.isPlaying;
+            #else
+            return true;
+            #endif
+        }
+
         public void _UpdateInstancedProperties()
         {
             if(props == null)
@@ -277,6 +280,7 @@ namespace VRSL
                     return;
                 }
             }
+            bool applyDMXProperties = ShouldApplyDMXProperties();
             if(useLegacySectorMode)
             {
                 if(singleChannelMode)
@@ -300,70 +304,10 @@ namespace VRSL
             props.SetInt("_PanInvert", invertPan == true ? 1 : 0);
             props.SetInt("_LegacyGoboRange", legacyGoboRange == true ? 1 : 0);
             props.SetInt("_TiltInvert", invertTilt == true ? 1 : 0);
-            props.SetInt("_EnableStrobe", enableStrobe == true ? 1 : 0);
+            props.SetInt("_EnableStrobe", applyDMXProperties && enableStrobe == true ? 1 : 0);
             props.SetInt("_EnableSpin", enableAutoSpin == true ? 1 : 0);
-            props.SetInt("_EnableDMX", enableDMXChannels == true ? 1 : 0);
-            props.SetInt("_EnableFineChannels", enableFineChannels == true ? 1 : 0);
-            props.SetInt("_ProjectionSelection", selectGOBO);
-            props.SetFloat("_FixtureRotationX", tiltOffsetBlue);
-            props.SetFloat("_FixtureBaseRotationY", panOffsetBlueGreen);
-            props.SetColor("_Emission", lightColorTint);
-            props.SetColor("_EmissionDMX", lightColorTint);
-            props.SetFloat("_ConeWidth", coneWidth);
-            props.SetFloat("_GlobalIntensity", globalIntensity);
-            props.SetFloat("_FinalIntensity", finalIntensity);
-            props.SetFloat("_ConeLength", Mathf.Abs(coneLength - 10.5f));
-            props.SetFloat("_MaxConeLength", maxConeLength);
-            props.SetFloat("_MaxMinPanAngle", (maxMinPan/2.0f));
-            props.SetFloat("_MaxMinTiltAngle", (maxMinTilt/2.0f));
-            foreach(MeshRenderer r in objRenderers)
-            {
-                if(r != null)
-                {
-                    r.SetPropertyBlock(_SetFinalIntensityComponents(props, r));
-                }
-            }
-        }
-        public void _UpdateInstancedPropertiesSansDMX()
-        {
-            if(props == null)
-            {
-                if(objRenderers.Length > 0 && objRenderers[0] != null)
-                {
-                    _SetProps();
-                }
-                else
-                {
-                    Debug.Log("Please add atleast one fixture renderer.");
-                    return;
-                }
-            }
-            if(useLegacySectorMode)
-            {
-                if(singleChannelMode)
-                {
-                    // calculatedDMXChannel = Mathf.Abs(Mathf.FloorToInt((int) sector * 13) + 1) + Mathf.Abs(Channel);
-                    props.SetInt("_DMXChannel", SectorConversion() + Mathf.Abs(Channel));
-                }
-                else
-                {
-                    props.SetInt("_DMXChannel", SectorConversion());
-                }
-                // calculatedDMXUniverse = Mathf.FloorToInt(calculatedDMXChannel / 512) + 1;
-                // calculatedDMXChannel = calculatedDMXChannel - ((calculatedDMXUniverse - 1) * 512);
-            }
-            else
-            {
-                props.SetInt("_DMXChannel", RawDMXConversion());
-            }
-            props.SetInt("_NineUniverseMode", nineUniverseMode == true ? 1 : 0);
-            props.SetInt("_PanInvert", invertPan == true ? 1 : 0);
-            props.SetInt("_TiltInvert", invertTilt == true ? 1 : 0);
-            props.SetInt("_LegacyGoboRange", legacyGoboRange == true ? 1 : 0);
-            props.SetInt("_EnableStrobe", 0);
-            props.SetInt("_EnableSpin", enableAutoSpin == true ? 1 : 0);
-            props.SetInt("_EnableDMX", 0);
-            props.SetInt("_EnableFineChannels", 0);
+            props.SetInt("_EnableDMX", applyDMXProperties && enableDMXChannels == true ? 1 : 0);
+            props.SetInt("_EnableFineChannels", applyDMXProperties && enableFineChannels == true ? 1 : 0);
             props.SetInt("_ProjectionSelection", selectGOBO);
             props.SetFloat("_FixtureRotationX", tiltOffsetBlue);
             props.SetFloat("_FixtureBaseRotationY", panOffsetBlueGreen);
@@ -651,7 +595,7 @@ namespace VRSL
             {
                 if (e.type == EventType.ExecuteCommand && e.commandName == "Duplicate")
                 {
-                    Init(false);
+                    Init();
                     return;
                 }
             }

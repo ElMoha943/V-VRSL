@@ -457,14 +457,7 @@ namespace VRSL.EditorScripts
                             {
                                 PrefabUtility.RecordPrefabInstancePropertyModifications(fixture);
                             }
-                            if(Application.isPlaying)
-                            {
-                                fixture._UpdateInstancedProperties();
-                            }
-                            else
-                            {
-                                fixture._UpdateInstancedPropertiesSansDMX();
-                            }
+                            fixture._UpdateInstancedProperties();
                         }
                     }
                     catch(Exception ex)
