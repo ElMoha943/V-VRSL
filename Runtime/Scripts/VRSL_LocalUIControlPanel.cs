@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.Rendering.PostProcessing;
 #if UDONSHARP
 using UdonSharp;
 using VRC.SDKBase;
@@ -19,6 +20,8 @@ using System.IO;
 using UdonSharpEditor;
 #endif
 #endif
+
+using TMPro;
 
 namespace VRSL
 {
@@ -78,8 +81,8 @@ namespace VRSL
         public Material[] laserMaterials;
         [Space(5)]
 
-        [Header("Post Processing Animators")]
-        public Animator bloomAnimator;
+        [Header("Post Processing")]
+        public PostProcessVolume bloomPP;
 
         [Space(5)]
         [Header("UI Sliders")]
@@ -90,27 +93,27 @@ namespace VRSL
         public UnityEngine.UI.Slider discoBallSlider;
         public UnityEngine.UI.Slider laserSlider;
         public UnityEngine.UI.Slider bloomSlider;
-        public UnityEngine.UI.Text masterSliderText, fixtureSliderText, volumetricSliderText, projectionSliderText, discoBallSliderText, laserSliderText, bloomSliderText;
+        public TMPro.TextMeshProUGUI masterSliderText, fixtureSliderText, volumetricSliderText, projectionSliderText, discoBallSliderText, laserSliderText, bloomSliderText;
         public float fixtureIntensityMax = 1.0f, volumetricIntensityMax = 1.0f, projectionIntensityMax = 1.0f, discoballIntensityMax = 1.0f, laserIntensityMax = 1.0f;
 
         public UnityEngine.UI.Toggle volumetricNoiseToggle;
         public UnityEngine.UI.Button volumetricHighButton, volumetricMedButton, volumetricLowButton;
-        public UnityEngine.UI.Text volumetricHighText, volumetricMedText, volumetricLowText;
+        public TMPro.TextMeshProUGUI volumetricHighText, volumetricMedText, volumetricLowText;
         public UnityEngine.UI.Button blinderProjectionHighButton, blinderProjectionLowButton;
-        public UnityEngine.UI.Text blinderProjectionHighText, blinderProjectionLowText;
+        public TMPro.TextMeshProUGUI blinderProjectionHighText, blinderProjectionLowText;
 
         public UnityEngine.UI.Button parProjectionHighButton, parProjectionLowButton;
-        public UnityEngine.UI.Text parProjectionHighText, parProjectionLowText;
+        public TMPro.TextMeshProUGUI parProjectionHighText, parProjectionLowText;
         public UnityEngine.UI.Button otherProjectionHighButton, otherProjectionLowButton;
-        public UnityEngine.UI.Text otherProjectionHighText, otherProjectionLowText;
+        public TMPro.TextMeshProUGUI otherProjectionHighText, otherProjectionLowText;
 
         public UnityEngine.UI.Button discoballHighButton, discoballLowButton;
-        public UnityEngine.UI.Text discoballHighText, discoballLowText;
+        public TMPro.TextMeshProUGUI discoballHighText, discoballLowText;
         public UnityEngine.UI.Button lensFlareHighButton, lensFlareLowButton;
-        public UnityEngine.UI.Text lensFlareHighText, lensFlareLowText;
+        public TMPro.TextMeshProUGUI lensFlareHighText, lensFlareLowText;
 
         public UnityEngine.UI.Button globalStrobeToggleButton;
-        public UnityEngine.UI.Text globalStrobeLabel;
+        public TMPro.TextMeshProUGUI globalStrobeLabel;
         UnityEngine.UI.ColorBlock defaultColorBlock;
         UnityEngine.UI.ColorBlock cbOn;
         public bool isUsingDMX = true;
@@ -580,14 +583,6 @@ namespace VRSL
                 defaultColorBlock = volumetricHighButton.colors;
                 cbOn = defaultColorBlock;
                 cbOn.normalColor = new Color(cbOn.normalColor.r + 0.35f, cbOn.normalColor.r + 0.35f, cbOn.normalColor.g + 0.35f, 1.0f);
-            }
-            if (bloomAnimator == null)
-            {
-                GameObject anim = GameObject.Find("PostProcessingExample-Bloom");
-                if (anim != null)
-                {
-                    bloomAnimator = anim.GetComponent<Animator>();
-                }
             }
             _SetTextureIDS();
             _RebuildCRTCaches();
@@ -1275,11 +1270,10 @@ namespace VRSL
         }
         public void _SetBloomIntensity()
         {
-            if (bloomAnimator != null && bloomSlider != null)
+            if (bloomPP != null && bloomSlider != null)
             {
-                bloomAnimator.SetFloat("BloomIntensity", bloomSlider.value);
-                if (bloomSliderText != null)
-                {
+                bloomPP.weight = bloomSlider.value;
+                if (bloomSliderText != null){
                     bloomSliderText.text = Mathf.Round(bloomSlider.value * 100.0f).ToString();
                 }
             }
