@@ -245,6 +245,10 @@ namespace VRSL
         private int previousGOBOSelection;
         [HideInInspector]
         public UnityEngine.Animations.AimConstraint targetConstraint;
+#if !COMPILER_UDONSHARP && UNITY_EDITOR
+        [HideInInspector]
+        public Component vrcTargetConstraint;
+#endif
         [HideInInspector]
         public bool foldout;
 
@@ -864,7 +868,8 @@ namespace VRSL
             }
             //Debug.Log(fixture.name + " is set to follow " + fixture.targetConstraint.GetSource(0).sourceTransform.name);
         }
-        public void _CheckConstraints(VRStageLighting_AudioLink_Static fixture)
+
+        bool CheckUnityConstraints(VRStageLighting_AudioLink_Static fixture)
         {
             if(fixture.targetToFollow != null)
             {
@@ -884,12 +889,12 @@ namespace VRSL
                     }
                     if(!hasConstraint)
                     {
-                        Debug.Log("This fixture does not support target following/tracking");
-                        fixture.targetToFollow = null;
+                        return false;
                     }
                     else
                     {
                         SetConstraints(fixture);
+                        return true;
                     }
                 }
                 else
@@ -902,13 +907,246 @@ namespace VRSL
                         {
                             SetConstraints(fixture);
                         }
+                        return true;
                     }
                     else
                     {
                         //Debug.Log("Constraint does not have a source... Updating it...");
                         SetConstraints(fixture);
+                        return true;
                     }
                 }
+            }
+            return false;
+        }
+
+        public void _CheckConstraints(VRStageLighting_AudioLink_Static fixture)
+        {
+            if(fixture.targetToFollow != null && !CheckUnityConstraints(fixture))
+            {
+                Debug.Log("This fixture does not support target following/tracking");
+                fixture.targetToFollow = null;
+            }
+        }
+
+        System.Type GetVRChatAimConstraintType()
+        {
+            const string typeName = "VRC.SDK3.Dynamics.Constraint.Components.VRCAimConstraint";
+            System.Type constraintType = System.Type.GetType(typeName + ", VRC.SDK3.Dynamics.Constraint");
+            if(constraintType != null)
+            {
+                return constraintType;
+            }
+
+            foreach(System.Reflection.Assembly assembly in System.AppDomain.CurrentDomain.GetAssemblies())
+            {
+                constraintType = assembly.GetType(typeName);
+                if(constraintType != null)
+                {
+                    return constraintType;
+                }
+            }
+
+            return null;
+        }
+
+        System.Type GetVRChatConstraintSourceType()
+        {
+            const string typeName = "VRC.Dynamics.VRCConstraintSource";
+            System.Type sourceType = System.Type.GetType(typeName + ", VRC.SDK3.Dynamics.Constraint");
+            if(sourceType != null)
+            {
+                return sourceType;
+            }
+
+            foreach(System.Reflection.Assembly assembly in System.AppDomain.CurrentDomain.GetAssemblies())
+            {
+                sourceType = assembly.GetType(typeName);
+                if(sourceType != null)
+                {
+                    return sourceType;
+                }
+            }
+
+            return null;
+        }
+
+        object GetPublicMemberValue(object target, string memberName)
+        {
+            if(target == null)
+            {
+                return null;
+            }
+
+            System.Type targetType = target.GetType();
+            System.Reflection.PropertyInfo property = targetType.GetProperty(memberName);
+            if(property != null)
+            {
+                return property.GetValue(target);
+            }
+
+            System.Reflection.FieldInfo field = targetType.GetField(memberName);
+            if(field != null)
+            {
+                return field.GetValue(target);
+            }
+
+            return null;
+        }
+
+        void SetPublicMemberValue(object target, string memberName, object value)
+        {
+            if(target == null)
+            {
+                return;
+            }
+
+            System.Type targetType = target.GetType();
+            System.Reflection.PropertyInfo property = targetType.GetProperty(memberName);
+            if(property != null && property.CanWrite)
+            {
+                property.SetValue(target, value);
+                return;
+            }
+
+            System.Reflection.FieldInfo field = targetType.GetField(memberName);
+            if(field != null)
+            {
+                field.SetValue(target, value);
+            }
+        }
+
+        bool SetVRChatConstraints(VRStageLighting_AudioLink_Static fixture)
+        {
+            if(fixture.vrcTargetConstraint == null || fixture.targetToFollow == null)
+            {
+                return false;
+            }
+
+            System.Type sourceType = GetVRChatConstraintSourceType();
+            if(sourceType == null)
+            {
+                return false;
+            }
+
+            object source = System.Activator.CreateInstance(sourceType, fixture.targetToFollow, 1.0f);
+            object sources = GetPublicMemberValue(fixture.vrcTargetConstraint, "Sources");
+            if(sources == null)
+            {
+                return false;
+            }
+
+            System.Type sourcesType = sources.GetType();
+            System.Reflection.PropertyInfo countProperty = sourcesType.GetProperty("Count");
+            System.Reflection.PropertyInfo itemProperty = sourcesType.GetProperty("Item");
+            System.Reflection.MethodInfo addMethod = sourcesType.GetMethod("Add", new System.Type[] { sourceType });
+
+            if(countProperty == null || itemProperty == null || addMethod == null)
+            {
+                return false;
+            }
+
+            SetPublicMemberValue(fixture.vrcTargetConstraint, "IsActive", true);
+            SetPublicMemberValue(fixture.vrcTargetConstraint, "Locked", true);
+            SetPublicMemberValue(fixture.vrcTargetConstraint, "GlobalWeight", 1.0f);
+
+            int sourceCount = (int)countProperty.GetValue(sources);
+            if(sourceCount <= 0)
+            {
+                addMethod.Invoke(sources, new object[] { source });
+            }
+            else
+            {
+                itemProperty.SetValue(sources, source, new object[] { 0 });
+            }
+
+            System.Reflection.MethodInfo applyConfigurationChangesMethod = fixture.vrcTargetConstraint.GetType().GetMethod("ApplyConfigurationChanges");
+            applyConfigurationChangesMethod?.Invoke(fixture.vrcTargetConstraint, null);
+            return true;
+        }
+
+        Transform GetVRChatConstraintSourceTransform(Component constraint, int index)
+        {
+            object sources = GetPublicMemberValue(constraint, "Sources");
+            if(sources == null)
+            {
+                return null;
+            }
+
+            System.Reflection.PropertyInfo countProperty = sources.GetType().GetProperty("Count");
+            System.Reflection.PropertyInfo itemProperty = sources.GetType().GetProperty("Item");
+            if(countProperty == null || itemProperty == null || (int)countProperty.GetValue(sources) <= index)
+            {
+                return null;
+            }
+
+            object source = itemProperty.GetValue(sources, new object[] { index });
+            if(source == null)
+            {
+                return null;
+            }
+
+            return GetPublicMemberValue(source, "SourceTransform") as Transform;
+        }
+
+        bool CheckVRChatConstraints(VRStageLighting_AudioLink_Static fixture)
+        {
+            if(fixture.targetToFollow == null)
+            {
+                return false;
+            }
+
+            if(fixture.vrcTargetConstraint == null)
+            {
+                System.Type vrcAimConstraintType = GetVRChatAimConstraintType();
+                if(vrcAimConstraintType == null)
+                {
+                    return false;
+                }
+
+                bool hasConstraint = false;
+                Component[] childs = fixture.GetComponentsInChildren(vrcAimConstraintType);
+                foreach(Component x in childs)
+                {
+                    if(x.gameObject.name.Contains("Head"))
+                    {
+                        fixture.vrcTargetConstraint = x;
+                        hasConstraint = true;
+                        break;
+                    }
+                }
+
+                if(!hasConstraint)
+                {
+                    return false;
+                }
+
+                return SetVRChatConstraints(fixture);
+            }
+
+            if(GetVRChatConstraintSourceTransform(fixture.vrcTargetConstraint, 0) != fixture.targetToFollow)
+            {
+                return SetVRChatConstraints(fixture);
+            }
+
+            return true;
+        }
+
+        public void _CheckVRChatConstraints(VRStageLighting_AudioLink_Static fixture)
+        {
+            if(fixture.targetToFollow != null && !CheckVRChatConstraints(fixture))
+            {
+                Debug.Log("This fixture does not support VRChat target following/tracking");
+                fixture.targetToFollow = null;
+            }
+        }
+
+        public void _CheckAvailableConstraints(VRStageLighting_AudioLink_Static fixture)
+        {
+            if(fixture.targetToFollow != null && !CheckUnityConstraints(fixture) && !CheckVRChatConstraints(fixture))
+            {
+                Debug.Log("This fixture does not support target following/tracking");
+                fixture.targetToFollow = null;
             }
         }
 

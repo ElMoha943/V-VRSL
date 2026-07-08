@@ -480,7 +480,7 @@ namespace VRSL.EditorScripts
                         else
                         {
                             fixture._UpdateInstancedPropertiesSansAudioLink();
-                            fixture._CheckConstraints(fixture);
+                            fixture._CheckAvailableConstraints(fixture);
                         }
                     }
                 }
