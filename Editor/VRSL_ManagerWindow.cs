@@ -1786,14 +1786,7 @@ public class VRSL_ManagerWindow : EditorWindow {
                         }
                     }   
                     fixture.laser._SetProps();
-                    if(Application.isPlaying)
-                    {
-                        fixture.laser._UpdateInstancedProperties();
-                    }
-                    else
-                    {
-                        fixture.laser._UpdateInstancedPropertiesSansAudioLink();
-                    }
+                    fixture.laser._UpdateInstancedProperties();
                 }
                 else
                 {
@@ -1810,27 +1803,13 @@ public class VRSL_ManagerWindow : EditorWindow {
                         }
                     }   
                     fixture.light._SetProps();
-                    if(Application.isPlaying)
-                    {
-                        fixture.light._UpdateInstancedProperties();
-                    }
-                    else
-                    {
-                        fixture.light._UpdateInstancedPropertiesSansAudioLink();
-                    }
+                    fixture.light._UpdateInstancedProperties();
                 }
             }
             // foreach(AudioLinkLaserListItem fixture in audioLinkLasers)
             // {
             //     fixture.laser._SetProps();
-            //     if(Application.isPlaying)
-            //     {
-            //         fixture.laser._UpdateInstancedProperties();
-            //     }
-            //     else
-            //     {
-            //         fixture.laser._UpdateInstancedPropertiesSansAudioLink();
-            //     }
+            //     fixture.laser._UpdateInstancedProperties();
             // }
         }
      }

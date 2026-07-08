@@ -471,17 +471,26 @@ namespace VRSL
 
         void OnEnable() 
         {
-            Init(true);
+            Init();
         }
 
         void Start()
         {
-            Init(true);
+            Init();
         }
 
         public void _SetProps()
         {
             props = new MaterialPropertyBlock();
+        }
+
+        bool ShouldApplyAudioLinkProperties()
+        {
+            #if !COMPILER_UDONSHARP && UNITY_EDITOR
+            return Application.isPlaying;
+            #else
+            return true;
+            #endif
         }
         
         public void _UpdateInstancedProperties()
@@ -498,9 +507,10 @@ namespace VRSL
                     return;
                 }
             }
+            bool applyAudioLinkProperties = ShouldApplyAudioLinkProperties();
             //AudioLink Stuff
-            props.SetFloat("_EnableAudioLink", enableAudioLink == true ? 1.0f : 0.0f);
-            props.SetInt("_EnableColorChord", enableColorChord == true ? 1 : 0);
+            props.SetFloat("_EnableAudioLink", applyAudioLinkProperties && enableAudioLink == true ? 1.0f : 0.0f);
+            props.SetInt("_EnableColorChord", applyAudioLinkProperties && enableColorChord == true ? 1 : 0);
             //props.SetFloat("_NumBands", spectrumBands.Length);
             props.SetFloat("_Delay", delay);
             props.SetFloat("_BandMultiplier", bandMultiplier);
@@ -533,52 +543,7 @@ namespace VRSL
                     objRenderers[i].SetPropertyBlock(props);
             }
         }
-
-        public void _UpdateInstancedPropertiesSansAudioLink()
-        {
-            if(props == null)
-            {
-                if(objRenderers.Length > 0 && objRenderers[0] != null)
-                {
-                    _SetProps();
-                }
-            }
-            //AudioLink Stuff
-            props.SetFloat("_EnableAudioLink", 0.0f);
-            props.SetInt("_EnableColorChord", 0);
-            //props.SetFloat("_NumBands", spectrumBands.Length);
-            props.SetFloat("_Delay", delay);
-            props.SetFloat("_BandMultiplier", bandMultiplier);
-            int b = (int) band;
-            float ba = 1.0f * b;
-            props.SetFloat("_Band", ba);
-            //Color Texture Sampling
-            props.SetFloat("_TextureColorSampleX", textureSamplingCoordinates.x);
-            props.SetFloat("_TextureColorSampleY", textureSamplingCoordinates.y);
-            props.SetInt("_EnableColorTextureSample", enableColorTextureSampling == true ? 1 : 0);
-            props.SetInt("_UseTraditionalSampling", traditionalColorTextureSampling == true ? 1 : 0);
-            props.SetInt("_EnableThemeColorSampling", enableThemeColorSampling == true ? 1 : 0);
-            props.SetInt("_ThemeColorTarget", themeColorTarget);
-            //General Light Stuff
-            props.SetColor("_Emission", lightColorTint);
-            props.SetFloat("_VertexConeWidth", coneWidth);
-            props.SetFloat("_GlobalIntensity", globalIntensity);
-            props.SetFloat("_FinalIntensity", finalIntensity);
-            props.SetFloat("_VertexConeLength", coneLength);
-            props.SetFloat("_ZConeFlatness", coneFlatness);
-            props.SetFloat("_XRotation", coneXRotation);
-            props.SetFloat("_YRotation", coneYRotation);
-            props.SetFloat("_ZRotation", coneZRotation);
-            props.SetInt("_LaserCount", laserCount);
-            props.SetFloat("_LaserThickness", laserThickness);
-            props.SetFloat("_Scroll", laserScroll);
-            for(int i = 0; i < objRenderers.Length; i++)
-            {
-                if(objRenderers[i])
-                    objRenderers[i].SetPropertyBlock(props);
-            }
-        }
-        void Init(bool withAL)
+        void Init()
         {
             if(objRenderers[0] == null)
             {
@@ -592,14 +557,7 @@ namespace VRSL
                 previousConeLength = coneLength;
                 previousGlobalIntensity = globalIntensity;
                 previousFinalIntensity = finalIntensity;
-                if(withAL)
-                {
-                    _UpdateInstancedProperties();
-                }
-                else
-                {
-                    _UpdateInstancedPropertiesSansAudioLink();
-                }
+                _UpdateInstancedProperties();
             }
             else
             {
@@ -617,7 +575,7 @@ namespace VRSL
                 {
                     if (e.type == EventType.ExecuteCommand && e.commandName == "Duplicate")
                     {
-                        Init(false);
+                        Init();
                     }
                 }
             }

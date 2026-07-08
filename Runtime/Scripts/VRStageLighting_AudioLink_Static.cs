@@ -254,12 +254,12 @@ namespace VRSL
 
         void OnEnable() 
         {
-            Init(true);
+            Init();
         }
 
         void Start()
         {
-            Init(true);
+            Init();
         }
 
         public void _SetProps()
@@ -621,6 +621,16 @@ namespace VRSL
                 }
             return props;
         }
+
+        bool ShouldApplyAudioLinkProperties()
+        {
+            #if !COMPILER_UDONSHARP && UNITY_EDITOR
+            return Application.isPlaying;
+            #else
+            return true;
+            #endif
+        }
+
         public void _UpdateInstancedProperties()
         {   
             if(props == null)
@@ -635,6 +645,7 @@ namespace VRSL
                     return;
                 }
             }
+            bool applyAudioLinkProperties = ShouldApplyAudioLinkProperties();
             //Color Texture Sampling
             props.SetFloat("_TextureColorSampleX", textureSamplingCoordinates.x);
             props.SetFloat("_TextureColorSampleY", textureSamplingCoordinates.y);
@@ -644,8 +655,8 @@ namespace VRSL
             props.SetInt("_ThemeColorTarget", themeColorTarget);
 
             //AudioLink Stuff
-            props.SetFloat("_EnableAudioLink", enableAudioLink == true ? 1.0f : 0.0f);
-            props.SetInt("_EnableColorChord", enableColorChord == true ? 1 : 0);
+            props.SetFloat("_EnableAudioLink", applyAudioLinkProperties && enableAudioLink == true ? 1.0f : 0.0f);
+            props.SetInt("_EnableColorChord", applyAudioLinkProperties && enableColorChord == true ? 1 : 0);
             //props.SetFloat("_NumBands", spectrumBands.Length);
             props.SetFloat("_Delay", delay);
             props.SetFloat("_BandMultiplier", bandMultiplier);
@@ -680,7 +691,7 @@ namespace VRSL
                 case 2:
                     if(objRenderers[0])
                         objRenderers[0].SetPropertyBlock(_SetFinalIntensityComponents(props, objRenderers[0]));
-                    if(objRenderers[0])
+                    if(objRenderers[1])
                         objRenderers[1].SetPropertyBlock(_SetFinalIntensityComponents(props, objRenderers[1]));
                     break;
                 case 3:
@@ -718,104 +729,7 @@ namespace VRSL
                     break;        
             }
         }
-        public void _UpdateInstancedPropertiesSansAudioLink()
-        {   
-            if(props == null)
-            {
-                if(objRenderers.Length > 0 && objRenderers[0] != null)
-                {
-                    _SetProps();
-                }
-                else
-                {
-                    Debug.Log("Please add atleast one fixture renderer.");
-                    return;
-                }
-            }
-            //Color Texture Sampling
-            props.SetFloat("_TextureColorSampleX", textureSamplingCoordinates.x);
-            props.SetFloat("_TextureColorSampleY", textureSamplingCoordinates.y);
-            props.SetInt("_EnableColorTextureSample", enableColorTextureSampling == true ? 1 : 0);
-            props.SetInt("_UseTraditionalSampling", traditionalColorTextureSampling == true ? 1 : 0);
-            props.SetInt("_EnableThemeColorSampling", enableThemeColorSampling == true ? 1 : 0);
-            props.SetInt("_ThemeColorTarget", themeColorTarget);
-
-            //AudioLink Stuff
-            props.SetFloat("_EnableAudioLink", 0.0f);
-            props.SetInt("_EnableColorChord", 0);
-            //props.SetFloat("_NumBands", spectrumBands.Length);
-            props.SetFloat("_Delay", delay);
-            props.SetFloat("_BandMultiplier", bandMultiplier);
-            int b = (int) band;
-            float ba = 1.0f * b;
-            props.SetFloat("_Band", ba);
-            //Movement Stuff
-            // props.SetInt("_PanInvert", invertPan == true ? 1 : 0);
-            // props.SetInt("_TiltInvert", invertTilt == true ? 1 : 0);
-            props.SetInt("_EnableSpin", enableAutoSpin == true ? 1 : 0);
-            props.SetFloat("_SpinSpeed", spinSpeed);
-            // props.SetFloat("_FixtureRotationX", tiltOffsetBlue);
-            // props.SetFloat("_FixtureBaseRotationY", panOffsetBlueGreen);
-            //Other Stuff
-            props.SetInt("_ProjectionSelection", selectGOBO);
-            props.SetColor("_Emission", lightColorTint);
-            props.SetFloat("_ConeWidth", coneWidth);
-            props.SetFloat("_GlobalIntensity", globalIntensity);
-            props.SetFloat("_FinalIntensity", finalIntensity);
-            props.SetFloat("_ConeLength", Mathf.Abs(coneLength - 10.0f));
-            props.SetFloat("_MaxConeLength", maxConeLength);
-            // for(int i = 0; i < objRenderers.Length; i++)
-            // {
-            //     objRenderers[i].SetPropertyBlock(props);
-            // }
-            switch(objRenderers.Length)
-            {
-                case 1:
-                    if(objRenderers[0])
-                        objRenderers[0].SetPropertyBlock(_SetFinalIntensityComponents(props, objRenderers[0]));
-                    break;
-                case 2:
-                    if(objRenderers[0])
-                        objRenderers[0].SetPropertyBlock(_SetFinalIntensityComponents(props, objRenderers[0]));
-                    if(objRenderers[1])
-                        objRenderers[1].SetPropertyBlock(_SetFinalIntensityComponents(props, objRenderers[1]));
-                    break;
-                case 3:
-                    if(objRenderers[0])
-                        objRenderers[0].SetPropertyBlock(_SetFinalIntensityComponents(props, objRenderers[0]));
-                    if(objRenderers[1])
-                        objRenderers[1].SetPropertyBlock(_SetFinalIntensityComponents(props, objRenderers[1]));
-                    if(objRenderers[2])
-                        objRenderers[2].SetPropertyBlock(_SetFinalIntensityComponents(props, objRenderers[2]));
-                    break;
-                case 4:
-                    if(objRenderers[0])
-                        objRenderers[0].SetPropertyBlock(_SetFinalIntensityComponents(props, objRenderers[0]));
-                    if(objRenderers[1])
-                        objRenderers[1].SetPropertyBlock(_SetFinalIntensityComponents(props, objRenderers[1]));
-                    if(objRenderers[2])
-                        objRenderers[2].SetPropertyBlock(_SetFinalIntensityComponents(props, objRenderers[2]));
-                    if(objRenderers[3])
-                        objRenderers[3].SetPropertyBlock(_SetFinalIntensityComponents(props, objRenderers[3]));
-                    break;
-                case 5:
-                    if(objRenderers[0])
-                        objRenderers[0].SetPropertyBlock(_SetFinalIntensityComponents(props, objRenderers[0]));
-                    if(objRenderers[1])
-                        objRenderers[1].SetPropertyBlock(_SetFinalIntensityComponents(props, objRenderers[1]));
-                    if(objRenderers[2])
-                        objRenderers[2].SetPropertyBlock(_SetFinalIntensityComponents(props, objRenderers[2]));
-                    if(objRenderers[3])
-                        objRenderers[3].SetPropertyBlock(_SetFinalIntensityComponents(props, objRenderers[3]));
-                    if(objRenderers[4])
-                        objRenderers[4].SetPropertyBlock(_SetFinalIntensityComponents(props, objRenderers[4]));
-                    break;
-                default:
-                    Debug.Log("Too many mesh renderers for this fixture!");
-                    break;           
-            }
-        }
-        void Init(bool withAL)
+        void Init()
         {
             if(objRenderers[0] == null)
             {
@@ -834,14 +748,7 @@ namespace VRSL
                 previousFinalIntensityFixture = finalIntensityFixture;
                 previousFinalIntensityProjection = finalIntensityProjection;
                 previousFinalIntensityVolumetric = finalIntensityVolumetric;
-                if(withAL)
-                {
-                    _UpdateInstancedProperties();
-                }
-                else
-                {
-                    _UpdateInstancedPropertiesSansAudioLink();
-                }
+                _UpdateInstancedProperties();
             }
             else
             {
@@ -1172,7 +1079,7 @@ namespace VRSL
                 {
                     if (e.type == EventType.ExecuteCommand && e.commandName == "Duplicate")
                     {
-                        Init(false);
+                        Init();
                         return;
                     }
                 }

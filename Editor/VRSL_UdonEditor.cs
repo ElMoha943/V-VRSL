@@ -385,14 +385,7 @@ namespace VRSL.EditorScripts
                 if(!isEmpty)
                 {
                     fixture._SetProps();
-                    if(Application.isPlaying)
-                    {
-                        fixture._UpdateInstancedProperties();
-                    }
-                    else
-                    {
-                        fixture._UpdateInstancedPropertiesSansAudioLink();
-                    }
+                    fixture._UpdateInstancedProperties();
 
                 }
             }
@@ -473,15 +466,8 @@ namespace VRSL.EditorScripts
                     if(!isEmpty)
                     {
                         fixture._SetProps();
-                        if(Application.isPlaying)
-                        {
-                            fixture._UpdateInstancedProperties();
-                        }
-                        else
-                        {
-                            fixture._UpdateInstancedPropertiesSansAudioLink();
-                            fixture._CheckAvailableConstraints(fixture);
-                        }
+                        fixture._UpdateInstancedProperties();
+                        fixture._CheckAvailableConstraints(fixture);
                     }
                 }
             }
@@ -663,14 +649,7 @@ namespace VRSL.EditorScripts
                             if(fixture.objRenderers.Length > 0 && fixture.objRenderers[0] != null)
                             {
                                 fixture._SetProps();
-                                if(Application.isPlaying)
-                                {
-                                    fixture._UpdateInstancedProperties();
-                                }
-                                else
-                                {
-                                    fixture._UpdateInstancedPropertiesSansAudioLink();
-                                }
+                                fixture._UpdateInstancedProperties();
                             }
                         }
                     }
@@ -681,14 +660,7 @@ namespace VRSL.EditorScripts
                             if(fixture.objRenderers.Length > 0 && fixture.objRenderers[0] != null)
                             {
                                 fixture._SetProps();
-                                if(Application.isPlaying)
-                                {
-                                    fixture._UpdateInstancedProperties();
-                                }
-                                else
-                                {
-                                    fixture._UpdateInstancedPropertiesSansAudioLink();
-                                }
+                                fixture._UpdateInstancedProperties();
 
                             }
                         }
