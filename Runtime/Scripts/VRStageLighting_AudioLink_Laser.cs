@@ -483,6 +483,7 @@ namespace VRSL
         {
             props = new MaterialPropertyBlock();
         }
+        
         public void _UpdateInstancedProperties()
         {
             if(props == null)
@@ -526,56 +527,11 @@ namespace VRSL
             props.SetInt("_LaserCount", laserCount);
             props.SetFloat("_LaserThickness", laserThickness);
             props.SetFloat("_Scroll", laserScroll);
-            // for(int i = 0; i < objRenderers.Length; i++)
-            // {
-            //     objRenderers[i].SetPropertyBlock(props);
-            // }
-            switch(objRenderers.Length)
+            for(int i = 0; i < objRenderers.Length; i++)
             {
-                case 1:
-                    if(objRenderers[0])
-                        objRenderers[0].SetPropertyBlock(props);
-                    break;
-                case 2:
-                    if(objRenderers[0])
-                        objRenderers[0].SetPropertyBlock(props);
-                    if(objRenderers[1])
-                        objRenderers[1].SetPropertyBlock(props);
-                    break;
-                case 3:
-                    if(objRenderers[0])
-                        objRenderers[0].SetPropertyBlock(props);
-                    if(objRenderers[1])
-                        objRenderers[1].SetPropertyBlock(props);
-                    if(objRenderers[2])
-                        objRenderers[2].SetPropertyBlock(props);
-                    break;
-                case 4:
-                    if(objRenderers[0])
-                        objRenderers[0].SetPropertyBlock(props);
-                    if(objRenderers[1])
-                        objRenderers[1].SetPropertyBlock(props);
-                    if(objRenderers[2])
-                        objRenderers[2].SetPropertyBlock(props);
-                    if(objRenderers[3])
-                        objRenderers[3].SetPropertyBlock(props);
-                    break;
-                case 5:
-                    if(objRenderers[0])
-                        objRenderers[0].SetPropertyBlock(props);
-                    if(objRenderers[1])
-                        objRenderers[1].SetPropertyBlock(props);
-                    if(objRenderers[2])
-                        objRenderers[2].SetPropertyBlock(props);
-                    if(objRenderers[3])
-                        objRenderers[3].SetPropertyBlock(props);
-                    if(objRenderers[4])
-                        objRenderers[4].SetPropertyBlock(props);
-                    break;
-                default:
-                    Debug.Log("Too many mesh renderers for this fixture!");
-                    break;   
-            }  
+                if(objRenderers[i])
+                    objRenderers[i].SetPropertyBlock(props);
+            }
         }
 
         public void _UpdateInstancedPropertiesSansAudioLink()
@@ -616,56 +572,11 @@ namespace VRSL
             props.SetInt("_LaserCount", laserCount);
             props.SetFloat("_LaserThickness", laserThickness);
             props.SetFloat("_Scroll", laserScroll);
-            // for(int i = 0; i < objRenderers.Length; i++)
-            // {
-            //     objRenderers[i].SetPropertyBlock(props);
-            // }
-            switch(objRenderers.Length)
+            for(int i = 0; i < objRenderers.Length; i++)
             {
-                case 1:
-                    if(objRenderers[0])
-                        objRenderers[0].SetPropertyBlock(props);
-                    break;
-                case 2:
-                    if(objRenderers[0])
-                        objRenderers[0].SetPropertyBlock(props);
-                    if(objRenderers[1])
-                        objRenderers[1].SetPropertyBlock(props);
-                    break;
-                case 3:
-                    if(objRenderers[0])
-                        objRenderers[0].SetPropertyBlock(props);
-                    if(objRenderers[1])
-                        objRenderers[1].SetPropertyBlock(props);
-                    if(objRenderers[2])
-                        objRenderers[2].SetPropertyBlock(props);
-                    break;
-                case 4:
-                    if(objRenderers[0])
-                        objRenderers[0].SetPropertyBlock(props);
-                    if(objRenderers[1])
-                        objRenderers[1].SetPropertyBlock(props);
-                    if(objRenderers[2])
-                        objRenderers[2].SetPropertyBlock(props);
-                    if(objRenderers[3])
-                        objRenderers[3].SetPropertyBlock(props);
-                    break;
-                case 5:
-                    if(objRenderers[0])
-                        objRenderers[0].SetPropertyBlock(props);
-                    if(objRenderers[1])
-                        objRenderers[1].SetPropertyBlock(props);
-                    if(objRenderers[2])
-                        objRenderers[2].SetPropertyBlock(props);
-                    if(objRenderers[3])
-                        objRenderers[3].SetPropertyBlock(props);
-                    if(objRenderers[4])
-                        objRenderers[4].SetPropertyBlock(props);
-                    break;
-                default:
-                    Debug.Log("Too many mesh renderers for this fixture!");
-                    break;  
-            }  
+                if(objRenderers[i])
+                    objRenderers[i].SetPropertyBlock(props);
+            }
         }
         void Init(bool withAL)
         {
