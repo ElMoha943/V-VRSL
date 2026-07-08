@@ -1,15 +1,11 @@
-﻿using UnityEngine;
+using UnityEngine;
 
-#if UDONSHARP
 using UdonSharp;
 using VRC.SDKBase;
 using VRC.Udon;
 
 [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
 public class SmoothingPanelOpener : UdonSharpBehaviour
-#else
-public class SmoothingPanelOpener : MonoBehaviour
-#endif
 {
     public Animator animator;
     public bool isOpen;
@@ -30,11 +26,7 @@ public class SmoothingPanelOpener : MonoBehaviour
         animator.SetBool("isOpen", false);
     }
 
-#if UDONSHARP
     public override void Interact()
-#else
-    public void Interact()
-#endif
     {
         isOpen = !isOpen;
         if (isOpen)

@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
   m_Name: VRSL_LocalUIControlPanel
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: 70022390366b3e644a300b4aef208e2c, type: 2}
+  serializedUdonProgramAsset: {fileID: 11400000, guid: 639435c5932b2aa4d9e5ce7d220c5a4e, type: 2}
   udonAssembly: 
   assemblyError: 
   sourceCsScript: {fileID: 11500000, guid: 3a6f7af16d40b384185acaf77b926698, type: 3}
@@ -1225,19 +1225,19 @@ MonoBehaviour:
       Data: 
     - Name: $k
       Entry: 1
-      Data: bloomAnimator
+      Data: bloomPP
     - Name: $v
       Entry: 7
       Data: 68|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
     - Name: <Name>k__BackingField
       Entry: 1
-      Data: bloomAnimator
+      Data: bloomPP
     - Name: <UserType>k__BackingField
       Entry: 7
       Data: 69|System.RuntimeType, mscorlib
     - Name: 
       Entry: 1
-      Data: UnityEngine.Animator, UnityEngine.AnimationModule
+      Data: UnityEngine.Rendering.PostProcessing.PostProcessVolume, Unity.Postprocessing.Runtime
     - Name: 
       Entry: 8
       Data: 
@@ -1276,7 +1276,7 @@ MonoBehaviour:
       Data: 72|UnityEngine.HeaderAttribute, UnityEngine.CoreModule
     - Name: header
       Entry: 1
-      Data: Post Processing Animators
+      Data: Post Processing
     - Name: 
       Entry: 8
       Data: 
@@ -1669,7 +1669,7 @@ MonoBehaviour:
       Data: 91|System.RuntimeType, mscorlib
     - Name: 
       Entry: 1
-      Data: UnityEngine.UI.Text, UnityEngine.UI
+      Data: TMPro.TextMeshProUGUI, Unity.TextMeshPro
     - Name: 
       Entry: 8
       Data: 

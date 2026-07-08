@@ -1,4 +1,4 @@
-﻿Shader "VRSL/Stencils/VRSL-Light Restoration Stencil"
+Shader "VRSL/Stencils/VRSL-Light Restoration Stencil"
 {
     Properties
     {

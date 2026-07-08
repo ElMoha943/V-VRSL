@@ -1,14 +1,9 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.Rendering.PostProcessing;
-#if UDONSHARP
 using UdonSharp;
 using VRC.SDKBase;
 using VRC.Udon;
 using static VRC.SDKBase.VRCShader;
-#else
-using static UnityEngine.Shader;
-using UnityEngine.Rendering;
-#endif
 
 #if UNITY_EDITOR && !COMPILER_UDONSHARP
 using UnityEditor;
@@ -16,9 +11,7 @@ using System.Collections.Generic;
 using System;
 using System.IO;
 
-#if UDONSHARP
 using UdonSharpEditor;
-#endif
 #endif
 
 using TMPro;
@@ -37,12 +30,8 @@ namespace VRSL
         Low
     }
 
-#if UDONSHARP
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     public class VRSL_LocalUIControlPanel : UdonSharpBehaviour
-#else
-    public class VRSL_LocalUIControlPanel : MonoBehaviour
-#endif
     {
         [SerializeField, HideInInspector]
         private VRStageLighting_AudioLink_Laser[] audioLinkLasers;
@@ -187,7 +176,7 @@ namespace VRSL
 
         public bool VolumetricNoise
         {
-#if (UNITY_ANDROID || UNITY_IOS) && UDONSHARP
+#if UNITY_ANDROID || UNITY_IOS
             set {
                 _volumetricNoise = false;
                 _ApplyVolumetricFogStatus();
@@ -990,11 +979,7 @@ namespace VRSL
                     {
                         Debug.Log("DMX Color: " + rt.name);
                     }
-#if UDONSHARP
                     VRCShader.SetGlobalTexture(_Udon_DMXGridRenderTexture, rt);
-#else
-                    Shader.SetGlobalTexture(_Udon_DMXGridRenderTexture, rt, RenderTextureSubElement.Default);
-#endif
                 }
                 else if (rt.name.Contains("Movement"))
                 {
@@ -1002,11 +987,7 @@ namespace VRSL
                     {
                         Debug.Log("DMX Movement: " + rt.name);
                     }
-#if UDONSHARP
                     VRCShader.SetGlobalTexture(_Udon_DMXGridRenderTextureMovement, rt);
-#else
-                    Shader.SetGlobalTexture(_Udon_DMXGridRenderTextureMovement, rt, RenderTextureSubElement.Default);
-#endif
                 }
                 else if (rt.name.Contains("Spin"))
                 {
@@ -1014,11 +995,7 @@ namespace VRSL
                     {
                         Debug.Log("DMX Spin Timings: " + rt.name);
                     }
-#if UDONSHARP
                     VRCShader.SetGlobalTexture(_Udon_DMXGridSpinTimer, rt);
-#else
-                    Shader.SetGlobalTexture(_Udon_DMXGridSpinTimer, rt, RenderTextureSubElement.Default);
-#endif
                 }
                 else if (rt.name.Contains("Strobe"))
                 {
@@ -1028,11 +1005,7 @@ namespace VRSL
                         {
                             Debug.Log("DMX Strobe Timings: " + rt.name);
                         }
-#if UDONSHARP
                         VRCShader.SetGlobalTexture(_Udon_DMXGridStrobeTimer, rt);
-#else
-                        Shader.SetGlobalTexture(_Udon_DMXGridStrobeTimer, rt, RenderTextureSubElement.Default);
-#endif
                     }
                     else
                     {
@@ -1041,42 +1014,30 @@ namespace VRSL
                         {
                             if (rt.name.Contains("Delay-Final") && DMXMode != LEGACY_MODE)
                             {
-#if UDONSHARP
                                 if (outputDebugLogs)
                                 {
                                     Debug.Log("DMX Strobe Output: " + rt.name);
                                 }
                                 VRCShader.SetGlobalTexture(_Udon_DMXGridStrobeOutput, rt);
-#else
-                                Shader.SetGlobalTexture(_Udon_DMXGridStrobeOutput, rt, RenderTextureSubElement.Default);
-#endif
                             }
                             else if (DMXMode == LEGACY_MODE)
                             {
-#if UDONSHARP
                                 if (outputDebugLogs)
                                 {
                                     Debug.Log("DMX Strobe Output: " + rt.name);
                                 }
                                 VRCShader.SetGlobalTexture(_Udon_DMXGridStrobeOutput, rt);
-#else
-                                Shader.SetGlobalTexture(_Udon_DMXGridStrobeOutput, rt, RenderTextureSubElement.Default);
-#endif
                             }
                         }
                         else
                         {
                             if (rt.name.Contains("Delay") == false)
                             {
-#if UDONSHARP
                                 if (outputDebugLogs)
                                 {
                                     Debug.Log("Strobe Output: " + rt.name);
                                 }
                                 VRCShader.SetGlobalTexture(_Udon_DMXGridStrobeOutput, rt);
-#else
-                                Shader.SetGlobalTexture(_Udon_DMXGridStrobeOutput, rt, RenderTextureSubElement.Default);
-#endif
                             }
                         }
                     }
@@ -1527,7 +1488,7 @@ namespace VRSL
         {
             string path = Application.dataPath;
             path = path.Replace("Assets", "");
-            path += "Packages" + "\\" + "com.acchosen.vr-stage-lighting" + "\\";
+            path += "Packages" + "\\" + "com.valenvrc.vvrsl" + "\\";
             path += "Runtime" + "\\" + "VERSION.txt";
 
             StreamReader reader = new StreamReader(path);
@@ -1621,9 +1582,7 @@ namespace VRSL
         }
         public override void OnInspectorGUI()
         {
-#if UDONSHARP
             if (UdonSharpGUI.DrawDefaultUdonSharpBehaviourHeader(target)) return;
-#endif
             EditorGUI.BeginChangeCheck();
             serializedObject.Update();
             DrawLogo();

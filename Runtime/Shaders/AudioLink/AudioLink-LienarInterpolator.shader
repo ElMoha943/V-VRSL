@@ -1,4 +1,4 @@
-﻿Shader "AudioLink/VRSL Linear Interpolator"
+Shader "AudioLink/VRSL Linear Interpolator"
 {
     Properties
     {

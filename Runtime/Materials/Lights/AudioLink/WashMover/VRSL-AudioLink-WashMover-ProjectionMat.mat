@@ -19,9 +19,8 @@ Material:
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 1
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: 3001
-  stringTagMap:
-    RenderType: Transparent
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
   disabledShaderPasses: []
   m_LockedProperties: 
   m_SavedProperties:
@@ -126,6 +125,7 @@ Material:
     - _ConeLength: 3.62
     - _ConeSync: 0.2
     - _ConeWidth: 2.5
+    - _DMXChannel: 0
     - _DNEnabler: 0
     - _Delay: 0
     - _DistFade: 1.31
@@ -135,11 +135,14 @@ Material:
     - _EnableAudioReact: 0
     - _EnableColorChord: 0
     - _EnableColorTextureSample: 0
+    - _EnableCompatibilityMode: 0
+    - _EnableDMX: 0
     - _EnableOSC: 0
     - _EnableSpin: 0
     - _EnableStaticEmissionColor: 0
     - _EnableStrobe: 0
     - _EnableThemeColorSampling: 0
+    - _EnableVerticalMode: 0
     - _Fade: 1.5
     - _FadeAmt: 0
     - _FadeStrength: 3.72
@@ -158,6 +161,7 @@ Material:
     - _IntensityCutoff: 0.2
     - _IsEven: 0
     - _LMStrength: 1
+    - _LegacyGoboRange: 0
     - _LensMaxBrightness: 5
     - _LightProbeMethod: 0
     - _MaxMinPanAngle: 0
@@ -167,6 +171,7 @@ Material:
     - _ModX: 0
     - _ModY: 0
     - _MultiSampleDepth: 1
+    - _NineUniverseMode: 0
     - _NoisePower: 0.333
     - _NoiseSeed: 420
     - _NumBands: 4

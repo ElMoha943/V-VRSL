@@ -15,10 +15,8 @@ using System.Data;
 using UnityEngine.UIElements;
 using System.Linq;
 
-#if UDONSHARP
 using VRC.Udon;
 using UdonSharpEditor;
-#endif
 
 #if !UNITY_EDITOR_LINUX && !UNITY_ANDROID && !UNITY_IOS
 using System.Drawing.Printing;
@@ -263,13 +261,9 @@ namespace VRSL.EditorScripts
             List<VRStageLighting_DMX_Static> sceneFixtures = new List<VRStageLighting_DMX_Static>();
             foreach(GameObject go in sceneObjects)
             {
-#if UDONSHARP
                 #pragma warning disable 0618 //suppressing obsoletion warnings
                 VRStageLighting_DMX_Static lightScript = go.GetUdonSharpComponent<VRStageLighting_DMX_Static>();
                 #pragma warning restore 0618 //suppressing obsoletion warnings
-#else
-                VRStageLighting_DMX_Static lightScript = go.GetComponent<VRStageLighting_DMX_Static>();
-#endif
                 if(lightScript != null)
                 {
                     sceneFixtures.Add(lightScript);
@@ -324,13 +318,9 @@ namespace VRSL.EditorScripts
                 List<VRStageLighting_DMX_Static> sceneFixtures = new List<VRStageLighting_DMX_Static>();
                 foreach(GameObject go in sceneObjects)
                 {
-#if UDONSHARP
                     #pragma warning disable 0618 //suppressing obsoletion warnings
                     VRStageLighting_DMX_Static lightScript = go.GetUdonSharpComponent<VRStageLighting_DMX_Static>();
                     #pragma warning restore 0618 //suppressing obsoletion warnings
-#else
-                    VRStageLighting_DMX_Static lightScript = go.GetComponent<VRStageLighting_DMX_Static>();
-#endif
                     if(lightScript != null)
                     {
                         sceneFixtures.Add(lightScript);
@@ -427,11 +417,9 @@ namespace VRSL.EditorScripts
                             }
                             sof.ApplyModifiedProperties();
 
-#if UDONSHARP
                             #pragma warning disable 0618 //suppressing obsoletion warnings
                             fixture.UpdateProxy();
                             #pragma warning restore 0618 //suppressing obsoletion warnings.
-#endif
 
                             fixture.enableDMXChannels = data[dmxID].enableDMXChannels;
                             fixture.fixtureID = data[dmxID].fixtureID;
@@ -462,11 +450,9 @@ namespace VRSL.EditorScripts
                             fixture.fixtureDefintion = data[dmxID].fixtureDefintion;
                             fixture.objRenderers = rends;
 
-#if UDONSHARP
                             #pragma warning disable 0618 //suppressing obsoletion warnings
                             fixture.ApplyProxyModifications();
                             #pragma warning restore 0618 //suppressing obsoletion warnings
-#endif
                             if(PrefabUtility.IsPartOfAnyPrefab(fixture))
                             {
                                 PrefabUtility.RecordPrefabInstancePropertyModifications(fixture);
@@ -504,13 +490,9 @@ namespace VRSL.EditorScripts
          //  colorLabel.text = "Emission Color";
             foreach (GameObject go in sceneObjects)
             {
-#if UDONSHARP
                 #pragma warning disable 0618 //suppressing obsoletion warnings
                 panel =  go.GetUdonSharpComponent<VRSL_LocalUIControlPanel>();
                 #pragma warning restore 0618
-#else
-                panel =  go.GetComponent<VRSL_LocalUIControlPanel>();
-#endif
                 if(panel != null)
                 {
                     hasLocalPanel = true;

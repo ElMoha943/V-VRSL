@@ -1,27 +1,19 @@
-﻿using UnityEngine;
+using UnityEngine;
 
-#if UDONSHARP
 using UdonSharp;
 using VRC.SDKBase;
 using VRC.Udon;
-#endif
 
 #if UNITY_EDITOR && !COMPILER_UDONSHARP
 using UnityEditor;
 
-#if UDONSHARP
 using UdonSharpEditor;
-#endif
 #endif
 
 namespace VRSL.EditorScripts
 {
-#if UDONSHARP
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     public class VRSL_CameraConfigurator : UdonSharpBehaviour
-#else
-    public class VRSL_CameraConfigurator : MonoBehaviour
-#endif
     {
         public Camera camObj;
         public float defaultSize = 9.6f;
@@ -214,9 +206,7 @@ namespace VRSL.EditorScripts
         }
         public override void OnInspectorGUI()
         {
-#if UDONSHARP
             if (UdonSharpGUI.DrawDefaultUdonSharpBehaviourHeader(target)) return;
-#endif
             serializedObject.Update();
 
             

@@ -1,4 +1,4 @@
-﻿Shader "VRSL/Standard Static/Surface Shaders/Transparent"
+Shader "VRSL/Standard Static/Surface Shaders/Transparent"
 {
     Properties
     {
@@ -63,7 +63,7 @@
             float2 uv_MetallicSmoothness;
 
         };
-        #include "Packages/com.acchosen.vr-stage-lighting/Runtime/Shaders/Shared/VRSL-Defines.cginc"
+        #include "Packages/com.valenvrc.vvrsl/Runtime/Shaders/Shared/VRSL-Defines.cginc"
         half _CurveMod, _AlphaIntensity, _EnableAlphaDMX;
         sampler2D _EmissionMask, _NormalMap, _MetallicSmoothness;
          #include "../Shared/VRSL-DMXFunctions.cginc"

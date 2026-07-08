@@ -1,4 +1,4 @@
-﻿Shader "VRSL/DMX CRTs/Strobe Output"
+Shader "VRSL/DMX CRTs/Strobe Output"
 {
     //THIS IS A TIMER, TO KEEP TRACK OF HOW MUCH TIME HAS PASSED FOR THE STROBE
     Properties
@@ -26,7 +26,7 @@
 
             #define VRSL_DMX
 
-       // #include "Packages/com.acchosen.vr-stage-lighting/Runtime/Shaders/VRSLDMX.cginc"
+       // #include "Packages/com.valenvrc.vvrsl/Runtime/Shaders/VRSLDMX.cginc"
             Texture2D _Udon_DMXGridRenderTexture;
             Texture2D _Udon_DMXGridStrobeTimer;
             SamplerState VRSL_PointClampSampler;

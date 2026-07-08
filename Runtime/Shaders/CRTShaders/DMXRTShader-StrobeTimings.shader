@@ -1,4 +1,4 @@
-﻿Shader "VRSL/DMX CRTs/Strobe Timer"
+Shader "VRSL/DMX CRTs/Strobe Timer"
 {
     //THIS IS A TIMER, TO KEEP TRACK OF HOW MUCH TIME HAS PASSED FOR THE STROBE
     Properties

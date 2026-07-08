@@ -1,4 +1,4 @@
-﻿Shader "VRSL/DMX CRTs/Spinner Timer"
+Shader "VRSL/DMX CRTs/Spinner Timer"
 {
     //THIS IS A TIMER, TO KEEP TRACK OF HOW MUCH TIME HAS PASSED FOR THE NEXT ROTATION
     Properties

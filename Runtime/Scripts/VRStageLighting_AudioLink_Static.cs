@@ -1,17 +1,12 @@
-﻿using UnityEngine;
-#if UDONSHARP
+using UnityEngine;
 using UdonSharp;
 using VRC.SDKBase;
 using VRC.Udon;
-#endif
 #if !COMPILER_UDONSHARP && UNITY_EDITOR
 using UnityEditor;
-#if UDONSHARP
 using UdonSharpEditor;
-//using VRC.Udon;
 using VRC.Udon.Common;
 using VRC.Udon.Common.Interfaces;
-#endif
 #endif
 
 namespace VRSL
@@ -25,12 +20,8 @@ namespace VRSL
         Treble
     }
 
-#if UDONSHARP
     [UdonBehaviourSyncMode(BehaviourSyncMode.None)]
     public class VRStageLighting_AudioLink_Static : UdonSharpBehaviour
-#else
-    public class VRStageLighting_AudioLink_Static : MonoBehaviour
-#endif
     {
         //////////////////Public Variables////////////////////
 
@@ -924,11 +915,9 @@ namespace VRSL
 
             private void OnDrawGizmos()
             {
-#if UDONSHARP
                 #pragma warning disable 0618 //suppressing obsoletion warnings
                 this.UpdateProxy(ProxySerializationPolicy.RootOnly);
                 #pragma warning restore 0618 //suppressing obsoletion warnings
-#endif
                 Gizmos.color = lightColorTint;
                 if(targetToFollow != null)
                 {

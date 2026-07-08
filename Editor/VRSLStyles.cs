@@ -1,4 +1,4 @@
-﻿#if !COMPILER_UDONSHARP && UNITY_EDITOR
+#if !COMPILER_UDONSHARP && UNITY_EDITOR
 using UnityEngine;
 using UnityEditor;
 using System.IO;

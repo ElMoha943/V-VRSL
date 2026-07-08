@@ -1,4 +1,4 @@
-﻿Shader "VRSL/Stencils/VRSL-Light Stencil"
+Shader "VRSL/Stencils/VRSL-Light Stencil"
 {
     Properties
     {
