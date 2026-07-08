@@ -39,15 +39,7 @@ namespace VRSL.EditorScripts
         }
         public static string GetVersion()
         {
-            string path = Application.dataPath;
-            path = path.Replace("Assets","");
-            path += "Packages"  + "\\" + "com.acchosen.vr-stage-lighting" + "\\";
-            path += "Runtime" + "\\"  + "VERSION.txt";
-
-            StreamReader reader = new StreamReader(path); 
-            string versionNum = reader.ReadToEnd();
-            string ver = "VR Stage Lighting ver:" + " <b><color=#b33cff>" + versionNum + "</color></b>";
-            return ver;
+            return "3.0.0-Alpha";
         }
         public static void DrawLogo()
         {

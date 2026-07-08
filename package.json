@@ -1,21 +1,18 @@
 {
-  "name": "com.acchosen.vr-stage-lighting",
-  "displayName": "VR Stage Lighting",
-  "version": "2.8.4",
-  "description": "A collection of HLSL shaders, UdonSharp scripts, 3D models, prefabs, and assets designed to emulate the real control, quality, and complexity of professional stage lighting into VRChat in as many ways as possible.",
+  "name": "com.valenvrc.vvrsl",
+  "displayName": "VVRSL",
+  "version": "3.0.0-Alpha.1",
+  "description": "VRSL Fork focused on debloated functionality and improved performance for VRChat.",
   "author": {
-    "name": "AcChosen",
-    "url": "https://github.com/AcChosen/VR-Stage-Lighting"
+    "name": "valenvrc",
+    "url": "https://github.com/ElMoha943/VR-Stage-Lighting"
   },
   "gitDependencies": {},
   "vpmDependencies": {
     "com.llealloo.audiolink": ">=0.3.1"
   },
-  "legacyFolders": {
-    "Assets\\VR-Stage-Lighting": ""
-  },
   "legacyFiles": {},
   "hideInEditor": false,
   "license": "MIT",
-  "unity": "2019.4"
+  "unity": "2022.3"
 }
