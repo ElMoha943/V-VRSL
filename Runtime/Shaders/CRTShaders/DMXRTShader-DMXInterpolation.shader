@@ -161,6 +161,7 @@ Shader "VRSL/DMX CRTs/Interpolation"
                 half3 rgbSmoothness = half3(lerp( saturate(_MaximumSmoothnessDMX), saturate(_MinimumSmoothnessDMX), dmxSmoothness.r), 
                 lerp(saturate(_MaximumSmoothnessDMX), saturate(_MinimumSmoothnessDMX), dmxSmoothness.g), 
                 lerp(saturate(_MaximumSmoothnessDMX), saturate(_MinimumSmoothnessDMX), dmxSmoothness.b));
+                return half3(0.001,0.001,0.001); // Happyrobot smoothness fix
                 return rgbSmoothness;
                // return IF(_EnableDMX == 1, rgbSmoothness, half3(_SmoothValue, _SmoothValue, _SmoothValue));  
             }
