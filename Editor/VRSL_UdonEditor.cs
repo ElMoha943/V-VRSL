@@ -166,6 +166,7 @@ namespace VRSL.EditorScripts
         GUIStyle l, I;
         GUIContent colorLabel;
         VRSL_LocalUIControlPanel panel;
+        VRSL_FixtureDefinitions fixtureDefinitions;
         string[] fixDefinitionNames = new string[1];
     //  SerializedProperty _globalIntensity;
         public static GUIStyle InfoLabel()
@@ -190,8 +191,68 @@ namespace VRSL.EditorScripts
 
         string[] GetFixtureOptions(string fixtureDefGUID)
         {
-          VRSL_FixtureDefinitions fixDefAsset = (VRSL_FixtureDefinitions) AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(fixtureDefGUID), typeof(VRSL_FixtureDefinitions));
-          return fixDefAsset.GetNames();
+          fixtureDefinitions = (VRSL_FixtureDefinitions) AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(fixtureDefGUID), typeof(VRSL_FixtureDefinitions));
+          return fixtureDefinitions == null ? new string[1] : fixtureDefinitions.GetNames();
+        }
+
+        void DrawDMXChannelRangeWarning()
+        {
+            SerializedProperty enabledProperty = serializedObject.FindProperty("enableDMXChannels");
+            SerializedProperty fixtureDefinitionProperty = serializedObject.FindProperty("fixtureDefintion");
+            if(targets.Length != 1 || !enabledProperty.boolValue || enabledProperty.hasMultipleDifferentValues ||
+                fixtureDefinitionProperty.hasMultipleDifferentValues || fixtureDefinitions == null)
+            {
+                return;
+            }
+
+            int fixtureDefinition = fixtureDefinitionProperty.intValue;
+            if(fixtureDefinition < 0 || fixtureDefinition >= fixtureDefinitions.DefinitionsArraySize)
+            {
+                return;
+            }
+
+            string[] channelDefinition = fixtureDefinitions.GetChannelDefinition(fixtureDefinition);
+            if(channelDefinition == null || channelDefinition.Length == 0)
+            {
+                return;
+            }
+
+            bool useLegacySectorMode = serializedObject.FindProperty("useLegacySectorMode").boolValue;
+            bool singleChannelMode = useLegacySectorMode && serializedObject.FindProperty("singleChannelMode").boolValue;
+            int channelCount = singleChannelMode ? 1 : channelDefinition.Length;
+            int startChannel;
+            int universe;
+
+            if(useLegacySectorMode)
+            {
+                int sector = Mathf.Max(0, serializedObject.FindProperty("sector").intValue);
+                startChannel = ((sector % 40) * 13) + 1;
+                universe = (sector / 40) + 1;
+                if(singleChannelMode)
+                {
+                    startChannel += serializedObject.FindProperty("Channel").intValue;
+                }
+            }
+            else
+            {
+                startChannel = serializedObject.FindProperty("dmxChannel").intValue;
+                universe = serializedObject.FindProperty("dmxUniverse").intValue;
+            }
+
+            int endChannel = startChannel + channelCount - 1;
+            if(endChannel <= 512)
+            {
+                return;
+            }
+
+            int availableChannels = Mathf.Max(0, 513 - startChannel);
+            string fixtureName = fixtureDefinitions.definitions[fixtureDefinition].name;
+            EditorGUILayout.HelpBox(
+                fixtureName + " uses " + channelCount + " channel" + (channelCount == 1 ? "" : "s") +
+                " and starts at channel " + startChannel + " in universe " + universe +
+                ", but only " + availableChannels + " channel" + (availableChannels == 1 ? " remains." : "s remain.") +
+                " Move it to channel " + (513 - channelCount) + " or earlier to keep the fixture within one universe.",
+                MessageType.Warning);
         }
 
         public void GetPanel()
@@ -287,6 +348,7 @@ namespace VRSL.EditorScripts
                 serializedObject.FindProperty("dmxUniverse").intValue = EditorGUILayout.IntSlider(new GUIContent("Universe", 
                 "The industry standard Artnet Universe. Use this to choose which universe to read the DMX Channel from."),fixture.dmxUniverse, 1, 9);
             }
+            DrawDMXChannelRangeWarning();
             EditorGUILayout.Space();
             EditorGUILayout.Space();
             GUILayout.Label(fixture._DMXChannelToString(), I);
