@@ -172,6 +172,7 @@ namespace VRSL
         #if !COMPILER_UDONSHARP && UNITY_EDITOR
         public Vector2Int GetSectorConversion()
         {
+            SectorConversion();
             return new Vector2Int(calculatedDMXChannel, calculatedDMXUniverse);
         }
 
@@ -179,59 +180,14 @@ namespace VRSL
 
         int SectorConversion()
         {
-            int x =  Mathf.Abs(Mathf.FloorToInt((int) sector * 13) + 1);
-        // = calculatedDMXChannel;//outgoing channel
-        // float z = calculatedDMXChannel/512.0f;
-            //Debug.Log(z);
-            #if UNITY_EDITOR //ALL BELOW IS FOR INSPECTOR ONLY
-            //TODO: FIND A BETTER WAY TO CALCULATE THIS
-            calculatedDMXChannel = x;
-            calculatedDMXUniverse = 1;
-        // int u = Mathf.FloorToInt(z); //universe
-        // int c = calculatedDMXChannel - ((u - 1) * 512);
-        if(calculatedDMXChannel > 512 && calculatedDMXChannel < (512 * 2) + 8 )
-        {
-            calculatedDMXChannel -= (512+8); //universe 2
-            calculatedDMXUniverse = 2;
-        }
-            else if (calculatedDMXChannel > (512 * 2) && calculatedDMXChannel < (512 * 3) + 13 )
-        {
-            calculatedDMXChannel -= ((512*2)+3) + (13 * 1); //universe 3
-            calculatedDMXUniverse = 3;
-        }
-            else if (calculatedDMXChannel > 512 * 3 + 13 && calculatedDMXChannel < (512 * 4) + 21)
-        {
-            calculatedDMXChannel -= ((512*3)+11) + (13 * 1); // universe 4
-            calculatedDMXUniverse = 4;
-        }
-            else if (calculatedDMXChannel > 512 * 4 + 21 && calculatedDMXChannel < (512 * 5) + 16 +13 )
-        {
-            calculatedDMXChannel -= ((512*4)+6) + (13 * 2); // universe 5
-            calculatedDMXUniverse = 5;
-        }
-            else if (calculatedDMXChannel > 512 * 5 && calculatedDMXChannel < (512 * 6) + 39)
-        {
-            calculatedDMXChannel -= ((512*5)+1) +(13 * 3); // universe 6
-            calculatedDMXUniverse = 6;
-        }
-            else if (calculatedDMXChannel > 512 * 6 && calculatedDMXChannel < 512 * 7 +  52)
-        {
-            calculatedDMXChannel -= ((512*6)+9) +(13 * 3); // universe 7
-            calculatedDMXUniverse = 7;
-        }
-            else if (calculatedDMXChannel > 512 * 7 && calculatedDMXChannel < 512 * 8  + 65)
-        {
-            calculatedDMXChannel -= ((512*7)+4) + 52; // universe 8
-            calculatedDMXUniverse = 8;
-        }
-            else if (calculatedDMXChannel > 512 * 8 && calculatedDMXChannel < 512 * 9 + 65 )
-        {
-            calculatedDMXChannel -= ((512*8)-1) + 65; // universe 9
-            calculatedDMXUniverse = 9;
-        }
-        #endif
-        //  Debug.Log("Current Channel: " + x);
-            return x;
+            const int channelsPerSector = 13;
+            const int sectorsPerUniverse = 40;
+
+            int validSector = Mathf.Max(0, sector);
+            calculatedDMXUniverse = (validSector / sectorsPerUniverse) + 1;
+            calculatedDMXChannel = ((validSector % sectorsPerUniverse) * channelsPerSector) + 1;
+
+            return (validSector * channelsPerSector) + 1;
         }
 
         int RawDMXConversion()
