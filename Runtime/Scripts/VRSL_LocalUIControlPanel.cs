@@ -9,7 +9,6 @@ using static VRC.SDKBase.VRCShader;
 using UnityEditor;
 using System.Collections.Generic;
 using System;
-using System.IO;
 
 using UdonSharpEditor;
 #endif
@@ -1433,13 +1432,9 @@ namespace VRSL
 
         static string GetVersion()
         {
-            string path = Application.dataPath;
-            path = path.Replace("Assets", "");
-            path += "Packages" + "\\" + "com.valenvrc.vvrsl" + "\\";
-            path += "Runtime" + "\\" + "VERSION.txt";
-
-            StreamReader reader = new StreamReader(path);
-            string versionNum = reader.ReadToEnd();
+            UnityEditor.PackageManager.PackageInfo packageInfo =
+                UnityEditor.PackageManager.PackageInfo.FindForAssembly(typeof(VRSL_LocalUIControlPanel).Assembly);
+            string versionNum = packageInfo != null ? packageInfo.version : "Unknown";
             string ver = "VR Stage Lighting ver:" + " <b><color=#b33cff>" + versionNum + "</color></b>";
             return ver;
         }
