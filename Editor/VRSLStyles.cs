@@ -1,7 +1,6 @@
 #if !COMPILER_UDONSHARP && UNITY_EDITOR
 using UnityEngine;
 using UnityEditor;
-using System.IO;
 
 // help link https://docs.unity3d.com/ScriptReference/EditorStyles.html
 // ---DISCLAIMER--- THIS CODE IS BASED OFF OF "SYNQARK"'s ARKTOON-SHADERS AND "XIEXE"'s UNITY-SHADERS. FOR MORE INFORMATION PLEASE REFER TO THE ORIGINAL BASE WRITER "https://github.com/synqark", "https://github.com/synqark/Arktoon-Shaders" or "https://github.com/Xiexe", "https://github.com/Xiexe/Xiexes-Unity-Shaders"
@@ -19,7 +18,9 @@ public class VRSLStyles : MonoBehaviour
     }
     public static string GetVersion()
     {
-        return "3.0.0-Alpha";
+        UnityEditor.PackageManager.PackageInfo packageInfo =
+            UnityEditor.PackageManager.PackageInfo.FindForAssembly(typeof(VRSLStyles).Assembly);
+        return packageInfo != null ? packageInfo.version : "Unknown";
     }
 
     public static void DrawLogo()

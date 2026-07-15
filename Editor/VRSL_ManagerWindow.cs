@@ -719,13 +719,7 @@ public class VRSL_ManagerWindow : EditorWindow {
 
     public static string GetVersion()
     {
-        string path = Application.dataPath;
-        path = path.Replace("Assets","");
-        path += "Packages"  + "\\" + "com.valenvrc.vvrsl" + "\\";
-        path += "Runtime" + "\\"  + "VERSION.txt";
-
-        StreamReader reader = new StreamReader(path); 
-        string versionNum = reader.ReadToEnd();
+        string versionNum = VRSLStyles.GetVersion();
         string ver = "VR Stage Lighting ver:" + " <b><color=#b33cff>" + versionNum + "</color></b>";
         return ver;
     }
@@ -764,29 +758,21 @@ public class VRSL_ManagerWindow : EditorWindow {
 
     static void CheckUSharpVideo()
     {
-        string path = Application.dataPath;
-        path += "/VRSL Addons/VRSL-USharpVideo Package/VERSION.txt";
-        hasUsharpVideo = File.Exists(path);
+        hasUsharpVideo = !string.IsNullOrEmpty(AssetDatabase.GUIDToAssetPath("e62fe963d8da32147bbd2f1caa73a0de"));
     }
     static void CheckDesktopDuplication()
     {
-        string path = Application.dataPath;
-        path += "/VRSL Addons/VRSL-DesktopDuplication Package/VERSION.txt";
-        hasDesktop = File.Exists(path);
+        hasDesktop = !string.IsNullOrEmpty(AssetDatabase.GUIDToAssetPath("d8bedad6090068740a8d3d9de3c84ea4"));
     }
 
     static void CheckProTV()
     {
-        string path = Application.dataPath;
-        path += "/VRSL Addons/VRSL-ProTV Package/VERSION.txt";
-        hasProTV = File.Exists(path);
+        hasProTV = !string.IsNullOrEmpty(AssetDatabase.GUIDToAssetPath("d58eb5975ef68b8448ae81cd41c1b615"));
     }
 
     static void CheckVideoTXL()
     {
-        string path = Application.dataPath;
-        path += "/VRSL Addons/VRSL-VideoTXL Package/VERSION.txt";
-        hasVideoTXL = File.Exists(path);
+        hasVideoTXL = !string.IsNullOrEmpty(AssetDatabase.GUIDToAssetPath("b815c24c9fa26f04e9d441922ce84968"));
     }
     static bool LoadPrefabs()
     {

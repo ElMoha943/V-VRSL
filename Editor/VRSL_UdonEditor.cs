@@ -78,7 +78,7 @@ namespace VRSL.EditorScripts
 
         public static string GetVersion()
         {
-            return "3.0.0-Alpha";
+            return VRSLStyles.GetVersion();
         }
 
         public static void DrawLogo()
