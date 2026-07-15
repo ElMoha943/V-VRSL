@@ -1,7 +1,7 @@
 {
   "name": "com.valenvrc.vvrsl",
   "displayName": "VVRSL",
-  "version": "3.0.0-Alpha.1",
+  "version": "3.0.0-Alpha.2",
   "description": "VRSL Fork focused on debloated functionality and improved performance for VRChat.",
   "author": {
     "name": "valenvrc",
@@ -9,7 +9,7 @@
   },
   "gitDependencies": {},
   "vpmDependencies": {
-    "com.vrchat.worlds": ">=3.1.0",
+    "com.vrchat.worlds": ">=3.10.4",
     "com.llealloo.audiolink": ">=0.3.1"
   },
   "legacyFiles": {},
