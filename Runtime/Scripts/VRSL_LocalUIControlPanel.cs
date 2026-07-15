@@ -108,20 +108,18 @@ namespace VRSL
         public bool isUsingDMX = true;
         public bool isUsingAudioLink = true;
         [Space(10)]
-        [Header("0 = Horizontal Mode  1 = Vertical Mode  2 = Legacy Mode")]
+        [Header("0 = Horizontal Mode  1 = Vertical Mode")]
 
-        [Range(0, 2)]
+        [Range(0, 1)]
         public int DMXMode;
 
         const int HORIZONTAL_MODE = 0;
         const int VERTICAL_MODE = 1;
-        const int LEGACY_MODE = 2;
         [Space(20)]
         public bool delayStrobeForGI = true;
         [Space(5)]
         public CustomRenderTexture[] DMX_CRTS_Horizontal;
         public CustomRenderTexture[] DMX_CRTS_Vertical;
-        public CustomRenderTexture[] DMX_CRTS_Legacy;
         public CustomRenderTexture[] AudioLink_CRTs;
 
         [HideInInspector]
@@ -161,7 +159,6 @@ namespace VRSL
         CustomRenderTexture[] _strobeCRTs;
         CustomRenderTexture[] _interpolatedCRTsHorizontal;
         CustomRenderTexture[] _interpolatedCRTsVertical;
-        CustomRenderTexture[] _interpolatedCRTsLegacy;
         Material[] _blinderProjectionMaterials;
         Material[] _parProjectionMaterials;
         Material[] _otherProjectionMaterials;
@@ -360,12 +357,11 @@ namespace VRSL
             return result;
         }
 
-        CustomRenderTexture[] _MergeCRTArrays(CustomRenderTexture[] a, CustomRenderTexture[] b, CustomRenderTexture[] c)
+        CustomRenderTexture[] _MergeCRTArrays(CustomRenderTexture[] a, CustomRenderTexture[] b)
         {
             int aLen = a != null ? a.Length : 0;
             int bLen = b != null ? b.Length : 0;
-            int cLen = c != null ? c.Length : 0;
-            CustomRenderTexture[] merged = new CustomRenderTexture[aLen + bLen + cLen];
+            CustomRenderTexture[] merged = new CustomRenderTexture[aLen + bLen];
             int idx = 0;
             if (a != null)
             {
@@ -383,27 +379,17 @@ namespace VRSL
                     idx++;
                 }
             }
-            if (c != null)
-            {
-                foreach (CustomRenderTexture item in c)
-                {
-                    merged[idx] = item;
-                    idx++;
-                }
-            }
             return merged;
         }
 
         void _RebuildCRTCaches()
         {
             _strobeCRTs = _MergeCRTArrays(
-                _CollectNamedCRTs(DMX_CRTS_Legacy, "Strobe"),
                 _CollectNamedCRTs(DMX_CRTS_Horizontal, "Strobe"),
                 _CollectNamedCRTs(DMX_CRTS_Vertical, "Strobe")
             );
             _interpolatedCRTsHorizontal = _CollectNamedCRTs(DMX_CRTS_Horizontal, "Interpolated");
             _interpolatedCRTsVertical = _CollectNamedCRTs(DMX_CRTS_Vertical, "Interpolated");
-            _interpolatedCRTsLegacy = _CollectNamedCRTs(DMX_CRTS_Legacy, "Interpolated");
         }
 
         Material[] _CollectNamedMaterials(Material[] source, string nameFragment, bool include)
@@ -514,7 +500,7 @@ namespace VRSL
             if (sperateInGameInterpolationSpeed)
             {
                 _EnsureShaderIDs();
-                if (_interpolatedCRTsHorizontal == null || _interpolatedCRTsVertical == null || _interpolatedCRTsLegacy == null)
+                if (_interpolatedCRTsHorizontal == null || _interpolatedCRTsVertical == null)
                 {
                     _RebuildCRTCaches();
                 }
@@ -534,19 +520,6 @@ namespace VRSL
                 if (_interpolatedCRTsVertical != null)
                 {
                     foreach (CustomRenderTexture rend in _interpolatedCRTsVertical)
-                    {
-                        if (rend != null && rend.material != null)
-                        {
-                            float max = Mathf.Clamp01(rend.material.GetFloat(_MaximumSmoothnessDMXID));
-                            float min = Mathf.Clamp01(rend.material.GetFloat(_MinimumSmoothnessDMXID));
-                            rend.material.SetFloat(_MaximumSmoothnessDMXID, Mathf.Clamp01(max / inGameInterpolationModifier));
-                            rend.material.SetFloat(_MinimumSmoothnessDMXID, Mathf.Clamp01(min / inGameInterpolationModifier));
-                        }
-                    }
-                }
-                if (_interpolatedCRTsLegacy != null)
-                {
-                    foreach (CustomRenderTexture rend in _interpolatedCRTsLegacy)
                     {
                         if (rend != null && rend.material != null)
                         {
@@ -1012,15 +985,7 @@ namespace VRSL
                         //Debug.Log("Setting Strobe Output");
                         if (delayStrobeForGI)
                         {
-                            if (rt.name.Contains("Delay-Final") && DMXMode != LEGACY_MODE)
-                            {
-                                if (outputDebugLogs)
-                                {
-                                    Debug.Log("DMX Strobe Output: " + rt.name);
-                                }
-                                VRCShader.SetGlobalTexture(_Udon_DMXGridStrobeOutput, rt);
-                            }
-                            else if (DMXMode == LEGACY_MODE)
+                            if (rt.name.Contains("Delay-Final"))
                             {
                                 if (outputDebugLogs)
                                 {
@@ -1062,22 +1027,15 @@ namespace VRSL
                     case HORIZONTAL_MODE:
                         EnableCRTS(DMX_CRTS_Horizontal);
                         DisableCRTS(DMX_CRTS_Vertical);
-                        DisableCRTS(DMX_CRTS_Legacy);
                         break;
                     case VERTICAL_MODE:
                         DisableCRTS(DMX_CRTS_Horizontal);
                         EnableCRTS(DMX_CRTS_Vertical);
-                        DisableCRTS(DMX_CRTS_Legacy);
-                        break;
-                    case LEGACY_MODE:
-                        DisableCRTS(DMX_CRTS_Horizontal);
-                        DisableCRTS(DMX_CRTS_Vertical);
-                        EnableCRTS(DMX_CRTS_Legacy);
                         break;
                     default:
-                        DisableCRTS(DMX_CRTS_Horizontal);
+                        DMXMode = HORIZONTAL_MODE;
+                        EnableCRTS(DMX_CRTS_Horizontal);
                         DisableCRTS(DMX_CRTS_Vertical);
-                        DisableCRTS(DMX_CRTS_Legacy);
                         break;
                 }
             }
@@ -1085,7 +1043,6 @@ namespace VRSL
             {
                 DisableCRTS(DMX_CRTS_Horizontal);
                 DisableCRTS(DMX_CRTS_Vertical);
-                DisableCRTS(DMX_CRTS_Legacy);
             }
         }
 
@@ -1105,16 +1062,6 @@ namespace VRSL
                 _CheckDMX();
             }
         }
-        public void _SetDMXLegacy()
-        {
-            if (isUsingDMX)
-            {
-                DMXMode = LEGACY_MODE;
-                _CheckDMX();
-            }
-        }
-
-
         public void _CheckAudioLink()
         {
             if (isUsingAudioLink)

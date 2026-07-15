@@ -4,7 +4,6 @@ Shader "VRSL/Basic Laser/DMX"
     {
         [Toggle] _EnableDMX ("Enable Stream DMX/DMX Control", Int) = 0
         [Toggle] _EnableFineChannels ("Enable Fine Channels (For Pan/Tilt)", Int) = 0
-        [Toggle] _EnableCompatibilityMode ("Enable Compatibility Mode", Int) = 0
         [Toggle] _EnableVerticalMode ("Enable Vertical Mode", Int) = 0
         _DMXChannel ("DMX Channel Number)", Int) = 0
         [HideInInspector][Toggle] _NineUniverseMode ("Extended Universe Mode", Int) = 0
@@ -95,7 +94,7 @@ Shader "VRSL/Basic Laser/DMX"
             half _XConeFlatness, _ZRotation, _UniversalIntensity;
             half _EndFade, _FadeStrength, _InternalShine, _LaserSoftening, _InternalShineLength;
             float _ScrollOffset;
-            uint _EnableCompatibilityMode, _EnableVerticalMode;
+            uint _EnableVerticalMode;
             sampler2D _Udon_DMXGridRenderTexture, _Udon_DMXGridRenderTextureMovement, _Udon_DMXGridSpinTimer;
             uniform float4 _Udon_DMXGridRenderTexture_TexelSize;
             uniform const half compatSampleYAxis = 0.019231;

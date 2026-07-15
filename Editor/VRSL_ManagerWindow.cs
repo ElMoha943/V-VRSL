@@ -93,10 +93,6 @@ public class DMXListItem
     private int Z_fixtureID; public int P_fixtureID;
     private int Z_dmxChannel; public int P_dmxChannel;
     private int Z_dmxUniverse; public int P_dmxUniverse;
-    private bool Z_useLegacySectorMode; public bool P_useLegacySectorMode;
-    private bool Z_singleChannelMode; public bool P_singleChannelMode;
-    private int Z_sector; public int P_sector;
-    private int Z_Channel; public int P_Channel;
     private bool Z_legacyGoboRange; public bool P_legacyGoboRange;
     private float Z_globalIntensity; public float P_globalIntensity;
     private float Z_finalIntensity; public float P_finalIntensity;
@@ -127,10 +123,6 @@ public class DMXListItem
         Z_fixtureID = P_fixtureID = this.light.fixtureID;
         Z_dmxChannel = P_dmxChannel = this.light.dmxChannel;
         Z_dmxUniverse = P_dmxUniverse = this.light.dmxUniverse;
-        Z_useLegacySectorMode = P_useLegacySectorMode =  this.light.useLegacySectorMode;
-        Z_singleChannelMode = P_singleChannelMode = this.light.singleChannelMode;
-        Z_sector = P_sector = this.light.sector;
-        Z_Channel = P_Channel = this.light.Channel;
         Z_legacyGoboRange = P_legacyGoboRange = this.light.legacyGoboRange;
         Z_globalIntensity = P_globalIntensity = this.light.globalIntensity;
         Z_finalIntensity = P_finalIntensity = this.light.finalIntensity;
@@ -174,10 +166,6 @@ public class DMXListItem
         light.fixtureID = P_fixtureID = Z_fixtureID;
         light.dmxChannel = P_dmxChannel = Z_dmxChannel;
         light.dmxUniverse = P_dmxUniverse = Z_dmxUniverse;
-        light.useLegacySectorMode = P_useLegacySectorMode = Z_useLegacySectorMode;
-        light.singleChannelMode = P_singleChannelMode = Z_singleChannelMode;
-        light.sector = P_sector = Z_sector;
-        light.Channel = P_Channel = Z_Channel;
         light.legacyGoboRange = P_legacyGoboRange = Z_legacyGoboRange;
         light.globalIntensity = P_globalIntensity = Z_globalIntensity;
         light.finalIntensity = P_finalIntensity = Z_finalIntensity;
@@ -211,10 +199,7 @@ public class DMXListItem
         so.FindProperty("enableFineChannels").boolValue = P_enableFineChannels;
         so.FindProperty("fixtureID").intValue = P_fixtureID;
         so.FindProperty("dmxChannel").intValue = P_dmxChannel;
-        so.FindProperty("useLegacySectorMode").boolValue = P_useLegacySectorMode;
-        so.FindProperty("singleChannelMode").boolValue = P_singleChannelMode;
-        so.FindProperty("sector").intValue = P_sector; 
-        so.FindProperty("Channel").intValue = P_Channel;
+        so.FindProperty("dmxUniverse").intValue = P_dmxUniverse;
         so.FindProperty("legacyGoboRange").boolValue = P_legacyGoboRange;
         so.FindProperty("globalIntensity").floatValue = P_globalIntensity;
         so.FindProperty("finalIntensity").floatValue = P_finalIntensity;
@@ -244,10 +229,6 @@ public class DMXListItem
         light.fixtureID = Z_fixtureID = P_fixtureID;
         light.dmxChannel = Z_dmxChannel = P_dmxChannel;
         light.dmxUniverse = Z_dmxUniverse = P_dmxUniverse;
-        light.useLegacySectorMode = Z_useLegacySectorMode = P_useLegacySectorMode;
-        light.singleChannelMode = Z_singleChannelMode = P_singleChannelMode;
-        light.sector = Z_sector = P_sector;
-        light.Channel = Z_Channel = P_Channel;
         light.legacyGoboRange = Z_legacyGoboRange = P_legacyGoboRange;
         light.globalIntensity = Z_globalIntensity = P_globalIntensity;
         light.finalIntensity = Z_finalIntensity = P_finalIntensity;
@@ -629,10 +610,10 @@ public class VRSL_ManagerWindow : EditorWindow {
     private static bool universeFourFold;
     private static bool[] bandFold = new bool[4];
     static GUIContent colorLabel;
-    private string[] dmxModes = new string[]{"Horizontal", "Vertical", "Legacy"};
+    private string[] dmxModes = new string[]{"Horizontal", "Vertical"};
     private string[] materialChooserList = new string[]{"Off","Intensity+Color", "Movement", "Spin", "Strobe Timing", "Strobe Output", "AudioLink Interpolation"};
     private string [] dmxGizmoInfo = new string[]{"None", "Channel Only", "Universe + Channel"};
-    private static UnityEngine.Object controlPanelUiPrefab, directionalLightPrefab, uDesktopHorizontalPrefab, uDesktopVerticalPrefab, uDesktopLegacyPrefab, uVidHorizontalPrefab, uVidVerticalPrefab, uVidLegacyPrefab,
+    private static UnityEngine.Object controlPanelUiPrefab, directionalLightPrefab, uDesktopHorizontalPrefab, uDesktopVerticalPrefab, uVidHorizontalPrefab, uVidVerticalPrefab,
     audioLinkPrefab, audioLinkControllerPrefab, standardAudioLinkControllerPrefab, oscGridReaderHorizontalPrefab, oscGridReaderVerticalPrefab, audioLinkVRSLPrefab, cubeMask, cylinderMask, capsuleMask, sphereMask,
     proTVVertical, proTVHorizontal, videoTXLVertical, videoTXLHorizontal;
     private static bool dmxSpawnsFoldout, audioLinkSpawnsFoldout, mainOptionsFoldout, stencilFoldout;
@@ -641,27 +622,27 @@ public class VRSL_ManagerWindow : EditorWindow {
     private static bool last9UniverseStatus;
     private static bool lastDepthLightRequirement, lastVolumetricNoiseToggle;
 
-    private static UnityEngine.Object spotlight_h, spotlight_v, spotlight_l, spotlight_a;
+    private static UnityEngine.Object spotlight_h, spotlight_v, spotlight_a;
     private static UnityEngine.Object gi_spotlight_h, gi_spotlight_v, gi_spotlight_a;
-    private static UnityEngine.Object washlight_h, washlight_v, washlight_l, washlight_a;
+    private static UnityEngine.Object washlight_h, washlight_v, washlight_a;
     private static UnityEngine.Object gi_washlight_h, gi_washlight_v, gi_washlight_a;
-    private static UnityEngine.Object blinder_h, blinder_v, blinder_l, blinder_a;
+    private static UnityEngine.Object blinder_h, blinder_v, blinder_a;
     private static UnityEngine.Object gi_blinder_h, gi_blinder_v, gi_blinder_a;
-    private static UnityEngine.Object flasher_h, flasher_v, flasher_l, flasher_a;
+    private static UnityEngine.Object flasher_h, flasher_v, flasher_a;
     private static UnityEngine.Object gi_flasher_h, gi_flasher_v, gi_flasher_a;   
-    private static UnityEngine.Object parlight_h, parlight_v, parlight_l, parlight_a;
+    private static UnityEngine.Object parlight_h, parlight_v, parlight_a;
     private static UnityEngine.Object gi_parlight_h, gi_parlight_v, gi_parlight_a;
-    private static UnityEngine.Object lightbar_h, lightbar_v, lightbar_l, lightbar_a;
+    private static UnityEngine.Object lightbar_h, lightbar_v, lightbar_a;
     private static UnityEngine.Object gi_lightbar_h, gi_lightbar_v, gi_lightbar_a;    
-    private static UnityEngine.Object discoball_h, discoball_v, discoball_l, discoball_a; 
-    private static UnityEngine.Object laser_h, laser_v, laser_l, laser_a;
-    private static UnityEngine.Object sixFour_h, sixFour_v, sixFour_l;
-    private static UnityEngine.Object multiLightbar_h, multiLightbar_v, multiLightbar_l;
-    private Material dmx_H_CRT_Color_Mat, dmx_V_CRT_Color_Mat, dmx_L_CRT_Color_Mat,
-    dmx_H_CRT_Mvmt_Mat, dmx_V_CRT_Mvmt_Mat, dmx_L_CRT_Mvmt_Mat,
-    dmx_H_CRT_Spin_Mat,dmx_V_CRT_Spin_Mat,dmx_L_CRT_Spin_Mat,
-    dmx_H_CRT_StrobeTime_Mat, dmx_V_CRT_StrobeTime_Mat, dmx_L_CRT_StrobeTime_Mat,
-    dmx_H_CRT_StrobeOut_Mat, dmx_V_CRT_StrobeOut_Mat, dmx_L_CRT_StrobeOut_Mat,
+    private static UnityEngine.Object discoball_h, discoball_v, discoball_a; 
+    private static UnityEngine.Object laser_h, laser_v, laser_a;
+    private static UnityEngine.Object sixFour_h, sixFour_v;
+    private static UnityEngine.Object multiLightbar_h, multiLightbar_v;
+    private Material dmx_H_CRT_Color_Mat, dmx_V_CRT_Color_Mat,
+    dmx_H_CRT_Mvmt_Mat, dmx_V_CRT_Mvmt_Mat,
+    dmx_H_CRT_Spin_Mat,dmx_V_CRT_Spin_Mat,
+    dmx_H_CRT_StrobeTime_Mat, dmx_V_CRT_StrobeTime_Mat,
+    dmx_H_CRT_StrobeOut_Mat, dmx_V_CRT_StrobeOut_Mat,
     audiolink_CRT_InterpolationMat;
     string[] volumetricMeshQualityNames = new string[] {"High", "Medium", "Low"};
     int[] volumetricMeshQualityValues = {0, 1, 2};
@@ -817,10 +798,8 @@ public class VRSL_ManagerWindow : EditorWindow {
         oscGridReaderVerticalPrefab = AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath("2ed7323806c632f4294ff51d8af9a2b2"), typeof(GameObject));
         uDesktopHorizontalPrefab = AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath("d8bedad6090068740a8d3d9de3c84ea4"), typeof(GameObject));
         uDesktopVerticalPrefab = AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath("b55309c416955b044a48bbced977331d"), typeof(GameObject));
-        uDesktopLegacyPrefab = AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath("a6013d8268c98274386159517c50aa09"), typeof(GameObject));
         uVidHorizontalPrefab = AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath("e62fe963d8da32147bbd2f1caa73a0de"), typeof(GameObject));
         uVidVerticalPrefab = AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath("91a099dcf3cff864a9bc08584904554a"), typeof(GameObject));
-        uVidLegacyPrefab = AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath("dd476adc52e8f374da7dd7e4e9274f71"), typeof(GameObject));
         audioLinkPrefab = AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath("8c1f201f848804f42aa401d0647f8902"), typeof(GameObject));
         audioLinkVRSLPrefab = AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath("c341366b553ad354198357faa3169627"), typeof(GameObject));
         audioLinkControllerPrefab = AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath("7156b82dc87d72144bdec0dc4f32a78a"), typeof(GameObject));
@@ -864,11 +843,6 @@ public class VRSL_ManagerWindow : EditorWindow {
         //     Debug.LogError("VRSL Control Panel: Failed to load " + AssetDatabase.GUIDToAssetPath("b55309c416955b044a48bbced977331d"));
         //     result = false;
         // }
-        // if(uDesktopLegacyPrefab == null)
-        // {
-        //     Debug.LogError("VRSL Control Panel: Failed to load " + AssetDatabase.GUIDToAssetPath("a6013d8268c98274386159517c50aa09"));
-        //     result = false;
-        // }
         // if(uVidHorizontalPrefab == null)
         // {
         //     Debug.LogError("VRSL Control Panel: Failed to load " + AssetDatabase.GUIDToAssetPath("e62fe963d8da32147bbd2f1caa73a0de"));
@@ -877,11 +851,6 @@ public class VRSL_ManagerWindow : EditorWindow {
         // if(uVidVerticalPrefab == null)
         // {
         //     Debug.LogError("VRSL Control Panel: Failed to load " + AssetDatabase.GUIDToAssetPath("91a099dcf3cff864a9bc08584904554a"));
-        //     result = false;
-        // }
-        // if(uVidLegacyPrefab == null)
-        // {
-        //     Debug.LogError("VRSL Control Panel: Failed to load " + AssetDatabase.GUIDToAssetPath("dd476adc52e8f374da7dd7e4e9274f71"));
         //     result = false;
         // }
         if(audioLinkPrefab == null)
@@ -2116,23 +2085,18 @@ public class VRSL_ManagerWindow : EditorWindow {
     {
         string dmx_H_CRT_Color_Mat_path = AssetDatabase.GUIDToAssetPath("c23ee34d1d3977548829651c8cceea33");
         string dmx_V_CRT_Color_Mat_path = AssetDatabase.GUIDToAssetPath("d2a0ea204b6092d49971eacf996dcec3");
-        string dmx_L_CRT_Color_Mat_path = AssetDatabase.GUIDToAssetPath("9a42fdd188c84e542be2a455485423a8");
 
         string dmx_H_CRT_Mvmt_Mat_path = AssetDatabase.GUIDToAssetPath("144ac9f77364a7d4ea6e607f40c31505");
         string dmx_V_CRT_Mvmt_Mat_path = AssetDatabase.GUIDToAssetPath("a949afd894bf9384bb57422931f130fc");
-        string dmx_L_CRT_Mvmt_Mat_path = AssetDatabase.GUIDToAssetPath("e79b2b00c4751b74ea6dacd87a9f41dd");
 
         string dmx_H_CRT_Spin_Mat_path = AssetDatabase.GUIDToAssetPath("0de093d844c8ac146b98341787214c64");
         string dmx_V_CRT_Spin_Mat_path = AssetDatabase.GUIDToAssetPath("1e05cea1a32288a47b1612ca4725ae2e");
-        string dmx_L_CRT_Spin_Mat_path = AssetDatabase.GUIDToAssetPath("d80a528643bc1c2418a6986cd3cf0141");
 
         string dmx_H_CRT_StrobeTime_Mat_path = AssetDatabase.GUIDToAssetPath("742ce52797fea8948a8f4c438b0c3b69");
         string dmx_V_CRT_StrobeTime_Mat_path = AssetDatabase.GUIDToAssetPath("05d3c32dd6873684283c962951dc067a");
-        string dmx_L_CRT_StrobeTime_Mat_path = AssetDatabase.GUIDToAssetPath("0f235f1aadc897344a6c8b3301b6f79e");
 
         string dmx_H_CRT_StrobeOut_Mat_path = AssetDatabase.GUIDToAssetPath("038cddd0ea70e1d41ad37272c1e7c31c");
         string dmx_V_CRT_StrobeOut_Mat_path = AssetDatabase.GUIDToAssetPath("fafb9a56ddc548e4dafd9cb0befa0e2e");
-        string dmx_L_CRT_StrobeOut_Mat_path = AssetDatabase.GUIDToAssetPath("8af3b80e2a7dd3e458aacc6701d4c657");
 
         string audiolink_CRT_InterpolationMat_path = AssetDatabase.GUIDToAssetPath("91f76b2e00433a141b2ad6ada0c59a80");
 
@@ -2172,23 +2136,6 @@ public class VRSL_ManagerWindow : EditorWindow {
                     e.ToString();                    
                 }
                 // break;
-            //legacy
-            // case 2:
-                try{
-
-                    dmx_L_CRT_Color_Mat = (Material)AssetDatabase.LoadAssetAtPath(dmx_L_CRT_Color_Mat_path, typeof(Material));
-                    dmx_L_CRT_Mvmt_Mat = (Material)AssetDatabase.LoadAssetAtPath(dmx_L_CRT_Mvmt_Mat_path, typeof(Material));
-                    dmx_L_CRT_Spin_Mat = (Material)AssetDatabase.LoadAssetAtPath(dmx_L_CRT_Spin_Mat_path, typeof(Material));
-                    dmx_L_CRT_StrobeTime_Mat = (Material)AssetDatabase.LoadAssetAtPath(dmx_L_CRT_StrobeTime_Mat_path, typeof(Material));
-                    dmx_L_CRT_StrobeOut_Mat = (Material)AssetDatabase.LoadAssetAtPath(dmx_L_CRT_StrobeOut_Mat_path, typeof(Material));
-                }
-                catch(Exception e)
-                {
-                    // loadSuccessful = false;
-                    Debug.Log("Could not load fixture prefab!");
-                    e.ToString();                    
-                }
-                // break;
             //audiolink
             // case 3:
                 try{
@@ -2213,86 +2160,71 @@ public class VRSL_ManagerWindow : EditorWindow {
 
         string spot_h_path = AssetDatabase.GUIDToAssetPath("f5be3cfe3f15bfb4e9477904c5af9daf");
         string spot_v_path = AssetDatabase.GUIDToAssetPath("9a6d4144bda0d3c4ba95593af446b653");
-        string spot_l_path = AssetDatabase.GUIDToAssetPath("d9cab657bd2dff14ea5425c2c4c4679e");
         string spot_a_path = AssetDatabase.GUIDToAssetPath("2aa50be2d32099842af2903a918a56f7");
 
         string wash_h_path = AssetDatabase.GUIDToAssetPath("b3e8ff051cc2d684aa255ceccce9b96f");
         string wash_v_path = AssetDatabase.GUIDToAssetPath("88bee1a0ddf090d4bb0721b30240c949");
-        string wash_l_path = AssetDatabase.GUIDToAssetPath("41c8453c8957aec4292212174d351a36");
         string wash_a_path = AssetDatabase.GUIDToAssetPath("dd0fe316ce2ca824ead0901561087fd3");
 
 
-        string blind_h_path, blind_v_path, blind_l_path, blind_a_path;
-        string par_h_path, par_v_path, par_l_path, par_a_path;
-        string bar_h_path, bar_v_path, bar_l_path, bar_a_path;
-        string six_h_path, six_v_path, six_l_path;
-        string multibar_h_path, multibar_v_path, multibar_l_path;
+        string blind_h_path, blind_v_path, blind_a_path;
+        string par_h_path, par_v_path, par_a_path;
+        string bar_h_path, bar_v_path, bar_a_path;
+        string six_h_path, six_v_path;
+        string multibar_h_path, multibar_v_path;
         if(legacyFixtures)
         {
             blind_h_path = AssetDatabase.GUIDToAssetPath("e9dde3e86ccb8ca4bb4ecbe35a6fa7b1");
             blind_v_path = AssetDatabase.GUIDToAssetPath("d7a8bacd5310e8e499962549ef931c57");
-            blind_l_path = AssetDatabase.GUIDToAssetPath("9310469001d6cdf4db2145f9fddd7933");
             blind_a_path = AssetDatabase.GUIDToAssetPath("269647a339f4d1c47951638c83aa839b");
 
             par_h_path = AssetDatabase.GUIDToAssetPath("946b3c09cfa93244c90a4b0ac7764b44");
             par_v_path = AssetDatabase.GUIDToAssetPath("2ff8eb277ef9d7047b12d127b2eaeb36");
-            par_l_path = AssetDatabase.GUIDToAssetPath("dd7cad5fc7f12624ea58efde5c3cd633");
             par_a_path = AssetDatabase.GUIDToAssetPath("161d81f8a11b22d42ae4e81f522939d3");
 
             bar_h_path = AssetDatabase.GUIDToAssetPath("96ffbd2a722ae324e892d303e2ee9a2a");
             bar_v_path = AssetDatabase.GUIDToAssetPath("b2a0b640363bc10408fb7a3803939fa0");
-            bar_l_path = AssetDatabase.GUIDToAssetPath("b1b81594f59ca5d469ad06808051c682");
             bar_a_path = AssetDatabase.GUIDToAssetPath("c33f8d4d996a9ba47b86d420e4cdb05b");
             
             six_h_path = AssetDatabase.GUIDToAssetPath("46d1954298362974887b80dc3d70ee5f");
             six_v_path = AssetDatabase.GUIDToAssetPath("51b428740444288448e19c88c64d5311");
-            six_l_path = AssetDatabase.GUIDToAssetPath("6f5c5d0af7e69e242ad56ac13882e04e");
 
             multibar_h_path = AssetDatabase.GUIDToAssetPath("c19e8fd46b4abdf49bb7b6cdc62acdde");
             multibar_v_path = AssetDatabase.GUIDToAssetPath("b8873da88b401dd4ab93b061c5ddf750");
-            multibar_l_path = AssetDatabase.GUIDToAssetPath("dd68d30b9f0b34442aac2fb4540ae553");
         }
         else
         {
             //5channel modes
             blind_h_path = AssetDatabase.GUIDToAssetPath("5ae312c8e69488842994fd62a7609adc");
             blind_v_path = AssetDatabase.GUIDToAssetPath("94d6ff221dc5748458941750e422114f");
-            blind_l_path = AssetDatabase.GUIDToAssetPath("9310469001d6cdf4db2145f9fddd7933");
             blind_a_path = AssetDatabase.GUIDToAssetPath("269647a339f4d1c47951638c83aa839b");
 
             par_h_path = AssetDatabase.GUIDToAssetPath("6a94fea4f85300a44b9e29ba54430110");
             par_v_path = AssetDatabase.GUIDToAssetPath("3b7bdfab2bd7abf4295be3356f6f3617");
-            par_l_path = AssetDatabase.GUIDToAssetPath("dd7cad5fc7f12624ea58efde5c3cd633");
             par_a_path = AssetDatabase.GUIDToAssetPath("161d81f8a11b22d42ae4e81f522939d3");
 
             bar_h_path = AssetDatabase.GUIDToAssetPath("fbb24c41d42d23c4296c31f5aca73942");
             bar_v_path = AssetDatabase.GUIDToAssetPath("78bf4380452cfbe4aa8154e17a189b28");
-            bar_l_path = AssetDatabase.GUIDToAssetPath("b1b81594f59ca5d469ad06808051c682");
             bar_a_path = AssetDatabase.GUIDToAssetPath("c33f8d4d996a9ba47b86d420e4cdb05b");
 
             six_h_path = AssetDatabase.GUIDToAssetPath("46d1954298362974887b80dc3d70ee5f");
             six_v_path = AssetDatabase.GUIDToAssetPath("51b428740444288448e19c88c64d5311");
-            six_l_path = AssetDatabase.GUIDToAssetPath("6f5c5d0af7e69e242ad56ac13882e04e");
 
             multibar_h_path = AssetDatabase.GUIDToAssetPath("c19e8fd46b4abdf49bb7b6cdc62acdde");
             multibar_v_path = AssetDatabase.GUIDToAssetPath("b8873da88b401dd4ab93b061c5ddf750");
-            multibar_l_path = AssetDatabase.GUIDToAssetPath("dd68d30b9f0b34442aac2fb4540ae553");
 
         }
 
         string flash_h_path = AssetDatabase.GUIDToAssetPath("6d00d693f1608ab49ad08d18dbe1fa02");
         string flash_v_path = AssetDatabase.GUIDToAssetPath("1c08f57da0cd0414c85f64b373431921");
-        string flash_l_path = AssetDatabase.GUIDToAssetPath("a38b2f56984259247bded9aa1b1ee149");
         string flash_a_path = AssetDatabase.GUIDToAssetPath("092158b73b160384f904e33d35a09123");
 
         string disco_h_path = AssetDatabase.GUIDToAssetPath("22192b7ad03f22a4db578b035fdca38d");
         string disco_v_path = AssetDatabase.GUIDToAssetPath("8bb1407f1f0e2cc48b9bbf35ca1951a6");
-        string disco_l_path = AssetDatabase.GUIDToAssetPath("65a96b17618e51548a669749173d48ff");
         string disco_a_path = AssetDatabase.GUIDToAssetPath("a7acda2f5fe7dfd4aaa49ec10a2d5586");
 
         string laser_h_path = AssetDatabase.GUIDToAssetPath("3d6c0b40980bcd34aba9183a62ecbd21");
         string laser_v_path = AssetDatabase.GUIDToAssetPath("55058c5ef8c22d04991b48a99a10acfe");
-        string laser_l_path = AssetDatabase.GUIDToAssetPath("55ac9bf95dc63bb4fb6ba2095d73cde2");
         string laser_a_path = AssetDatabase.GUIDToAssetPath("75c269de381facb4cae616c67f83f519");
 
 
@@ -2339,27 +2271,6 @@ public class VRSL_ManagerWindow : EditorWindow {
                     multiLightbar_v = AssetDatabase.LoadAssetAtPath(multibar_v_path, typeof(GameObject));
                     discoball_v = AssetDatabase.LoadAssetAtPath(disco_v_path, typeof(GameObject));
                     laser_v = AssetDatabase.LoadAssetAtPath(laser_v_path, typeof(GameObject));
-                }
-                catch(Exception e)
-                {
-                    loadSuccessful = false;
-                    Debug.Log("Could not load fixture prefab!");
-                    e.ToString();                    
-                }
-                break;
-            //legacy
-            case 2:
-                try{
-                    spotlight_l = AssetDatabase.LoadAssetAtPath(spot_l_path, typeof(GameObject));
-                    washlight_l = AssetDatabase.LoadAssetAtPath(wash_l_path, typeof(GameObject));
-                    blinder_l = AssetDatabase.LoadAssetAtPath(blind_l_path, typeof(GameObject));
-                    flasher_l = AssetDatabase.LoadAssetAtPath(flash_l_path, typeof(GameObject));
-                    parlight_l = AssetDatabase.LoadAssetAtPath(par_l_path, typeof(GameObject));
-                    lightbar_l = AssetDatabase.LoadAssetAtPath(bar_l_path, typeof(GameObject));
-                    sixFour_l = AssetDatabase.LoadAssetAtPath(six_l_path, typeof(GameObject));
-                    multiLightbar_l = AssetDatabase.LoadAssetAtPath(multibar_l_path, typeof(GameObject));
-                    discoball_l = AssetDatabase.LoadAssetAtPath(disco_l_path, typeof(GameObject));
-                    laser_l = AssetDatabase.LoadAssetAtPath(laser_l_path, typeof(GameObject));
                 }
                 catch(Exception e)
                 {
@@ -2958,43 +2869,6 @@ public class VRSL_ManagerWindow : EditorWindow {
                                     break;                                                           
                             }
                         break;
-                    case 2:
-                            switch(materialChooser)
-                            {
-                                default:
-                                    break;
-                                case 1:
-                                    EditorGUILayout.BeginVertical();
-                                    CreateMaterialGUI(dmx_L_CRT_Color_Mat);
-                                    EditorGUILayout.EndVertical();
-                                    break;
-                                case 2:
-                                    EditorGUILayout.BeginVertical();
-                                    CreateMaterialGUI(dmx_L_CRT_Mvmt_Mat);
-                                    EditorGUILayout.EndVertical();
-                                    break;
-                                case 3:
-                                    EditorGUILayout.BeginVertical();
-                                    CreateMaterialGUI(dmx_L_CRT_Spin_Mat);
-                                    EditorGUILayout.EndVertical();
-                                    break;
-                                case 4:
-                                    EditorGUILayout.BeginVertical();
-                                    CreateMaterialGUI(dmx_L_CRT_StrobeTime_Mat);
-                                    EditorGUILayout.EndVertical();
-                                    break;
-                                case 5:
-                                    EditorGUILayout.BeginVertical();
-                                    CreateMaterialGUI(dmx_L_CRT_StrobeOut_Mat);
-                                    EditorGUILayout.EndVertical();
-                                    break;      
-                                case 6:
-                                    EditorGUILayout.BeginVertical();
-                                    CreateMaterialGUI(audiolink_CRT_InterpolationMat);
-                                    EditorGUILayout.EndVertical();
-                                    break;                                                           
-                            }
-                        break;
                 }
                 EditorGUI.indentLevel--;
                 EditorGUILayout.EndVertical();
@@ -3062,14 +2936,6 @@ public class VRSL_ManagerWindow : EditorWindow {
                                             //Selection.SetActiveObjectWithContext(PrefabUtility.InstantiatePrefab(uDesktopVerticalPrefab as GameObject), null);
                                         Repaint();
                                     }
-                                    if(GUILayout.Button(Label("Legacy", "Spawn the legacy version of the uDesktop DMX Reader screen! Use send your DMX stream directly to the Unity Editor by copying your screen!"), HalfButton()))
-                                    {
-                                        Debug.Log("VRSL Control Panel: Spawning Legacy Desktop to Editor DMX Screen...");
-                                        if(LoadPrefabs())
-                                            SpawnPrefabWithUndo(uDesktopLegacyPrefab, "Spawn Desktop To Editor Screen", false, false);
-                                            //Selection.SetActiveObjectWithContext(PrefabUtility.InstantiatePrefab(uDesktopLegacyPrefab as GameObject), null);
-                                        Repaint();
-                                    }
                                 EditorGUILayout.EndHorizontal();
                             }
                             // EditorGUILayout.EndVertical();
@@ -3093,14 +2959,6 @@ public class VRSL_ManagerWindow : EditorWindow {
                                         if(LoadPrefabs())
                                             SpawnPrefabWithUndo(uVidVerticalPrefab, "Spawn USharp Video DMX Screen", false, false);
                                             //Selection.SetActiveObjectWithContext(PrefabUtility.InstantiatePrefab(uVidVerticalPrefab as GameObject), null);
-                                        Repaint();
-                                    }
-                                    if(GUILayout.Button(Label("Legacy", "Spawn the legacy version of the USharpVideo Player DMX Reader Screen. Use this video player prefab to stream DMX data to VRChat via Twitch/VRCDN! You can replace the video player in this prefab with any other video player you want as long as the screen gets duplicated to the larger plane!"), HalfButton()))
-                                    {
-                                        Debug.Log("VRSL Control Panel: Spawning Legacy USharpVideo DMX Screen...");
-                                        if(LoadPrefabs())
-                                            SpawnPrefabWithUndo(uVidLegacyPrefab, "Spawn USharpVideo DMX Screen", false, false);
-                                            //Selection.SetActiveObjectWithContext(PrefabUtility.InstantiatePrefab(uVidLegacyPrefab as GameObject), null);
                                         Repaint();
                                     }
                                 EditorGUILayout.EndHorizontal();
@@ -3165,9 +3023,6 @@ public class VRSL_ManagerWindow : EditorWindow {
                         case 1:
                             fp = "Vertical";
                             break;
-                        case 2:
-                            fp = "Legacy";
-                            break;
                         default:
                             break;
                     }  
@@ -3178,7 +3033,7 @@ public class VRSL_ManagerWindow : EditorWindow {
                     EditorGUILayout.BeginHorizontal(GUILayout.MaxWidth((position.width/2f)));
                     int mode = panel.DMXMode;
 
-                    string legacyfixString = legacyFixtures || mode == 2 ? "(13CH)" : "(5CH)";
+                    string legacyfixString = legacyFixtures ? "(13CH)" : "(5CH)";
                     string giSuffix = (hasDMXGI && useGIPrefabs) ? "+GI" : ""; 
                     //legacyfixString = legacyfixString + giSuffix;
 
@@ -3197,9 +3052,6 @@ public class VRSL_ManagerWindow : EditorWindow {
                                     case 1:
                                         SpawnPrefabWithUndo(spotlight_v, "Spawn Vertical Spotlight", true, false);
                                         break;
-                                    case 2:
-                                        SpawnPrefabWithUndo(spotlight_l, "Spawn Legacy Spotlight", true, false);
-                                        break; 
                                     default:
                                         break;                                    
                                 }
@@ -3226,9 +3078,6 @@ public class VRSL_ManagerWindow : EditorWindow {
                                     case 1:
                                         SpawnPrefabWithUndo(washlight_v, "Spawn Vertical Washlight", true, false);
                                         break;
-                                    case 2:
-                                        SpawnPrefabWithUndo(washlight_l, "Spawn Legacy Washlight", true, false);
-                                        break; 
                                     default:
                                         break;                                    
                                 }
@@ -3255,9 +3104,6 @@ public class VRSL_ManagerWindow : EditorWindow {
                                     case 1:
                                         SpawnPrefabWithUndo(blinder_v, "Spawn Vertical Blinder", true, false);
                                         break;
-                                    case 2:
-                                        SpawnPrefabWithUndo(blinder_l, "Spawn Legacy Blinder", true, false);
-                                        break; 
                                     default:
                                         break;                                    
                                 }
@@ -3284,9 +3130,6 @@ public class VRSL_ManagerWindow : EditorWindow {
                                     case 1:
                                         SpawnPrefabWithUndo(flasher_v, "Spawn Vertical Flasher", true, false);
                                         break;
-                                    case 2:
-                                        SpawnPrefabWithUndo(flasher_l, "Spawn Legacy Flasher", true, false);
-                                        break; 
                                     default:
                                         break;                                    
                                 }
@@ -3315,9 +3158,6 @@ public class VRSL_ManagerWindow : EditorWindow {
                                     case 1:
                                         SpawnPrefabWithUndo(parlight_v, "Spawn Vertical Parlight", true, false);
                                         break;
-                                    case 2:
-                                        SpawnPrefabWithUndo(parlight_l, "Spawn Legacy Parlight", true, false);
-                                        break; 
                                     default:
                                         break;                                    
                                 }
@@ -3344,9 +3184,6 @@ public class VRSL_ManagerWindow : EditorWindow {
                                     case 1:
                                         SpawnPrefabWithUndo(lightbar_v, "Spawn Vertical LightBar", true, false);
                                         break;
-                                    case 2:
-                                        SpawnPrefabWithUndo(lightbar_l, "Spawn Legacy LightBar", true, false);
-                                        break; 
                                     default:
                                         break;                                    
                                 }
@@ -3373,9 +3210,6 @@ public class VRSL_ManagerWindow : EditorWindow {
                                     case 1:
                                         SpawnPrefabWithUndo(discoball_v, "Spawn Vertical Discoball", true, false);
                                         break;
-                                    case 2:
-                                        SpawnPrefabWithUndo(discoball_l, "Spawn Legacy Discoball", true, false);
-                                        break; 
                                     default:
                                         break;                                    
                                 }
@@ -3402,9 +3236,6 @@ public class VRSL_ManagerWindow : EditorWindow {
                                     case 1:
                                         SpawnPrefabWithUndo(laser_v, "Spawn Vertical Laser", true, false);
                                         break;
-                                    case 2:
-                                        SpawnPrefabWithUndo(laser_l, "Spawn Legacy Laser", true, false);
-                                        break; 
                                     default:
                                         break;                                    
                                 }
@@ -3433,9 +3264,6 @@ public class VRSL_ManagerWindow : EditorWindow {
                                     case 1:
                                         SpawnPrefabWithUndo(sixFour_v, "Spawn Vertical 6x4 Light", true, false);
                                         break;
-                                    case 2:
-                                        SpawnPrefabWithUndo(sixFour_l, "Spawn Legacy 6x4 Light", true, false);
-                                        break; 
                                     default:
                                         break;                                    
                                 }
@@ -3462,9 +3290,6 @@ public class VRSL_ManagerWindow : EditorWindow {
                                     case 1:
                                         SpawnPrefabWithUndo(multiLightbar_v, "Spawn Vertical Multi-Lightbar", true, false);
                                         break;
-                                    case 2:
-                                        SpawnPrefabWithUndo(multiLightbar_l, "Spawn Legacy Multi-Lightbar", true, false);
-                                        break; 
                                     default:
                                         break;                                    
                                 }
@@ -3885,21 +3710,8 @@ public class VRSL_ManagerWindow : EditorWindow {
                                 fixture.P_enableFineChannels = EditorGUILayout.Toggle("Enable Fine Channels", fixture.P_enableFineChannels);
                                 fixture.P_nineUniverseMode = EditorGUILayout.Toggle("Extended Universe Mode", fixture.P_nineUniverseMode);
                                 fixture.P_fixtureID = EditorGUILayout.IntField("Fixture ID", fixture.P_fixtureID, GUILayout.MaxWidth(sectionWidth - 10));
-                                fixture.P_useLegacySectorMode = EditorGUILayout.Toggle("Legacy Sector Mode",fixture.P_useLegacySectorMode);
-                                if(fixture.P_useLegacySectorMode)
-                                {
-                                    fixture.P_sector = EditorGUILayout.IntField("Sector", fixture.P_sector, GUILayout.MaxWidth(sectionWidth - 10));
-                                    fixture.P_singleChannelMode = EditorGUILayout.Toggle("Single Channel Mode",fixture.P_singleChannelMode);
-                                    if(fixture.P_singleChannelMode)
-                                    {
-                                        fixture.P_Channel = EditorGUILayout.IntSlider("Single Channel CH",fixture.P_Channel, 0, 12, GUILayout.MaxWidth(sectionWidth - 10));
-                                    }
-                                }
-                                else
-                                {
-                                    fixture.P_dmxChannel = EditorGUILayout.IntSlider("DMX Channel",fixture.P_dmxChannel, 1, 512, GUILayout.MaxWidth(sectionWidth - 10));
-                                    fixture.P_dmxUniverse = EditorGUILayout.IntSlider("Universe",fixture.P_dmxUniverse, 1, 3, GUILayout.MaxWidth(sectionWidth - 10));
-                                }
+                                fixture.P_dmxChannel = EditorGUILayout.IntSlider("DMX Channel",fixture.P_dmxChannel, 1, 512, GUILayout.MaxWidth(sectionWidth - 10));
+                                fixture.P_dmxUniverse = EditorGUILayout.IntSlider("Universe",fixture.P_dmxUniverse, 1, 9, GUILayout.MaxWidth(sectionWidth - 10));
                                 fixture.P_legacyGoboRange = EditorGUILayout.Toggle("Legacy Gobo Range",fixture.P_legacyGoboRange);
                                 GUILayout.Space(4.0f);
 

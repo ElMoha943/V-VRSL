@@ -52,7 +52,7 @@ UNITY_INSTANCING_BUFFER_END(Props)
 #endif
 
 
-uint _EnableCompatibilityMode, _EnableVerticalMode;
+uint _EnableVerticalMode;
 //half _MaxMinTiltAngle, _MaxMinPanAngle;
 
 float VRSL_invLerp(float from, float to, float value)
@@ -142,31 +142,6 @@ float GetOffsetY()
 }
 
 
-float2 LegacyRead(int channel, int sector)
-{
-    // say we were on sector 6
-    // we need to move over 2 sectors
-    // and we need to move up 3 sectors
-
-    //1 sector is every 13 channels
-        float x = 0.02000;
-        float y = 0.02000;
-        //TRAVERSING THE Y AXIS OF THE OSC GRID
-        float ymod = floor(sector / 2.0);       
-
-        //TRAVERSING THE X AXIS OF THE OSC GRID
-        float xmod = sector % 2.0;
-
-        x+= (xmod * 0.50);
-        y+= (ymod * 0.04);
-        y-= sector >= 23 ? 0.025 : 0.0;
-        x+= (channel * 0.04);
-        x-= sector >= 40 ? 0.01 : 0.0;
-        //we are now on the correct
-        return float2(x,y);
-
-}
-
 float2 IndustryRead(int x, int y)
 {
     #ifdef _VRSL_LEGACY_TEXTURES
@@ -223,14 +198,14 @@ float ReadDMX(uint DMXChannel, Texture2D _Tex)
 
     // y = (y > 6 && y < 31) && x == 13.0 ? y - 1 : y;
     
-    float2 xyUV = _EnableCompatibilityMode == 1 ? LegacyRead(x-1.0,y) : IndustryRead(x,(y + 1.0));
+    float2 xyUV = IndustryRead(x,(y + 1.0));
         
     float4 uvcoords = float4(xyUV.x, xyUV.y, 0,0);
     //float4 c = tex2Dlod(_Tex, uvcoords);
     float4 c = _Tex.SampleLevel(VRSL_PointClampSampler, xyUV, 0);
     float value = 0.0;
     
-   if(getNineUniverseMode() && _EnableCompatibilityMode != 1)
+   if(getNineUniverseMode())
    {
     value = c.r;
     value = IF(targetColor > 0, c.g, value);
@@ -262,7 +237,7 @@ float ReadDMXRaw(uint DMXChannel, Texture2D _Tex)
     float y = DMXChannel / 13.0; // starts at 1 // doubles as sector
     y = frac(y)== 0.00000 ? y - 1 : y;
     
-    float2 xyUV = _EnableCompatibilityMode == 1 ? LegacyRead(x-1.0,y) : IndustryRead(x,(y + 1.0));
+    float2 xyUV = IndustryRead(x,(y + 1.0));
 
     float4 uvcoords = float4(xyUV.x, xyUV.y, 0,0);
     //float4 c = tex2Dlod(_Tex, uvcoords);

@@ -217,27 +217,9 @@ namespace VRSL.EditorScripts
                 return;
             }
 
-            bool useLegacySectorMode = serializedObject.FindProperty("useLegacySectorMode").boolValue;
-            bool singleChannelMode = useLegacySectorMode && serializedObject.FindProperty("singleChannelMode").boolValue;
-            int channelCount = singleChannelMode ? 1 : channelDefinition.Length;
-            int startChannel;
-            int universe;
-
-            if(useLegacySectorMode)
-            {
-                int sector = Mathf.Max(0, serializedObject.FindProperty("sector").intValue);
-                startChannel = ((sector % 40) * 13) + 1;
-                universe = (sector / 40) + 1;
-                if(singleChannelMode)
-                {
-                    startChannel += serializedObject.FindProperty("Channel").intValue;
-                }
-            }
-            else
-            {
-                startChannel = serializedObject.FindProperty("dmxChannel").intValue;
-                universe = serializedObject.FindProperty("dmxUniverse").intValue;
-            }
+            int channelCount = channelDefinition.Length;
+            int startChannel = serializedObject.FindProperty("dmxChannel").intValue;
+            int universe = serializedObject.FindProperty("dmxUniverse").intValue;
 
             int endChannel = startChannel + channelCount - 1;
             if(endChannel <= 512)
@@ -326,28 +308,10 @@ namespace VRSL.EditorScripts
             serializedObject.FindProperty("fixtureID").intValue = EditorGUILayout.IntField(new GUIContent("Fixture ID", 
             "The ID number for this fixture. This is mostly for organizational purposes and is entirely optional. Most DMX software have an ID attached to each fixture to run the fixtures through commands more easily, and it is recommended to have those IDs lined up here as well for the sake simplicity. This ID is public and can also be used for Udon scripting as well."),fixture.fixtureID);
 
-            serializedObject.FindProperty("useLegacySectorMode").boolValue  = EditorGUILayout.Toggle(new GUIContent("Enable Legacy Sector Mode", 
-            "Enables the legacy 'Sector' based method of assigning DMX Channels. Keep this unchecked to use industry standard DMX Channels."), fixture.useLegacySectorMode);
-            if(fixture.useLegacySectorMode)
-            {
-                serializedObject.FindProperty("sector").intValue = EditorGUILayout.IntField(new GUIContent("Sector", 
-                "Chooses the DMX Address to start this fixture at. A Sector in this context is every 13 Channels. I.E Sector 0 is channels 1-13, Sector 1 is channels 14-26, etc."),fixture.sector);
-                serializedObject.FindProperty("singleChannelMode").boolValue = EditorGUILayout.Toggle(new GUIContent("Enable Single Channel Mode",
-                "Enables single channel DMX mode for this fixture. This is for single channeled fixtures instead of the standard 13-channeled ones. Currently, the 'Flasher' fixture is the only single-channeled fixture at the moment"), fixture.singleChannelMode);
-                if(fixture.singleChannelMode)
-                {
-                    serializedObject.FindProperty("Channel").intValue = EditorGUILayout.IntSlider(new GUIContent("Single Channel CH",
-                    "Chooses the which of the 13 Channels of the current sector to sample from when single channel mode is enabled. Do not worry about this value if you are not using a single-channeled fixture."),fixture.Channel, 0, 12);
-                    
-                }
-            }
-            else
-            {
-                serializedObject.FindProperty("dmxChannel").intValue = EditorGUILayout.IntSlider(new GUIContent("DMX Channel", 
-                "The industry standard DMX Channel this fixture begins on. Most standard VRSL fixtures are 13 channels"),fixture.dmxChannel, 1, 512);
-                serializedObject.FindProperty("dmxUniverse").intValue = EditorGUILayout.IntSlider(new GUIContent("Universe", 
-                "The industry standard Artnet Universe. Use this to choose which universe to read the DMX Channel from."),fixture.dmxUniverse, 1, 9);
-            }
+            serializedObject.FindProperty("dmxChannel").intValue = EditorGUILayout.IntSlider(new GUIContent("DMX Channel", 
+            "The industry standard DMX Channel this fixture begins on. Most standard VRSL fixtures are 13 channels"),fixture.dmxChannel, 1, 512);
+            serializedObject.FindProperty("dmxUniverse").intValue = EditorGUILayout.IntSlider(new GUIContent("Universe", 
+            "The industry standard Artnet Universe. Use this to choose which universe to read the DMX Channel from."),fixture.dmxUniverse, 1, 9);
             DrawDMXChannelRangeWarning();
             EditorGUILayout.Space();
             EditorGUILayout.Space();

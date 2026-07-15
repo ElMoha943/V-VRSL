@@ -113,7 +113,7 @@ half _RTLMStrength;
 int _TextureSampleMode;
 int _LightProbeMethod;
 half _Saturation, _SaturationLength, _LensMaxBrightness, _UniversalIntensity;
-uint _EnableCompatibilityMode, _EnableVerticalMode;
+uint _EnableVerticalMode;
 uint _GoboBeamSplitEnable;
 
 

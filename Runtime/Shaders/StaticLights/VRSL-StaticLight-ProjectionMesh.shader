@@ -10,7 +10,6 @@ Shader "VRSL/Standard Static/Projection"
 
 		 [HideInInspector][Toggle] _EnableStrobe ("Enable Strobe", Int) = 0
 
-		 [Toggle] _EnableCompatibilityMode ("Enable Compatibility Mode", Int) = 0
 		 [Toggle] _EnableVerticalMode ("Enable Vertical Mode", Int) = 0
 		 [Toggle] _EnableDMX ("Enable Stream DMX/DMX Control", Int) = 0
 		 [Enum(UnityEngine.Rendering.BlendMode)] _BlendSrc ("Source Blend mode", Float) = 2

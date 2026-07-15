@@ -142,10 +142,6 @@ namespace VRSL.EditorScripts
                 enableDMXChannels = fixture.enableDMXChannels;
                 nineUniverseMode = fixture.nineUniverseMode;
                 fixtureID = fixture.fixtureID;
-                useLegacySectorMode = fixture.useLegacySectorMode;
-                singleChannelMode = fixture.singleChannelMode;
-                sector = fixture.sector;
-                Channel = fixture.Channel;
                 legacyGoboRange = fixture.legacyGoboRange;
                 globalIntensity = fixture.globalIntensity;
                 finalIntensity = fixture.finalIntensity;
@@ -166,17 +162,8 @@ namespace VRSL.EditorScripts
                 maxMinPan = fixture.maxMinPan;
                 maxMinTilt = fixture.maxMinTilt;
                 fixtureDefintion = fixture.fixtureDefintion;
-                if(useLegacySectorMode)
-                {
-                    Vector2Int chanUni = fixture.GetSectorConversion();
-                    dmxChannel = chanUni.x;
-                    dmxUniverse = chanUni.y;
-                }
-                else
-                {
-                    dmxChannel = fixture.dmxChannel;
-                    dmxUniverse = fixture.dmxUniverse;
-                }
+                dmxChannel = fixture.dmxChannel;
+                dmxUniverse = fixture.dmxUniverse;
 
 
         }
@@ -192,10 +179,6 @@ namespace VRSL.EditorScripts
         public int dmxChannel;
         public int dmxUniverse;
         public int fixtureDefintion;
-        public bool useLegacySectorMode;
-        public bool singleChannelMode;
-        public int sector;
-        public int Channel;
         public bool legacyGoboRange;
         public float globalIntensity;
         public float finalIntensity;
@@ -391,10 +374,6 @@ namespace VRSL.EditorScripts
                             so.FindProperty("fixtureID").intValue = data[dmxID].fixtureID;
                             so.FindProperty("dmxChannel").intValue = data[dmxID].dmxChannel;
                             so.FindProperty("dmxUniverse").intValue = data[dmxID].dmxUniverse;
-                            so.FindProperty("useLegacySectorMode").boolValue = data[dmxID].useLegacySectorMode;
-                            so.FindProperty("singleChannelMode").boolValue = data[dmxID].singleChannelMode;
-                            so.FindProperty("sector").intValue = data[dmxID].sector; 
-                            so.FindProperty("Channel").intValue = data[dmxID].Channel;
                             so.FindProperty("legacyGoboRange").boolValue = data[dmxID].legacyGoboRange;
                             so.FindProperty("globalIntensity").floatValue = data[dmxID].globalIntensity;
                             so.FindProperty("finalIntensity").floatValue = data[dmxID].finalIntensity;
@@ -438,10 +417,6 @@ namespace VRSL.EditorScripts
                             fixture.fixtureID = data[dmxID].fixtureID;
                             fixture.dmxChannel = data[dmxID].dmxChannel;
                             fixture.dmxUniverse = data[dmxID].dmxUniverse;
-                            fixture.useLegacySectorMode = data[dmxID].useLegacySectorMode;
-                            fixture.singleChannelMode = data[dmxID].singleChannelMode;
-                            fixture.sector = data[dmxID].sector; 
-                            fixture.Channel = data[dmxID].Channel;
                             fixture.legacyGoboRange = data[dmxID].legacyGoboRange;
                             fixture.globalIntensity = data[dmxID].globalIntensity;
                             fixture.finalIntensity = data[dmxID].finalIntensity;

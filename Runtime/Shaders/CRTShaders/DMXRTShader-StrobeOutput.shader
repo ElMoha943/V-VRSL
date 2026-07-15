@@ -5,7 +5,6 @@ Shader "VRSL/DMX CRTs/Strobe Output"
     {
         [NoScaleOffset]_DMXTexture("DMX Grid Render Texture (To Control Lights)", 2D) = "white" {}
         _MaxStrobeFreq("Maximum Strobe Frequency", Range(1,100)) = 25
-        [Toggle]_EnableCompatibilityMode("Compatibility Mode", Float) = 0
         [Toggle]_NineUniverseMode("Nine Universe Mode", Float) = 0
         [Toggle]_DisableStrobe("Disable All Strobe", Float) = 0
      }
@@ -30,7 +29,7 @@ Shader "VRSL/DMX CRTs/Strobe Output"
             Texture2D _Udon_DMXGridRenderTexture;
             Texture2D _Udon_DMXGridStrobeTimer;
             SamplerState VRSL_PointClampSampler;
-            float _NineUniverseMode, _EnableCompatibilityMode;
+            float _NineUniverseMode;
             uint _DisableStrobe;
 
             #define IF(a, b, c) lerp(b, c, step((fixed) (a), 0));
@@ -39,7 +38,7 @@ Shader "VRSL/DMX CRTs/Strobe Output"
             {
                     float3 value = float3(0,0,0);
                         
-                    if(_NineUniverseMode == 1 && _EnableCompatibilityMode != 1)
+                    if(_NineUniverseMode == 1)
                     {
                         value.r = c.r;
                         value.g = c.g;

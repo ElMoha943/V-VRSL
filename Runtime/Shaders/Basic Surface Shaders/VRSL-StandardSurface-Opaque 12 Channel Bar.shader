@@ -9,7 +9,6 @@ Shader "VRSL/Standard Static/Surface Shaders/Opaque Multi-Channel Bar"
 		//[NoScaleOffset] _Udon_DMXGridRenderTexture("DMX Grid Render Texture (RAW Unsmoothed)", 2D) = "white" {}
 		//[NoScaleOffset] _Udon_DMXGridRenderTextureMovement("DMX Grid Render Texture (To Control Lights)", 2D) = "white" {}
 		//[NoScaleOffset] _Udon_DMXGridStrobeTimer("DMX Grid Render Texture (For Strobe Timings", 2D) = "white" {}
-        [Toggle] _EnableCompatibilityMode ("Enable Compatibility Mode", Int) = 0
         [Toggle] _EnableVerticalMode ("Enable Vertical Mode", Int) = 0
         [Enum(15CH,0,48CH,1)] _ChannelMode ("Channel Mode", Int) = 0
        

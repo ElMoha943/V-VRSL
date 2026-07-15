@@ -1,5 +1,4 @@
 using UnityEngine;
-using System.Numerics;
 
 using UdonSharp;
 using VRC.SDKBase;
@@ -33,16 +32,6 @@ namespace VRSL
         [Tooltip ("Enables 9-Universe mode for this fixture. The grid will be split up by RGB channels with each section and color representing a universe. Only availble on the Vertical and Horizontal Grid nodes.")]
         public bool nineUniverseMode;
 
-        [Tooltip ("Enables the legacy 'Sector' based method of assigning DMX Channels. Keep this unchecked to use industry standard DMX Channels.")]
-
-        public bool useLegacySectorMode = false;
-        [Tooltip ("Enables single channel DMX mode for this fixture. This is for single channeled fixtures instead of the standard 13-channeled ones. Currently, the 'Flasher' fixture is the only single-channeled fixture at the moment")]
-        public bool singleChannelMode = false;
-        [Tooltip ("Chooses the DMX Address to start this fixture at. A Sector in this context is every 13 Channels. I.E Sector 0 is channels 1-13, Sector 1 is channels 14-26, etc.")]
-        public int sector;
-        [Tooltip ("Chooses the which of the 13 Channels of the current sector to sample from when single channel mode is enabled. Do not worry about this value if you are not using a single-channeled fixture.")]
-        [Range(0.0f, 12.0f)]
-        public int Channel = 0;
         public bool legacyGoboRange;
         [Space(5)]
         [Header("General Settings")]
@@ -169,27 +158,6 @@ namespace VRSL
         {
             props = new MaterialPropertyBlock();
         }
-        #if !COMPILER_UDONSHARP && UNITY_EDITOR
-        public Vector2Int GetSectorConversion()
-        {
-            SectorConversion();
-            return new Vector2Int(calculatedDMXChannel, calculatedDMXUniverse);
-        }
-
-        #endif
-
-        int SectorConversion()
-        {
-            const int channelsPerSector = 13;
-            const int sectorsPerUniverse = 40;
-
-            int validSector = Mathf.Max(0, sector);
-            calculatedDMXUniverse = (validSector / sectorsPerUniverse) + 1;
-            calculatedDMXChannel = ((validSector % sectorsPerUniverse) * channelsPerSector) + 1;
-
-            return (validSector * channelsPerSector) + 1;
-        }
-
         int RawDMXConversion()
         {
                 calculatedDMXChannel = dmxChannel;
@@ -250,24 +218,7 @@ namespace VRSL
                 _SetProps();
             }
             bool applyDMXProperties = ShouldApplyDMXProperties();
-            if(useLegacySectorMode)
-            {
-                if(singleChannelMode)
-                {
-                    // calculatedDMXChannel = Mathf.Abs(Mathf.FloorToInt((int) sector * 13) + 1) + Mathf.Abs(Channel);
-                    props.SetInt("_DMXChannel", SectorConversion() + Mathf.Abs(Channel));
-                }
-                else
-                {
-                    props.SetInt("_DMXChannel", SectorConversion());
-                }
-                // calculatedDMXUniverse = Mathf.FloorToInt(calculatedDMXChannel / 512) + 1;
-                // calculatedDMXChannel = calculatedDMXChannel - ((calculatedDMXUniverse - 1) * 512);
-            }
-            else
-            {
-                props.SetInt("_DMXChannel", RawDMXConversion());
-            }
+            props.SetInt("_DMXChannel", RawDMXConversion());
 
             props.SetInt("_NineUniverseMode", nineUniverseMode == true ? 1 : 0);
             props.SetInt("_PanInvert", invertPan == true ? 1 : 0);

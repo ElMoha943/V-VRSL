@@ -2,11 +2,8 @@ Shader "VRSL/DMX CRTs/Interpolation"
 {
     Properties
     {
-        _DMXChannel ("DMX Channel (for legacy global movement speed)", Int) = 0
-        [Toggle] _EnableLegacyGlobalMovementSpeedChannel ("Enable Legacy Global Movement Speed Channel (disables individiual movement speed per sector)", Int) = 0
         [Toggle] _EnableDMX ("Enable Stream DMX/DMX Control", Int) = 0
         [Toggle] _NineUniverseMode ("Extended Universe Mode", Int) = 0
-        [Toggle] _EnableCompatibilityMode ("Enable Stream DMX/DMX Control", Int) = 0
         [Toggle(_SIGNAL_DETECTION)] _SignalDetectionSystem ("Enable Signal Detection System To Prevent Unnecesary Strobing", Int) = 0
         _SignalDetectionSensativity ("Signal Detection Sensativity", Range(0.0001,0.5)) = 0.025
         [Toggle(_OLD_SCHOOL_SMOOTHING)] _UseOldSchoolSmoothing ("Use Old School Smoothing", Int) = 0
@@ -37,8 +34,8 @@ Shader "VRSL/DMX CRTs/Interpolation"
             sampler2D   _Tex;
             sampler2D _DMXTexture;
             SamplerState sampler_point_repeat;
-            int _IsEven, _DMXChannel, _EnableDMX, _EnableLegacyGlobalMovementSpeedChannel;
-            uint _EnableCompatibilityMode, _NineUniverseMode;
+            int _IsEven, _EnableDMX;
+            uint _NineUniverseMode;
             half oscSmoothnessRAW;
             half3 rgbSmoothnessRaw;
             #define IF(a, b, c) lerp(b, c, step((fixed) (a), 0));
@@ -47,57 +44,6 @@ Shader "VRSL/DMX CRTs/Interpolation"
             #pragma multi_compile_local _ _SIGNAL_DETECTION
 
 
-
-            half2 getSectorCoordinates(half x, half y, uint sector)
-            {
-                // say we were on sector 6
-                // we need to move over 2 sectors
-                // and we need to move up 3 sectors
-
-                //1 sector is every 13 channels
-                //the grid is 26x26 aka 2 sectors per row
-                //TRAVERSING THE Y AXIS OF THE DMX GRID
-
-                half ymod = floor(sector / 2);
-                half originalx = x;
-                half originaly = y;       
-
-                //TRAVERSING THE X AXIS OF THE DMX GRID
-                half xmod = sector % 2;
-
-
-                //x += (xmod * 0.052);
-                //0.498573
-                //0.036343
-                x+= (xmod * 0.498573);
-                y+= (ymod * 0.03846);
-                //y += (ymod * 0.006);
-                originaly = IF(sector == 0, originaly, originaly + (0.0147 * (sector)));
-
-                return IF(_EnableCompatibilityMode == 1, 
-                half2 (x, y), 
-                half2(originalx, originaly));
-
-            }
-
-            half getValueAtCoords(half x, half y, uint sector)
-            {
-            half2 recoords = getSectorCoordinates(x, y, sector);
-            half4 uvcoords = half4(recoords.x, recoords.y, 0,0);
-            half4 c = tex2D(_DMXTexture, uvcoords);
-            half3 cRGB = half3(c.r, c.g, c.b);
-            half value = LinearRgbToLuminance(cRGB);
-
-            return value;
-            }
-
-            half3 getValueAtCoordsRGB(half x, half y, uint sector)
-            {
-            half2 recoords = getSectorCoordinates(x, y, sector);
-            half4 uvcoords = half4(recoords.x, recoords.y, 0,0);
-            half4 c = tex2D(_DMXTexture, uvcoords);
-            return c.rgb;
-            }
 
             half getValueAtUV(half2 uv)
             {
@@ -131,14 +77,7 @@ Shader "VRSL/DMX CRTs/Interpolation"
 
             half getSmoothnessValue(half2 uv, out half dmxSmoothness)
             {
-                if(_EnableLegacyGlobalMovementSpeedChannel == 1)
-                {
-                    dmxSmoothness = IF(_EnableCompatibilityMode == 1, getValueAtCoords(0.096151, 0.019231, _DMXChannel), getValueAtCoords(0.189936, 0.00762, _DMXChannel));
-                }
-                else
-                {
-                    dmxSmoothness = IF(_EnableCompatibilityMode == 1, getValueAtCoords(0.096151, 0.019231, _DMXChannel), getValueAtUV(half2(0.960, uv.y)));
-                }
+                dmxSmoothness = getValueAtUV(half2(0.960, uv.y));
                 half oscSmoothness = lerp(saturate(_MaximumSmoothnessDMX), saturate(_MinimumSmoothnessDMX), dmxSmoothness);
                 return oscSmoothness;
                // return IF(_EnableDMX == 1, oscSmoothness, _SmoothValue);  
@@ -147,16 +86,7 @@ Shader "VRSL/DMX CRTs/Interpolation"
 
             half3 getSmoothnessValueRGB(half2 uv, out half3 dmxSmoothness)
             {
-
-                //rgbSmoothnessRaw = half3(0,0,0);
-                if(_EnableLegacyGlobalMovementSpeedChannel == 1)
-                {
-                    dmxSmoothness = getValueAtCoordsRGB(0.189936, 0.00762, _DMXChannel);
-                }
-                else
-                {
-                    dmxSmoothness = getValueAtUVRGB(half2(0.960, uv.y));
-                }
+                dmxSmoothness = getValueAtUVRGB(half2(0.960, uv.y));
 
                 half3 rgbSmoothness = half3(lerp( saturate(_MaximumSmoothnessDMX), saturate(_MinimumSmoothnessDMX), dmxSmoothness.r), 
                 lerp(saturate(_MaximumSmoothnessDMX), saturate(_MinimumSmoothnessDMX), dmxSmoothness.g), 
@@ -243,11 +173,6 @@ Shader "VRSL/DMX CRTs/Interpolation"
                             return half4(0,0,0,0);
                         }
                     #endif
-                    // if(IN.localTexcoord.y > 0.90)
-                    // {
-                    //     oscSmoothnessRAW = IF(_EnableCompatibilityMode == 1, getValueAtCoords(0.096151, 0.019231, _DMXChannel), getValueAtCoords(0.189936, 0.00762, _DMXChannel));
-                    //     return oscSmoothnessRAW;
-                    // }
                     if(_NineUniverseMode && _EnableDMX)
                     {
 
