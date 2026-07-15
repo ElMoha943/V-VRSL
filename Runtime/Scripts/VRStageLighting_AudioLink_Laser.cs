@@ -22,156 +22,76 @@ namespace VRSL
         //////////////////Public Variables////////////////////
 
         [Header("Audio Link Settings")]
-        [SerializeField,
-         Tooltip("Enable or disable Audio Link Reaction for this fixture.")
-        ,FieldChangeCallback(nameof(EnableAudioLink))
-        ]
+        [SerializeField,Tooltip("Enable or disable Audio Link Reaction for this fixture."),FieldChangeCallback(nameof(EnableAudioLink))]
         private bool enableAudioLink;
 
-
-        //[Tooltip("The Audio Link Script to react to.")]
-        //public AudioLink audioLink;
-
-
-        [SerializeField,
-         Tooltip("The frequency band of the spectrum to react to.")
-        ,FieldChangeCallback(nameof(Band))
-        ]
+        [SerializeField,Tooltip("The frequency band of the spectrum to react to."),FieldChangeCallback(nameof(Band))]
         private AudioLinkBandState band;
 
-
-        [SerializeField, Range(0, 31),
-         Tooltip("The level of delay to add to the reaction.")
-        ,FieldChangeCallback(nameof(Delay))
-        ]
+        [SerializeField, Range(0, 31),Tooltip("The level of delay to add to the reaction."),FieldChangeCallback(nameof(Delay))]
         private int delay;
 
-
-        [SerializeField, Range(1.0f, 15.0f),
-         Tooltip("Multiplier for the sensativity of the reaction.")
-        ,FieldChangeCallback(nameof(BandMultiplier))
-        ]
+        [SerializeField, Range(1.0f, 15.0f),Tooltip("Multiplier for the sensativity of the reaction."),FieldChangeCallback(nameof(BandMultiplier))]
         private float bandMultiplier = 1.0f;
 
-
-        [SerializeField,
-         Tooltip("Enable Color Chord tinting of the light emission.")
-        ,FieldChangeCallback(nameof(ColorChord))
-        ]
+        [SerializeField,Tooltip("Enable Color Chord tinting of the light emission."),FieldChangeCallback(nameof(ColorChord))]
         private bool enableColorChord;
 
         [Header("General Settings")]
-        [SerializeField, Range(0, 1),
-         Tooltip("Sets the overall intensity of the shader. Good for animating or scripting effects related to intensity. Its max value is controlled by Final Intensity.")
-        ,FieldChangeCallback(nameof(GlobalIntensity))
-        ]
+        [SerializeField, Range(0, 1),Tooltip("Sets the overall intensity of the shader. Good for animating or scripting effects related to intensity. Its max value is controlled by Final Intensity."),FieldChangeCallback(nameof(GlobalIntensity))]
         private float globalIntensity = 1; 
 
-        [SerializeField, Range(0, 1),
-         Tooltip("Sets the maximum brightness value of Global Intensity. Good for personalized settings of the max brightness of the shader by other users via UI.")
-        ,FieldChangeCallback(nameof(FinalIntensity))
-        ]
+        [SerializeField, Range(0, 1),Tooltip("Sets the maximum brightness value of Global Intensity. Good for personalized settings of the max brightness of the shader by other users via UI."),FieldChangeCallback(nameof(FinalIntensity))]
         private float finalIntensity = 1;
 
-
-        [SerializeField, ColorUsage(false, false),
-         Tooltip("The main color of the light.")
-            ,FieldChangeCallback(nameof(LightColorTint))
-        ]
+        [SerializeField, ColorUsage(false, false),Tooltip("The main color of the light."),FieldChangeCallback(nameof(LightColorTint))]
         private Color lightColorTint = Color.white * 2.0f;
 
-
-        [SerializeField,
-         Tooltip("Check this box if you wish to sample separate texture for the color. The color will be influenced by the intensity of the original emission color! The texture is set in the shader itself.")
-            ,FieldChangeCallback(nameof(ColorTextureSampling))
-        ]
+        [SerializeField,Tooltip("Check this box if you wish to sample separate texture for the color. The color will be influenced by the intensity of the original emission color! The texture is set in the shader itself."),FieldChangeCallback(nameof(ColorTextureSampling))]
         private bool enableColorTextureSampling;
 
-        [SerializeField,
-         Tooltip("Check this box if you wish to use traditional color sampling instead of white to black conversion")
-            ,FieldChangeCallback(nameof(TraditionalColorTextureSampling))
-        ]
+        [SerializeField,Tooltip("Check this box if you wish to use traditional color sampling instead of white to black conversion"),FieldChangeCallback(nameof(TraditionalColorTextureSampling))]
         private bool traditionalColorTextureSampling;
 
-        [SerializeField,
-         Tooltip("The UV coordinates to sample the color from on the texture.")
-            ,FieldChangeCallback(nameof(TextureSamplingCoordinates))
-        ]
+        [SerializeField,Tooltip("The UV coordinates to sample the color from on the texture."),FieldChangeCallback(nameof(TextureSamplingCoordinates))]
         private Vector2 textureSamplingCoordinates = new Vector2(0.5f, 0.5f);
 
-        
-        [SerializeField,
-         Tooltip("Check this box if you wish to enable AudioLink Theme colors.")
-            ,FieldChangeCallback(nameof(ThemeColorSampling))
-        ]
+        [SerializeField,Tooltip("Check this box if you wish to enable AudioLink Theme colors."),FieldChangeCallback(nameof(ThemeColorSampling))]
         private bool enableThemeColorSampling;
 
-
-        [SerializeField, Range(1, 4),
-         Tooltip("Theme Color to Sample from.")
-            ,FieldChangeCallback(nameof(ThemeColorTarget))
-        ]
+        [SerializeField, Range(1, 4),Tooltip("Theme Color to Sample from."),FieldChangeCallback(nameof(ThemeColorTarget))]
         private int themeColorTarget = 1;
 
-        [SerializeField, Range(-3.75f, 20.0f),
-         Tooltip("Controls the radius of the laser cone.")
-            ,FieldChangeCallback(nameof(ConeWidth))
-        ]
+        [SerializeField, Range(-3.75f, 20.0f),Tooltip("Controls the radius of the laser cone."),FieldChangeCallback(nameof(ConeWidth))]
         private float coneWidth = 2.5f;
 
-        [SerializeField, Range(-0.5f, 5.0f),
-         Tooltip("Controls the length of the laser cone")
-            ,FieldChangeCallback(nameof(ConeLength))
-        ]
+        [SerializeField, Range(-0.5f, 5.0f),Tooltip("Controls the length of the laser cone"),FieldChangeCallback(nameof(ConeLength))]
         private float coneLength = 8.5f; 
 
-        [SerializeField, Range(0.0f, 1.999f),
-         Tooltip("Controls how flat or round the cone is.")
-            ,FieldChangeCallback(nameof(ConeFlatness))
-        ]
+        [SerializeField, Range(0.0f, 1.999f),Tooltip("Controls how flat or round the cone is."),FieldChangeCallback(nameof(ConeFlatness))]
         private float coneFlatness = 0.0f;
 
-        [SerializeField, Range(-90.0f, 90.0f),
-         Tooltip("X rotation coffset for cone")
-            ,FieldChangeCallback(nameof(ConeXRotation))
-        ]
+        [SerializeField, Range(-90.0f, 90.0f),Tooltip("X rotation coffset for cone"),FieldChangeCallback(nameof(ConeXRotation))]
         private float coneXRotation = 0.0f; 
 
-        [SerializeField, Range(-90.0f, 90.0f),
-         Tooltip("Y rotation offset for cone")
-            ,FieldChangeCallback(nameof(ConeYRotation))
-        ]
+        [SerializeField, Range(-90.0f, 90.0f),Tooltip("Y rotation offset for cone"),FieldChangeCallback(nameof(ConeYRotation))]
         private float coneYRotation = 0.0f;
 
-        [SerializeField, Range(-90.0f, 90.0f),
-         Tooltip("Z rotation offset for cone")
-            ,FieldChangeCallback(nameof(ConeZRotation))
-        ]
+        [SerializeField, Range(-90.0f, 90.0f),Tooltip("Z rotation offset for cone"),FieldChangeCallback(nameof(ConeZRotation))]
         private float coneZRotation = 0.0f;  
 
-        [SerializeField, Range(4.0f, 68f),
-         Tooltip("Number of laser beams in cone")
-            ,FieldChangeCallback(nameof(LaserCount))
-        ]
+        [SerializeField, Range(4.0f, 68f),Tooltip("Number of laser beams in cone"),FieldChangeCallback(nameof(LaserCount))]
         private int laserCount = 14;  
 
-        [SerializeField, Range(0.003f, 0.25f),
-         Tooltip("Controls how thick/thin the lasers are")
-            ,FieldChangeCallback(nameof(LaserThickness))
-        ]
+        [SerializeField, Range(0.003f, 0.25f),Tooltip("Controls how thick/thin the lasers are"),FieldChangeCallback(nameof(LaserThickness))]
         private float laserThickness = 0.125f; 
 
-        [SerializeField, Range(-1.0f, 1.0f),
-         Tooltip("Controls the speed of laser scroll animation. Negative goes left, positive goes right, 0 means no scroll")
-            ,FieldChangeCallback(nameof(LaserScroll))
-        ]
+        [SerializeField, Range(-1.0f, 1.0f),Tooltip("Controls the speed of laser scroll animation. Negative goes left, positive goes right, 0 means no scroll"),FieldChangeCallback(nameof(LaserScroll))]
         private float laserScroll = 0.0f; 
-
 
         [Header("Mesh Settings")]
         [Tooltip ("The meshes used to make up the light. You need atleast 1 mesh in this group for the script to work properly.")]
         public MeshRenderer[] objRenderers;
-
 
         private float previousConeWidth, previousConeLength, previousGlobalIntensity, previousFinalIntensity, previousConeFlatness, previousConeXRotation, previousConeYRotation, previousConeZRotation, previousLaserThickness, previousLaserScroll;
         private int previousLaserCount;
@@ -181,311 +101,255 @@ namespace VRSL
         [HideInInspector]
         public bool foldout;
 
-
-
         ////////////////////////////////////////////////////////////////////////////////
 
-        public bool EnableAudioLink
-        {
-            get
-            {
+        public bool EnableAudioLink{
+            get{
                 return enableAudioLink;
             }
-            set
-            {
+            set{
                 enableAudioLink = value;
                 _UpdateInstancedProperties();
             }
         }
 
-        public bool ColorChord
-        {
-            get
-            {
+        public bool ColorChord{
+            get{
                 return enableColorChord;
             }
-            set
-            {
+            set{
                 enableColorChord = value;
                 _UpdateInstancedProperties();
             }
         }
 
-        public AudioLinkBandState Band
-        {
-            get
-            {
+        public AudioLinkBandState Band{
+            get{
                 return band;
             }
-            set
-            {
+            set{
                 band = value;
                 _UpdateInstancedProperties();
             }
         }
-        public int Delay
-        {
-            get
-            {
+
+        public int Delay{
+            get{
                 return delay;
             }
-            set
-            {
+            set{
                 delay = value;
                 _UpdateInstancedProperties();
             }
         }
-        public float BandMultiplier
-        {
-            get
-            {
+
+        public float BandMultiplier{
+            get{
                 return bandMultiplier;
             }
-            set
-            {
+            set{
                 bandMultiplier = value;
                 _UpdateInstancedProperties();
             }
         }
-            public Color LightColorTint
-        {
-            get
-            {
+
+        public Color LightColorTint{
+            get{
                 return lightColorTint;
             }
-            set
-            {
+            set{
                 previousColorTint = lightColorTint;
                 lightColorTint = value;
                 _UpdateInstancedProperties();
             }
         }
-        public float ConeWidth
-        {
-            get
-            {
+
+        public float ConeWidth{
+            get{
                 return coneWidth;
             }
-            set
-            {
+            set{
                 previousConeWidth = coneWidth;
                 coneWidth = value;
                 _UpdateInstancedProperties();
             }
         }
-        public float ConeLength
-        {
-            get
-            {
+
+        public float ConeLength{
+            get{
                 return coneLength;
             }
-            set
-            {
+            set{
                 previousConeLength = coneLength;
                 coneLength = value;
                 _UpdateInstancedProperties();
             }
         }
-        public float GlobalIntensity
-        {
-            get
-            {
+
+        public float GlobalIntensity{
+            get{
                 return globalIntensity;
             }
-            set
-            {
+            set{
                 previousGlobalIntensity = globalIntensity;
                 globalIntensity = value;
                 _UpdateInstancedProperties();
             }
         }
-        public float FinalIntensity
-        {
-            get
-            {
+
+        public float FinalIntensity{
+            get{
                 return finalIntensity;
             }
-            set
-            {
+            set{
                 previousFinalIntensity = finalIntensity;
                 finalIntensity = value;
                 _UpdateInstancedProperties();
             }
         }
         
-        public float ConeFlatness
-        {
-            get
-            {
+        public float ConeFlatness{
+            get{
                 return coneFlatness;
             }
-            set
-            {
+            set{
                 previousConeFlatness = coneFlatness;
                 coneFlatness = value;
                 _UpdateInstancedProperties();
             }
         }
-        public float ConeXRotation
-        {
-            get
-            {
+
+        public float ConeXRotation{
+            get{
                 return coneXRotation;
             }
-            set
-            {
+            set{
                 previousConeXRotation = coneXRotation;
                 coneXRotation = value;
                 _UpdateInstancedProperties();
             }
         }
-        public float ConeYRotation
-        {
-            get
-            {
+
+        public float ConeYRotation{
+            get{
                 return coneYRotation;
             }
-            set
-            {
+            set{
                 previousConeYRotation = coneYRotation;
                 coneYRotation = value;
                 _UpdateInstancedProperties();
             }
         }
-        public float ConeZRotation
-        {
-            get
-            {
+
+        public float ConeZRotation{
+            get{
                 return coneZRotation;
             }
-            set
-            {
+            set{
                 previousConeZRotation = coneZRotation;
                 coneZRotation = value;
                 _UpdateInstancedProperties();
             }
         }
-        public int LaserCount
-        {
-            get
-            {
+
+        public int LaserCount{
+            get{
                 return laserCount;
             }
-            set
-            {
+            set{
                 previousLaserCount = laserCount;
                 laserCount = value;
                 _UpdateInstancedProperties();
             }
         }
-        public float LaserThickness
-        {
-            get
-            {
+
+        public float LaserThickness{
+            get{
                 return laserThickness;
             }
-            set
-            {
+            set{
                 previousLaserThickness = laserThickness;
                 laserThickness = value;
                 _UpdateInstancedProperties();
             }
         }
-        public float LaserScroll
-        {
-            get
-            {
+
+        public float LaserScroll{
+            get{
                 return laserScroll;
             }
-            set
-            {
+            set{
                 previousLaserScroll = laserScroll;
                 laserScroll = value;
                 _UpdateInstancedProperties();
             }
         }
-        public bool ColorTextureSampling
-        {
-            get
-            {
+
+        public bool ColorTextureSampling{
+            get{
                 return enableColorTextureSampling;
             }
-            set
-            {
+            set{
                 enableColorTextureSampling = value;
                 _UpdateInstancedProperties();
             }
         }
-        public bool TraditionalColorTextureSampling
-        {
-            get
-            {
+
+        public bool TraditionalColorTextureSampling{
+            get{
                 return traditionalColorTextureSampling;
             }
-            set
-            {
+            set{
                 traditionalColorTextureSampling = value;
                 _UpdateInstancedProperties();
             }
         }
-        public Vector2 TextureSamplingCoordinates
-        {
-            get
-            {
+
+        public Vector2 TextureSamplingCoordinates{
+            get{
                 return textureSamplingCoordinates;
             }
-            set
-            {
+            set{
                 textureSamplingCoordinates = value;
                 _UpdateInstancedProperties();
             }
         }
 
-        public bool ThemeColorSampling
-            {
-                get
-                {
-                    return enableThemeColorSampling;
-                }
-                set
-                {
-                    enableThemeColorSampling = value;
-                    _UpdateInstancedProperties();
-                }
+        public bool ThemeColorSampling{
+            get{
+                return enableThemeColorSampling;
             }
-            public int ThemeColorTarget
-            {
-                get
-                {
-                    return themeColorTarget;
-                }
-                set
-                {
-                    themeColorTarget = value;
-                    _UpdateInstancedProperties();
-                }
+            set{
+                enableThemeColorSampling = value;
+                _UpdateInstancedProperties();
+            }
+        }
 
+        public int ThemeColorTarget{
+            get{
+                return themeColorTarget;
             }
+            set{
+                themeColorTarget = value;
+                _UpdateInstancedProperties();
+            }
+        }
 
         ///////////////////////////////////////////////////////////
 
-        void OnEnable() 
-        {
+        void OnEnable() {
             Init();
         }
 
-        void Start()
-        {
+        void Start(){
             Init();
         }
 
-        public void _SetProps()
-        {
+        public void _SetProps(){
             props = new MaterialPropertyBlock();
         }
 
-        bool ShouldApplyAudioLinkProperties()
-        {
+        bool ShouldApplyAudioLinkProperties(){
             #if !COMPILER_UDONSHARP && UNITY_EDITOR
             return Application.isPlaying;
             #else
@@ -493,31 +357,21 @@ namespace VRSL
             #endif
         }
 
-        bool HasValidRenderers()
-        {
+        bool HasValidRenderers(){
             if(objRenderers == null)
-            {
                 return false;
-            }
             for(int i = 0; i < objRenderers.Length; i++)
-            {
                 if(objRenderers[i] != null)
-                {
                     return true;
-                }
-            }
             return false;
         }
         
-        public void _UpdateInstancedProperties()
-        {
-            if(!HasValidRenderers())
-            {
+        public void _UpdateInstancedProperties(){
+            if(!HasValidRenderers()){
                 Debug.Log("Please add atleast one fixture renderer.");
                 return;
             }
-            if(props == null)
-            {
+            if(props == null){
                 _SetProps();
             }
             bool applyAudioLinkProperties = ShouldApplyAudioLinkProperties();
@@ -551,19 +405,12 @@ namespace VRSL
             props.SetFloat("_LaserThickness", laserThickness);
             props.SetFloat("_Scroll", laserScroll);
             for(int i = 0; i < objRenderers.Length; i++)
-            {
                 if(objRenderers[i] != null)
-                {
                     objRenderers[i].SetPropertyBlock(props);
-                }
-            }
         }
-        void Init()
-        {
-            if(!HasValidRenderers())
-            {
-                return;
-            }
+
+        void Init(){
+            if(!HasValidRenderers()) return;
             _SetProps();
             previousColorTint = lightColorTint;
             previousConeWidth = coneWidth;
@@ -574,18 +421,15 @@ namespace VRSL
         }
 
         #if !COMPILER_UDONSHARP && UNITY_EDITOR
-                void OnValidate()
-            {
-                Event e = Event.current;
-        
-                if (e != null)
-                {
-                    if (e.type == EventType.ExecuteCommand && e.commandName == "Duplicate")
-                    {
-                        Init();
-                    }
+        void OnValidate(){
+            Event e = Event.current;
+    
+            if (e != null){
+                if (e.type == EventType.ExecuteCommand && e.commandName == "Duplicate"){
+                    Init();
                 }
             }
+        }
         #endif
 
     }
