@@ -20,3 +20,4 @@ I code in C# so some shader code changes are vibe coded, you have been warned.
 - Version is now get directly from package.
 - Implemented Smoothing tweak by HappyRobot.
 - Added more gobos.
+- Ingame Control panel now uses TMPro instead of legacy text and includes performance improvements and null checks.
