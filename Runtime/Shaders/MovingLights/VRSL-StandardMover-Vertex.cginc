@@ -353,7 +353,7 @@ v2f vert (appdata v)
 				#endif
 		#endif
 
-		#if !defined(PROJECTION_YES) && !defined(VOLUMETRIC_YES)
+		#if !defined(PROJECTION_YES)
 			//calculate rotations for normals, cast to half4 first with 0 as w
 			half4 newNormals = half4(v.normal.x, v.normal.y, v.normal.z, 0);
 			newNormals = calculateRotations(v, newNormals, 1, oscPanValue, oscTiltValue);
