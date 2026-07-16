@@ -59,6 +59,7 @@ half4 VolumetricLightingBRDF(v2f i, fixed facePos)
 		#ifdef VRSL_DMX
 			half gi = getGlobalIntensity();
 			half fi = getFinalIntensity();
+			uint dmxEnabled = isDMX();
 		#endif
 		#ifdef VRSL_AUDIOLINK
 			half audioReact = i.audioGlobalFinalIntensity.x;
@@ -77,7 +78,7 @@ half4 VolumetricLightingBRDF(v2f i, fixed facePos)
 
 
 		#ifdef VRSL_DMX
-			if(((all(i.rgbColor <= half4(0.005,0.005,0.005,1)) || i.intensityStrobeGOBOSpinSpeed.x <= 0.005) && isDMX() == 1) || gi <= 0.005 || fi <= 0.005)
+			if(((all(i.rgbColor <= half4(0.005,0.005,0.005,1)) || i.intensityStrobeGOBOSpinSpeed.x <= 0.005) && dmxEnabled == 1) || gi <= 0.005 || fi <= 0.005)
 			{
 				//If the light is basically off, don't render anything.
 				return half4(0,0,0,0);
@@ -231,15 +232,6 @@ half4 VolumetricLightingBRDF(v2f i, fixed facePos)
 		}
 		// threeDNoiseScale *= 1.5;
 
-		float3 inverseTransformScale = 1/float3(
-			length(unity_ObjectToWorld._m00_m10_m20),
-			length(unity_ObjectToWorld._m01_m11_m21),
-			length(unity_ObjectToWorld._m02_m12_m22)
-		);
-		threeDNoiseScale *= inverseTransformScale;
-		threeDNoiseScale *= 1.25;
-	
-
 		//Combine Gradient with emission color, intersection fade and camera fade.
 		col = col * getEmissionColor() * intersectionFade * cameraFade;
 
@@ -252,14 +244,18 @@ half4 VolumetricLightingBRDF(v2f i, fixed facePos)
 		#endif
 		#if !defined(_ALPHATEST_ON) || SHADER_API_GLES3
 			#ifndef _POTATO_MODE_ON
+				#if defined(_2D_NOISE_ON) || (defined(_MAGIC_NOISE_ON_HIGH) && defined(_HQ_MODE)) || (defined(_MAGIC_NOISE_ON_MED) && !defined(_HQ_MODE))
+					float noiseTime = _Time.y * 0.1;
+				#endif
+
 				//Generate 2D noise texture, add scroll effect, and map to cone.
 				#ifdef _2D_NOISE_ON
 					half2 texUV = i.uv2;
 					half3 baseWorldPos = unity_ObjectToWorld._m03_m13_m23;
 					texUV.x += baseWorldPos.z;
 					texUV.y += baseWorldPos.x;
-					texUV.x = (_Time.y*0.1) * 0.75f + texUV.x;
-					texUV.y = (_Time.y*0.1) * 0.10f + texUV.y;
+					texUV.x = noiseTime * 0.75f + texUV.x;
+					texUV.y = noiseTime * 0.10f + texUV.y;
 					
 					#ifdef _HQ_MODE
 						half4 tex = tex2D(_NoiseTexHigh, texUV);
@@ -281,9 +277,19 @@ half4 VolumetricLightingBRDF(v2f i, fixed facePos)
 					//Get vertex/frag position in worldspace
 					float3 worldposNoise = i.worldPos.xyz;
 					//Add Scrolling effect
-					worldposNoise.x += ((_Time.y*0.1) * noise2X);
-					worldposNoise.y += ((_Time.y*0.1) * noise2Y);
-					worldposNoise.z += ((_Time.y*0.1) * noise2Z);
+					worldposNoise.x += noiseTime * noise2X;
+					worldposNoise.y += noiseTime * noise2Y;
+					worldposNoise.z += noiseTime * noise2Z;
+
+					//Scale correction is only consumed by the 3D noise path.
+					float3 inverseTransformScale = 1/float3(
+						length(unity_ObjectToWorld._m00_m10_m20),
+						length(unity_ObjectToWorld._m01_m11_m21),
+						length(unity_ObjectToWorld._m02_m12_m22)
+					);
+					threeDNoiseScale *= inverseTransformScale;
+					threeDNoiseScale *= 1.25;
+
 					//Add Tiling effect
 					//float3 q = threeDNoiseScale * worldposNoise.xyz;
 					half3 q = half3(0,0,0);
@@ -304,7 +310,6 @@ half4 VolumetricLightingBRDF(v2f i, fixed facePos)
 						threeDNoise += 0.1250*Noise( q ); 
 						q = mul(m,q)*2.03;
 						threeDNoise += 0.0625*Noise( q ); 
-						q = mul(m,q)*2.01;
 					#endif
 					
 					//If we aren't using gobos, remove the 2D noise effect
@@ -413,7 +418,7 @@ half4 VolumetricLightingBRDF(v2f i, fixed facePos)
 		maxIntensity *= 0.75;
 		#endif
 		#ifdef VRSL_DMX
-			if(isDMX() == 1)
+			if(dmxEnabled == 1)
 			{
 				result = lerp(fixed4(0,0,0,result.w), (result * i.rgbColor * strobe), i.intensityStrobeGOBOSpinSpeed.x * maxIntensity);
 				result = lerp(half4(0,0,0,result.w), result, i.intensityStrobeGOBOSpinSpeed.x * i.intensityStrobeGOBOSpinSpeed.x * 2);
@@ -448,7 +453,7 @@ half4 VolumetricLightingBRDF(v2f i, fixed facePos)
 		// result = isDMX() == 1 ? 
 		// 	lerp(half4(0,0,0,result.w), result, i.intensityStrobeGOBOSpinSpeed.x * i.intensityStrobeGOBOSpinSpeed.x * 2) : result;
 		#ifdef VRSL_DMX
-			result = (i.intensityStrobeGOBOSpinSpeed.x <= _IntensityCutoff && isDMX() == 1) ? half4(0,0,0,result.w) : result;
+			result = (i.intensityStrobeGOBOSpinSpeed.x <= _IntensityCutoff && dmxEnabled == 1) ? half4(0,0,0,result.w) : result;
 			//Fixture lens is now apart of Volumetrics, calculation for lens strenght is here
 			//half maxBrightness = lerp(1.0, _LensMaxBrightness)
 			#if !defined(WASH)
