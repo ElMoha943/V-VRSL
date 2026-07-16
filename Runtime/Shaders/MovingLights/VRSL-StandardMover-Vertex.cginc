@@ -2,6 +2,8 @@
 //FOR MOVER LIGHT SHADER
 #define IF(a, b, c) lerp(b, c, step((fixed) (a), 0));
 
+#include "../Shared/VRSL-FixtureState.cginc"
+
 #ifdef VRSL_DMX
 	half4 calculateRotations(appdata v, half4 input, int normalsCheck, half pan, half tilt)
 	{
@@ -341,13 +343,15 @@ v2f vert (appdata v)
 	UNITY_INITIALIZE_OUTPUT(v2f, o); //DON'T INITIALIZE OR IT WILL BREAK PROJECTION
 	UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
     UNITY_TRANSFER_INSTANCE_ID(v, o);
+	VRSLFixtureState fixtureState;
 	
 	////////////////////////////////////////START DMX VERTEX//////////////////////////////////////////////////////////////////////
 	#ifdef VRSL_DMX
-		uint dmx = getDMXChannel();
-		half oscConeWidth = getDMXConeWidth(dmx);
-		half oscPanValue = GetPanValue(dmx);
-		half oscTiltValue = GetTiltValue(dmx);
+		VRSL_LoadFixtureTransformState(fixtureState);
+		uint dmx = fixtureState.channel;
+		half oscConeWidth = fixtureState.coneWidth;
+		half oscPanValue = fixtureState.pan;
+		half oscTiltValue = fixtureState.tilt;
 
 
 		v.vertex = CalculateConeWidth(v, v.vertex, oscConeWidth, dmx);
@@ -438,12 +442,16 @@ v2f vert (appdata v)
 		#endif
 
 		#if defined(PROJECTION_YES) 
+			VRSL_LoadFixtureLightState(fixtureState);
+			VRSL_LoadFixtureGoboSelection(fixtureState);
+			VRSL_LoadFixtureEmission(fixtureState);
+			VRSL_LoadFixtureIntensityControls(fixtureState);
 			
 			//UNITY_SETUP_INSTANCE_ID(v);
 			UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 			//move verts to clip space
 			o.pos = UnityObjectToClipPos(v.vertex);
-			o.emissionColor = getEmissionColor();
+			o.emissionColor = fixtureState.emissionColor;
 			//o.uv = TRANSFORM_TEX(v.uv, _ProjectionMainTex);
 			//get screen space position of verts
 			o.screenPos = ComputeScreenPos(o.pos);
@@ -465,15 +473,15 @@ v2f vert (appdata v)
 			o.viewDir = normalize(UnityObjectToViewPos(v.vertex.xyz));
 			o.viewDir /= o.viewDir.z; // rescale vector so z is 1.0
 			//GET DMX/DMX VALUES
-			o.intensityStrobeWidth = half3(GetDMXIntensity(dmx, 1.0), GetStrobeOutput(dmx), oscConeWidth);
+			o.intensityStrobeWidth = half3(fixtureState.intensity, fixtureState.strobe, fixtureState.coneWidth);
 			#ifdef WASH
-				half spinSpeed = 0.0;
+				fixtureState.goboSpinSpeed = 0.0;
 			#else
-				half spinSpeed = getGoboSpinSpeed(dmx);
+				VRSL_LoadFixtureGoboSpin(fixtureState);
 			#endif
-			o.goboPlusSpinPanTilt = half4(getDMXGoboSelection(dmx), spinSpeed, oscPanValue, oscTiltValue);
-			o.rgbColor = GetDMXColor(dmx);
-			if(((all(o.rgbColor <= half4(0.01,0.01,0.01,1)) || o.intensityStrobeWidth.x <= 0.01) && isDMX() == 1) || getGlobalIntensity() <= 0.005 || getFinalIntensity() <= 0.005 || all(o.emissionColor <= half4(0.005, 0.005, 0.005, 1.0)))
+			o.goboPlusSpinPanTilt = half4(fixtureState.goboSelection, fixtureState.goboSpinSpeed, fixtureState.pan, fixtureState.tilt);
+			o.rgbColor = fixtureState.color;
+			if(((all(o.rgbColor <= half4(0.01,0.01,0.01,1)) || o.intensityStrobeWidth.x <= 0.01) && isDMX() == 1) || fixtureState.globalIntensity <= 0.005 || fixtureState.finalIntensity <= 0.005 || all(o.emissionColor <= half4(0.005, 0.005, 0.005, 1.0)))
 			{
 				v.vertex = half4(0,0,0,0);
 				o.pos = UnityObjectToClipPos(v.vertex);
@@ -491,6 +499,10 @@ v2f vert (appdata v)
 
 		//Volumetric Part - Vertex Shader
 		#if defined(VOLUMETRIC_YES)
+			VRSL_LoadFixtureLightState(fixtureState);
+			VRSL_LoadFixtureGoboSelection(fixtureState);
+			VRSL_LoadFixtureGoboSpin(fixtureState);
+			VRSL_LoadFixtureIntensityControls(fixtureState);
 			o.pos = UnityObjectToClipPos(v.vertex);
 			//UNITY_INITIALIZE_OUTPUT(v2f, o);
 			//UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
@@ -521,14 +533,14 @@ v2f vert (appdata v)
 			//o.tan = tangent;
 			//o.norm = worldNormal;
 			//GETTING DATA FROM DMX TEXTURE
-			o.intensityStrobeGOBOSpinSpeed = half4(GetDMXIntensity(dmx, 1.0),GetStrobeOutput(dmx), getGoboSpinSpeed(dmx), getDMXGoboSelection(dmx));
+			o.intensityStrobeGOBOSpinSpeed = half4(fixtureState.intensity, fixtureState.strobe, fixtureState.goboSpinSpeed, fixtureState.goboSelection);
 			o.intensityStrobeGOBOSpinSpeed.x = isDMX() == 1 ? o.intensityStrobeGOBOSpinSpeed.x : 1.0;
 			#if !defined(WASH)
 			uint gobo = isDMX() > 0 ? ceil(o.intensityStrobeGOBOSpinSpeed.w) : instancedGOBOSelection();
 			o.stripeInfo = GetStripeInfo(gobo);
 			#endif
-			o.rgbColor = GetDMXColor(dmx);
-			if(((all(o.rgbColor <= half4(0.005,0.005,0.005,1)) || o.intensityStrobeGOBOSpinSpeed.x <= 0.01) && isDMX() == 1) || getGlobalIntensity() <= 0.005 || getFinalIntensity() <= 0.005)
+			o.rgbColor = fixtureState.color;
+			if(((all(o.rgbColor <= half4(0.005,0.005,0.005,1)) || o.intensityStrobeGOBOSpinSpeed.x <= 0.01) && isDMX() == 1) || fixtureState.globalIntensity <= 0.005 || fixtureState.finalIntensity <= 0.005)
 			{
 				v.vertex = half4(0,0,0,0);
 				o.pos = UnityObjectToClipPos(v.vertex);
@@ -542,13 +554,14 @@ v2f vert (appdata v)
 		// #endif
 		
 		#if !defined(UNITY_PASS_SHADOWCASTER) && !defined(PROJECTION_YES) && !defined(VOLUMETRIC_YES)
+		VRSL_LoadFixtureLightState(fixtureState);
 		
 		o.color = v.color;
 		o.worldPos = mul(unity_ObjectToWorld, v.vertex);
 
 
-		o.intensityStrobe = half2(GetDMXIntensity(dmx, 1.0),GetStrobeOutput(dmx));
-		o.rgbColor = GetDMXColor(dmx);
+		o.intensityStrobe = half2(fixtureState.intensity, fixtureState.strobe);
+		o.rgbColor = fixtureState.color;
 		o.btn[0] = bitangent;
 		o.btn[1] = tangent;
 		o.btn[2] = worldNormal;
@@ -580,7 +593,8 @@ v2f vert (appdata v)
 	////////////////////////////////////////START AUDIOLINK VERTEX//////////////////////////////////////////////////////////////////////
 
 	#ifdef VRSL_AUDIOLINK
-		v.vertex = CalculateConeWidth(v, v.vertex, getConeWidth());
+		VRSL_LoadFixtureTransformState(fixtureState);
+		v.vertex = CalculateConeWidth(v, v.vertex, fixtureState.coneWidth);
 		v.vertex = CalculateProjectionScaleRange(v, v.vertex, _ProjectionRange);
 
 		#if defined(VOLUMETRIC_YES)
@@ -593,30 +607,36 @@ v2f vert (appdata v)
 		//calculate rotations for verts
 		//v.vertex = calculateRotations(v, v.vertex, 0);
 		#if defined(PROJECTION_YES)
+			VRSL_LoadFixtureIntensityControls(fixtureState);
+			VRSL_LoadFixtureEmission(fixtureState);
 			#ifdef RAW
-				o.globalFinalIntensity.x = getGlobalIntensity();
-				o.globalFinalIntensity.y = getFinalIntensity();
+				o.globalFinalIntensity.x = fixtureState.globalIntensity;
+				o.globalFinalIntensity.y = fixtureState.finalIntensity;
 			#else
-				o.audioGlobalFinalConeIntensity.x = GetAudioReactAmplitude();
-				o.audioGlobalFinalConeIntensity.y = getGlobalIntensity();
-				o.audioGlobalFinalConeIntensity.z = getFinalIntensity();
-				o.audioGlobalFinalConeIntensity.w = getConeWidth();
+				VRSL_LoadFixtureAudioState(fixtureState);
+				o.audioGlobalFinalConeIntensity.x = fixtureState.audioAmplitude;
+				o.audioGlobalFinalConeIntensity.y = fixtureState.globalIntensity;
+				o.audioGlobalFinalConeIntensity.z = fixtureState.finalIntensity;
+				o.audioGlobalFinalConeIntensity.w = fixtureState.coneWidth;
 			#endif
 
-			o.emissionColor = getEmissionColor();
+			o.emissionColor = fixtureState.emissionColor;
 		#endif
 		#if defined(VOLUMETRIC_YES)
+			VRSL_LoadFixtureIntensityControls(fixtureState);
+			VRSL_LoadFixtureEmission(fixtureState);
 			#ifdef RAW
-				o.globalFinalIntensity.x = getGlobalIntensity();
-				o.globalFinalIntensity.y = getFinalIntensity();
+				o.globalFinalIntensity.x = fixtureState.globalIntensity;
+				o.globalFinalIntensity.y = fixtureState.finalIntensity;
 			#else
-				o.audioGlobalFinalIntensity.x = GetAudioReactAmplitude();
-				o.audioGlobalFinalIntensity.y = getGlobalIntensity();
-				o.audioGlobalFinalIntensity.z = getFinalIntensity();
+				VRSL_LoadFixtureAudioState(fixtureState);
+				o.audioGlobalFinalIntensity.x = fixtureState.audioAmplitude;
+				o.audioGlobalFinalIntensity.y = fixtureState.globalIntensity;
+				o.audioGlobalFinalIntensity.z = fixtureState.finalIntensity;
 			#endif
-			o.emissionColor = getEmissionColor();
+			o.emissionColor = fixtureState.emissionColor;
 			float3 worldCam;
-			o.coneWidth = getConeWidth() + 1.25;
+			o.coneWidth = fixtureState.coneWidth + 1.25;
 			worldCam.x = unity_CameraToWorld[0][3];
 			worldCam.y = unity_CameraToWorld[1][3];
 			worldCam.z = unity_CameraToWorld[2][3];
