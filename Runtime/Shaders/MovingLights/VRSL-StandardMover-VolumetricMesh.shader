@@ -33,9 +33,6 @@ Shader "VRSL/Standard Mover/Volumetric"
 		_ConeLength("Cone Length", Range(1,10)) = 1
 		_MaxConeLength("Max Cone Length", Range(1,10)) = 1
 		_ConeSync ("Cone Scale Sync", Range(0,1)) = 0.2
-		// _BlockLengthX("DMX Block Base Distance X", Float) = 0.019231
-		// _BlockLengthY("DMX Block Base Distance Y", Float) = 0
-		//[Enum(Off,0,One,1)] _BlendSrc ("Source Blend mode", Float) = 1
 		[Enum(Off,0,One,1)] _BlendDst ("Destination Blend mode", Float) = 1
 		[Enum(UnityEngine.Rendering.BlendOp)] _BlendOp ("Blend Operation", Float) = 0
 		[Enum(HQTransparent,0,Transparent,1,AlphaToCoverage,2)] _RenderMode ("Render Mode", Int) = 1
@@ -49,10 +46,6 @@ Shader "VRSL/Standard Mover/Volumetric"
 
 		_FixtureRotationOrigin("Fixture Pivot Origin", Float) = (0, 0.014709, -1.02868, 0)
 		[Toggle] _UseRawGrid("Use Raw Grid For Light Intensity And Color", Int) = 0
-		// [NoScaleOffset] _Udon_DMXGridRenderTexture("DMX Grid Render Texture (RAW Unsmoothed)", 2D) = "white" {}
-		// [NoScaleOffset] _Udon_DMXGridRenderTextureMovement("DMX Grid Render Texture (To Control Lights)", 2D) = "white" {}
-		// [NoScaleOffset] _Udon_DMXGridStrobeTimer("DMX Grid Render Texture (For Strobe Timings", 2D) = "white" {}
-		// [NoScaleOffset] _Udon_DMXGridSpinTimer("DMX Grid Render Texture (For GOBO Spin Timings", 2D) = "white" {}
 		_MaxMinPanAngle("Max/Min Pan Angle (-x, x)", Float) = 180
 		_MaxMinTiltAngle("Max/Min Tilt Angle (-y, y)", Float) = 180
 
@@ -89,7 +82,6 @@ Shader "VRSL/Standard Mover/Volumetric"
 		_Noise2PowerPotato("Magic Noise Strength", Range(0, 1)) = 1
 
 
-		//[NoScaleOffset]_InsideConeNormalMap("Inside Cone Normal Map", 2D) = "bump" {}
 
 		_FixtureMaxIntensity ("Maximum Cone Intensity",Range (0,5)) = 1
 		_PulseSpeed("Pulse Speed", Range(0,2)) = 0
@@ -99,7 +91,6 @@ Shader "VRSL/Standard Mover/Volumetric"
 		_DistFade("Distance Fade", Range(0,1)) = 0.1
 		_FadeAmt("Depth Blending", Range(0, 100)) = 0.1
 		_BlindingAngleMod("Blinding Angle Modification", Range(0, 1)) = 1
-		//_IntensityCutoff("Intensity Minimum Cut Off", Range (0, 1)) = 0.2
 		[Toggle]_GoboBeamSplitEnable("Enable Splitting the beam on Gobos 2-6", Int) = 0
 		_StripeSplit ("Stripe Split GOBO2", Range(0, 30)) = 0
 		_StripeSplitStrength ("Stripe Split Strength G0B02", Range(0, 1)) = 0
@@ -134,8 +125,6 @@ Shader "VRSL/Standard Mover/Volumetric"
 
 
 
-		//[Toggle] _UseWorldNorm("Use World Normal vs View Normal", Float) = 0
-		//[KeywordEnum(None, UseDNTexture)] _DNEnabler ("Enable Depth Normal Texture", Float) = 0
 
 	}
     SubShader
@@ -161,7 +150,6 @@ Shader "VRSL/Standard Mover/Volumetric"
 			CGPROGRAM
 			#pragma vertex vert
 			#pragma fragment frag
-			//#pragma multi_compile_fog
 			#pragma multi_compile_instancing
 			#pragma instancing_options assumeuniformscaling
 			#pragma multi_compile_local _ _MAGIC_NOISE_ON_MED _MAGIC_NOISE_ON_HIGH
@@ -201,12 +189,9 @@ Shader "VRSL/Standard Mover/Volumetric"
 				float2 camAngleCamfade : TEXCOORD5;
 				float4 screenPos : TEXCOORD6;
 				float4 pos : SV_POSITION;
-				//float3 objPos : TEXCOORD7;
 				centroid float3 objNormal : TEXCOORD8;
 				float2 stripeInfo : TEXCOORD9;
 				float coneWidth : TEXCOORD10;
-				//float2 uvClone : TEXCOORD10;
-				//float3 norm : TEXCOORD11;
 				float2 uv2 : TEXCOORD13;
 				float4 worldDirection : TEXCOORD14;
 				float4 intensityStrobeGOBOSpinSpeed : TEXCOORD15;

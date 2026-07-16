@@ -125,9 +125,6 @@ Shader "VRSL/AudioLink/Standard Static/Lens Flare"
 
             #define COUNT 8 //you can edit to any number(e.g. 1~32), the lower the faster. Keeping this number a const can enable many compiler optimizations
 
-           // sampler2D _MainTex;
-            //float4 _MainTex_ST;
-            //half4 _Emission;
             half _ColorSat, _ScaleFactor, _ReferenceDistance, _UVScale;
             float _LightSourceViewSpaceRadius;
             float _DepthOcclusionTestZBias;
@@ -137,9 +134,7 @@ Shader "VRSL/AudioLink/Standard Static/Lens Flare"
 
             float _UsePreMultiplyAlpha;
 
-          //  float _FlickerAnimSpeed;
             float _FlickResultIntensityLowestPoint;
-            //float _ShouldDoFlicker;
              half _RemoveTextureArtifact, _CurveMod;
             #include "Packages/com.valenvrc.vvrsl/Runtime/Shaders/Shared/VRSL-Defines.cginc"
             #include "../Shared/VRSL-AudioLink-Functions.cginc"
@@ -192,20 +187,6 @@ Shader "VRSL/AudioLink/Standard Static/Lens Flare"
                 rgb = rgb*rgb*(3.0-2.0*rgb);
                 return c.z * lerp( float3(1,1,1), rgb, c.y);
             }
-            // float4 getEmissionColor()
-            // {
-            //     return UNITY_ACCESS_INSTANCED_PROP(Props,_Emission);
-            // }
-            // float getGlobalIntensity()
-            // {
-            //     return UNITY_ACCESS_INSTANCED_PROP(Props, _GlobalIntensity);
-            // }
-
-            // float getFinalIntensity()
-            // {
-            //     return UNITY_ACCESS_INSTANCED_PROP(Props, _FinalIntensity);
-            // }
-
             v2f vert (appdata v)
             {
                 v2f o;
@@ -304,26 +285,16 @@ Shader "VRSL/AudioLink/Standard Static/Lens Flare"
                         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                         visibilityResult01 *= smoothstep(_StartFadeinDistanceWorldUnit,_EndFadeinDistanceWorldUnit,linearEyeDepthOfFlarePivot);
 
-                        // if(_ShouldDoFlicker)
-                        // {
-                        //     float flickerMul = 0;
-                        //     //TODO: expose more control to noise? (send me an issue in GitHub, if anyone need this)
-                        //     flickerMul += saturate(sin(_Time.y * _FlickerAnimSpeed * 1.0000)) * (1-_FlickResultIntensityLowestPoint) + _FlickResultIntensityLowestPoint;
-                        //     flickerMul += saturate(sin(_Time.y * _FlickerAnimSpeed * 0.6437)) * (1-_FlickResultIntensityLowestPoint) + _FlickResultIntensityLowestPoint;   
-                        //     visibilityResult01 *= saturate(flickerMul/2);
-                        // }
                         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                         //apply all combinations(visibilityResult01) to vertex color
                         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                         o.color.a *= visibilityResult01;
                         o.vertex = visibilityResult01 < divider ? 0 : o.vertex;
-                // }
                 #endif
                 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 //premultiply alpha to rgb after alpha's calculation is done
                 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// 
                 o.color.rgb *= o.color.a;                 
-                //o.color.a = _UsePreMultiplyAlpha? o.color.a : 0;
 
                 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 //pure optimization:
@@ -345,7 +316,6 @@ Shader "VRSL/AudioLink/Standard Static/Lens Flare"
                     o.screenPos = ComputeScreenPos(o.vertex);
                 #endif
                 
-              //  UNITY_TRANSFER_FOG(o,o.vertex);
                 return o;
             }
 
@@ -364,8 +334,6 @@ Shader "VRSL/AudioLink/Standard Static/Lens Flare"
                     };
                     int index = (uint(pos.x) % 4) * 4 + uint(pos.y) % 4;
                     float4 col = saturate(tex2D(_MainTex, i.uv ));
-                   // col *= i.maskX;
-                    //clip((col.a) - DITHER_THRESHOLDS[index]);
                     // apply fog
                     UNITY_APPLY_FOG(i.fogCoord, col);
                     clip((((col.r + col.g + col.b)/3) * (_ClippingThreshold * 10)) - DITHER_THRESHOLDS[index]);
@@ -378,12 +346,6 @@ Shader "VRSL/AudioLink/Standard Static/Lens Flare"
                     col *= i.maskX;
                     return col;
                 #endif
-                // fixed4 col = saturate(tex2D(_MainTex, i.uv )-_RemoveTextureArtifact) * i.color;
-                // UNITY_APPLY_FOG(i.fogCoord, col);
-
-
-                // col *= i.maskX;
-                // return col;
             }
             ENDCG
         }

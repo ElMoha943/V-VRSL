@@ -3,14 +3,11 @@ Shader "VRSL/Wash Mover/Projection"
 
 	Properties
 	{
-		//[Header (INSTANCED PROPERITES)]
 		 [HideInInspector]_DMXChannel ("Starting Channel", Int) = 0
 		 [HideInInspector][Toggle] _NineUniverseMode ("Extended Universe Mode", Int) = 0
 		 [HideInInspector][Toggle] _PanInvert ("Invert Mover Pan", Int) = 0
 		 [HideInInspector][Toggle] _TiltInvert ("Invert Mover Tilt", Int) = 0
 
-		 //[HideInInspector]_FinalStrobeFreq ("Final Strobe Frequency", Float) = 0
-		 //[HideInInspector]_NewTimer("New Timer From Udon For Strobe", Float) = 0
 		 [Toggle] _EnableVerticalMode ("Enable Vertical Mode", Int) = 0
 		 [Toggle] _EnableStrobe ("Enable Strobe", Int) = 0
 		 [Toggle] _EnableDMX ("Enable Stream DMX/DMX Control", Int) = 0
@@ -21,13 +18,11 @@ Shader "VRSL/Wash Mover/Projection"
 		 [HideInInspector]_StrobeFreq("Strobe Frequency", Range(0,25)) = 1
 		 [HideInInspector][Toggle] _EnableSpin("Enable Auto Spinning", Float) = 0
 
-		//[Header (BASIC CONTROLS)]
 		[HideInInspector]_FinalIntensity("Final Intensity", Range(0,1)) = 1
 		_GlobalIntensity("Global Intensity", Range(0,1)) = 1
 		_GlobalIntensityBlend("Global Intensity Blend", Range(0,1)) = 1
 		_UniversalIntensity ("Universal Intensity", Range (0,1)) = 1
 		[HDR]_Emission("Light Color Tint", Color) = (1,1,1,1)
-		//[HDR]_StaticEmission("Static Light Color Tint", Color) = (1,1,1,1)
 		[Toggle] _EnableStaticEmissionColor("Enable Static Emission Color", Int) = 0
 		_Saturation("Final Saturation", Range(0,1)) = 1
 		_SaturationLength("Final Saturation Length", Range(0,0.2)) = 0.1
@@ -35,23 +30,10 @@ Shader "VRSL/Wash Mover/Projection"
 		_ConeWidth("Cone Width", Range(0,5.5)) = 0
 		_ConeLength("Cone Length", Range(1,10)) = 1
 		_ConeSync ("Cone Scale Sync", Range(0,1)) = 0.2
-		// _BlockLengthX("DMX Block Base Distance X", Float) = 0.019231
-		// _BlockLengthY("DMX Block Base Distance Y", Float) = 0
-
 		[Enum(UnityEngine.Rendering.BlendMode)] _BlendSrc ("Source Blend mode", Float) = 2
-		//[Enum(UnityEngine.Rendering.BlendMode)] _BlendDst ("Destination Blend mode", Float) = 1
 		[Enum(UnityEngine.Rendering.BlendOp)] _BlendOp ("Blend Operation", Float) = 0
-		//[Space(16)]
-
-		//[Header(MOVER CONTROLS)]
-
-
 		_FixtureRotationOrigin("Fixture Pivot Origin", Float) = (0, 0.014709, -1.02868, 0)
 		[Toggle] _UseRawGrid("Use Raw Grid For Light Intensity And Color", Int) = 0
-		// [NoScaleOffset] _Udon_DMXGridRenderTexture("DMX Grid Render Texture (RAW Unsmoothed)", 2D) = "white" {}
-		// [NoScaleOffset] _Udon_DMXGridRenderTextureMovement("DMX Grid Render Texture (To Control Lights)", 2D) = "white" {}
-		// [NoScaleOffset] _Udon_DMXGridStrobeTimer("DMX Grid Render Texture (For Strobe Timings", 2D) = "white" {}
-		// [NoScaleOffset] _Udon_DMXGridSpinTimer("DMX Grid Render Texture (For GOBO Spin Timings", 2D) = "white" {}
 		[Toggle] _EnableAudioReact ("Enable AudioLink Audio React", Int) = 0
 		[NoScaleOffset] _AudioSpectrum("AudioSpectrum", 2D) = "black" {}
 		_MaxMinPanAngle("Max/Min Pan Angle (-x, x)", Float) = 180
@@ -59,12 +41,6 @@ Shader "VRSL/Wash Mover/Projection"
 
 		_FixtureMaxIntensity ("Maximum Cone Intensity",Range (0,0.5)) = 0.5
 
-		// [Header(Divide)]
-		// _Divide ("Divide", Range(0, 30)) = 0
-		// _DividePower ("Divide Strength", Range(0, 1)) = 0
-
-		//[Space(24)]
-		//[Header(PROJECTION GOBO SETTINGS)]
 		_ProjectionRotation("Static Projection UV Rotation", Range(-180, 180)) = 0
 		_SpinSpeed ("Auto Spin Speed", Range(0, 10)) = 0
 		_ProjectionIntensity ("Projection Intensity", Range(0,20)) = 0
@@ -78,22 +54,15 @@ Shader "VRSL/Wash Mover/Projection"
 
 		[NoScaleOffset] _ProjectionMainTex ("Projection Texture GOBO 1", 2D) = "white"{}
 		_ProjectionUVMod ("Projection UV Scale Modifier 1", Range(0,2)) = 0
-		//[NoScaleOffset] _ProjectionTex2 ("Projection Texture GOBO 2", 2D) = "white"{}
 		_ProjectionUVMod2 ("Projection UV Scale Modifier 2", Range(0,2)) = 0
-		//[NoScaleOffset] _ProjectionTex3 ("Projection Texture GOBO 3", 2D) = "white"{}
 		_ProjectionUVMod3 ("Projection UV Scale Modifier 3", Range(0,2)) = 0
-		//[NoScaleOffset] _ProjectionTex4 ("Projection Texture GOBO 4", 2D) = "white"{}
 		_ProjectionUVMod4 ("Projection UV Scale Modifier 4", Range(0,2)) = 0
-		//[NoScaleOffset] _ProjectionTex5 ("Projection Texture GOBO 5", 2D) = "white"{}
 		_ProjectionUVMod5 ("Projection UV Scale Modifier 5", Range(0,2)) = 0
-		//[NoScaleOffset] _ProjectionTex6 ("Projection Texture GOBO 6", 2D) = "white"{}
 		_ProjectionUVMod6 ("Projection UV Scale Modifier 6", Range(0,2)) = 0	
 		_ProjectionUVMod7 ("Projection UV Scale Modifier 7", Range(0,2)) = 0
 		_ProjectionUVMod8 ("Projection UV Scale Modifier 8", Range(0,2)) = 0	
 
 		_MinimumBeamRadius ("Minimum Beam Radius", Range(0.001,1)) = 1
-		//[Space(8)]	
-
 		_RedMultiplier ("Red Channel Multiplier", Range(0, 5)) = 1
 		_GreenMultiplier ("Green Channel Multiplier", Range(0, 5)) = 1
 		_BlueMultiplier ("Blue Channel Multiplier", Range(0,5)) = 1
@@ -107,38 +76,6 @@ Shader "VRSL/Wash Mover/Projection"
         [Enum(Off,0,One,1)] _BlendDst ("Destination Blend mode", Float) = 1
 		[Enum(UnityEngine.Rendering.BlendOp)] _BlendOp ("Blend Operation", Float) = 0
         _ClippingThreshold ("Clipping Threshold", Range (0,1)) = 0.5
-		//_Fade ("Fade mod", Range(0, 6)) = 1.5
-
-
-	// 	[Space(16)]
-		
-
-
-	// 	[Space(48)]
-	// 	[Header(MAIN)]
-	// [Enum(Unity Default, 0, Non Linear, 1)]_LightProbeMethod("Light Probe Sampling", Int) = 0
-	// 	[Enum(UVs, 0, Triplanar World, 1, Triplanar Object, 2)]_TextureSampleMode("Texture Mode", Int) = 0
-	// 	_TriplanarFalloff("Triplanar Blend", Range(0.5,1)) = 1
-	// 	_MainTex("Main Texture", 2D) = "white" {}
-	// _Color("Color", Color) = (1,1,1,1)
-
-	// 	[Space(16)]
-	// [Header(NORMALS)]
-	// _BumpMap("Normal Map", 2D) = "bump" {}
-	// _BumpScale("Normal Scale", Range(-1,1)) = 1
-
-	// 	[Space(16)]
-	// [Header(METALLIC)]
-	// _MetallicGlossMap("Metallic Map", 2D) = "white" {}
-	// _Metallic("Metallic", Range(0,1)) = 0
-	// 	_Glossiness("Smoothness", Range(0,1)) = 0
-
-	// 	[Space(16)]
-	// [Header(LIGHTMAPPING HACKS)]
-	// _SpecularLMOcclusion("Specular Occlusion", Range(0,1)) = 0
-	// 	_SpecLMOcclusionAdjust("Spec Occlusion Sensitiviy", Range(0,1)) = 0.2
-	// 	_LMStrength("Lightmap Strength", Range(0,1)) = 1
-	// 	_RTLMStrength("Realtime Lightmap Strength", Range(0,1)) = 1
 	[Enum(Off,0,On,1)] _MultiSampleDepth ("Multi Sample Depth", Int) = 1
 
 
@@ -173,10 +110,8 @@ Shader "VRSL/Wash Mover/Projection"
             #pragma fragment frag
 			#pragma multi_compile_local _ _ALPHATEST_ON
 			#pragma shader_feature_local _MULTISAMPLEDEPTH
-			//#pragma multi_compile_fog
 			#pragma multi_compile_instancing
 			#pragma instancing_options assumeuniformscaling
-			//#pragma multi_compile _DNENABLER_NONE _DNENABLER_USEDNTEXTURE
 			#define PROJECTION_YES //To identify the pass in the vert/frag shaders
 			#define PROJECTION_MOVER
 			#define WASH

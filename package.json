@@ -1,7 +1,7 @@
 {
   "name": "com.valenvrc.vvrsl",
   "displayName": "VVRSL",
-  "version": "3.0.0-Alpha.2",
+  "version": "3.0.0-Alpha.3",
   "description": "VRSL Fork focused on debloated functionality and improved performance for VRChat.",
   "author": {
     "name": "valenvrc",

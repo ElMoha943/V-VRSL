@@ -16,7 +16,6 @@ half Fresnel(half3 Normal, half3 ViewDir, half Power)
 	half3 i = floor(p); p -= i; 
 	p *= p * (3. - 2. * p);
 	half2 uv = (p.xy + i.xy + half2(37, 17) * i.z + .5)*0.00390625;
-	//uv.y *= -1;
 	half4 uv4 = half4(uv.x, uv.y * -1, 0.0, 0.0);
 	p.xy = tex2Dlod(_LightMainTex, uv4).yx;
 	return lerp(p.x, p.y, p.z);
@@ -52,7 +51,6 @@ half4 VolumetricLightingBRDF(v2f i, fixed facePos)
 	#endif
 
 
-	//UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
 		UNITY_SETUP_INSTANCE_ID(i);
 
 
@@ -96,9 +94,7 @@ half4 VolumetricLightingBRDF(v2f i, fixed facePos)
 
 
 		half widthNormalized = i.coneWidth/5.5;
-		//uint gobo = instancedGOBOSelection();
 		//Select Gobo!
-		//uint gobo = i.intensityStrobeGOBOSpinSpeed.w;
 		#ifdef VRSL_DMX
 			half spinSpeed = i.intensityStrobeGOBOSpinSpeed.z;
 			spinSpeed = (-spinSpeed) * UNITY_ACCESS_INSTANCED_PROP(Props,_EnableSpin);
@@ -122,7 +118,6 @@ half4 VolumetricLightingBRDF(v2f i, fixed facePos)
 		
 		//CREDIT TO DJ LUKIS FOR MIRROR DEPTH CORRECTION
 		//Get Screen Pos UVs
-		//float perspectiveDivide = 1.0f / i.pos.w;
 		#ifdef _USE_DEPTH_LIGHT
 			float4 direction = i.worldDirection * (1.0f / i.pos.w);
 			float2 screenUV = i.screenPos.xy / i.screenPos.w;
@@ -145,9 +140,6 @@ half4 VolumetricLightingBRDF(v2f i, fixed facePos)
 		#else
 			half intersectionFade = 1.0;
 		#endif
-		//Attempt to fade cone away when intersecting with the camera.
-		//float cameraFade = i.camAngleCamfade.y;
-
 		//Fade the camera less when you are closer to the source of the light.
 		#ifdef VRSL_DMX
 			half cameraFade = i.camAngleCamfade.y;
@@ -194,7 +186,6 @@ half4 VolumetricLightingBRDF(v2f i, fixed facePos)
 		fixed4 col = gradientTexture.r;
 
 		//Calculate View Direction for fading edges.
-		//half3 viewDir = normalize(wpos - i.worldPos.xyz);
 		float3 viewDir = (wpos - i.worldPos.xyz);
 		viewDir = normalize(mul(unity_WorldToObject,float4(viewDir,0.0)));
 		//Initialize Edge Fade
@@ -230,8 +221,6 @@ half4 VolumetricLightingBRDF(v2f i, fixed facePos)
 			edgeFade = Fresnel(i.objNormal, viewDir, fadeSTR);
 			threeDNoiseScale = noise2StretchInside;
 		}
-		// threeDNoiseScale *= 1.5;
-
 		//Combine Gradient with emission color, intersection fade and camera fade.
 		col = col * getEmissionColor() * intersectionFade * cameraFade;
 
@@ -272,8 +261,6 @@ half4 VolumetricLightingBRDF(v2f i, fixed facePos)
 
 				//If we are using 3D noise...
 				#if (defined(_MAGIC_NOISE_ON_HIGH) && defined(_HQ_MODE)) || (defined(_MAGIC_NOISE_ON_MED) && !defined(_HQ_MODE))
-				//if(_ToggleMagicNoise > 0)
-				//{
 					//Get vertex/frag position in worldspace
 					float3 worldposNoise = i.worldPos.xyz;
 					//Add Scrolling effect
@@ -291,7 +278,6 @@ half4 VolumetricLightingBRDF(v2f i, fixed facePos)
 					threeDNoiseScale *= 1.25;
 
 					//Add Tiling effect
-					//float3 q = threeDNoiseScale * worldposNoise.xyz;
 					half3 q = half3(0,0,0);
 					q.x = threeDNoiseScale * worldposNoise.x;
 					q.y = threeDNoiseScale * worldposNoise.y;
@@ -319,22 +305,16 @@ half4 VolumetricLightingBRDF(v2f i, fixed facePos)
 						half newNP = lerp(noise2Power - 0.2, noise2Power, gradientTexture.r);
 						threeDNoise = lerp(1, threeDNoise, newNP);
 					#else
-						// half nnp = lerp(noise2Power * 5, noise2Power, saturate(-uvMap.x));
 						threeDNoise = lerp(1, threeDNoise, noise2Power);
 					#endif
-				//}
 				//If we aren't using 3D noise..
 				#else
-				//{
 					//If we are using gobos, add another 0.2 to the 2D noise power strength.
-					//np = gobo > 1 ? clamp(0,1,_NoisePower + 0.2) : _NoisePower; 
 					#ifndef WASH
 					np = gobo > 1 ? clamp(0,1,_NoisePower + 0.2) : _NoisePower; 
 					#else
-						//tex = tex2D(_NoiseTex, texUV);
 						np = _NoisePower;
 					#endif
-				//}
 				#endif
 				//Mix 2D noise Power
 				tex = lerp(fixed4(1, 1, 1, 1), tex, np);
@@ -345,14 +325,10 @@ half4 VolumetricLightingBRDF(v2f i, fixed facePos)
 
 
 		//Mix in blinding effect.
-		//col*= ((i.blindingEffect));
-		// col = lerp(col, col*i.blindingEffect * i.blindingEffect * 10, gradientTexture);
-		//col*=2.0;
 		col = lerp(col, fixed4(0,0,0,0), pow(i.uv.x,.5));
 
 
 		//Beam Splitter and gobo spin
-		//const float pi = 3.14159265;
 		//Choose split strength and pattern based on information in i.stripeinfo.
 		#ifdef VRSL_DMX
 			#if !defined(WASH)
@@ -372,7 +348,6 @@ half4 VolumetricLightingBRDF(v2f i, fixed facePos)
 				//Choose split strength and pattern based on information in i.stripeinfo.
 				half splitter = (sin(i.uv.y * pi * floor(i.stripeInfo.x) * 2 + (_Time.w * spinSpeed)) + 1.0);
 				//Do not use beam splitting if we aren't using gobos.
-				//half splitstr = IF(_GoboBeamSplitEnable == 1 && gobo > 1, i.stripeInfo.y, 0);
 				half splitstr = _GoboBeamSplitEnable == 1 && gobo > 1 ? i.stripeInfo.y : 0;
 				splitter = lerp(1.0, splitter, splitstr);
 			#else
@@ -381,9 +356,6 @@ half4 VolumetricLightingBRDF(v2f i, fixed facePos)
 		#endif
 
 		//Mix in 2D noise, beam splitting, and 3D noise.
-		// col *= tex;
-		// col *= splitter;
-		// col *= threeDNoise;
 		#if !defined(_ALPHATEST_ON) || SHADER_API_GLES3
 			#ifndef _POTATO_MODE_ON
 				col *= tex * splitter * threeDNoise;
@@ -403,7 +375,6 @@ half4 VolumetricLightingBRDF(v2f i, fixed facePos)
 			result = lerp(col,col * 25, saturate(pow(gradientTexture, _InnerIntensityCurve)));
 		#endif
 		#endif
-		//#ifndef _ALPHATEST_ON
 			//Mix in Frensel Edge Fade
 			#if _ALPHATEST_ON && !SHADER_API_GLES3
 				
@@ -412,7 +383,6 @@ half4 VolumetricLightingBRDF(v2f i, fixed facePos)
 			#else
 				result *= edgeFade;
 			#endif
-		//#endif
 		half maxIntensity = _FixtureMaxIntensity;
 		#ifdef _HQ_MODE
 		maxIntensity *= 0.75;
@@ -432,9 +402,7 @@ half4 VolumetricLightingBRDF(v2f i, fixed facePos)
 		if( i.uv.x < 0.001 == false)
 		{
 			half blinding = i.blindingEffect;
-			//#ifdef VRSL_AUDIOLINK
 				blinding = lerp(1.0, blinding, _BlindingStrength);
-			//#endif
 			#if defined(_ALPHATEST_ON) && !SHADER_API_GLES3
 				result = lerp(result, result*blinding * 20, gradientTexture);
 				#ifdef WASH
@@ -446,16 +414,9 @@ half4 VolumetricLightingBRDF(v2f i, fixed facePos)
 			result *= saturate(maxIntensity - (lerp(0.15, maxIntensity * 0.95, pow(widthNormalized,0.4))));
 			
 		}
-		// result = isDMX() == 1 ?
-		// lerp(fixed4(0,0,0,result.w), (result * i.rgbColor * strobe), i.intensityStrobeGOBOSpinSpeed.x * maxIntensity) :
-		// result * strobe;
-
-		// result = isDMX() == 1 ? 
-		// 	lerp(half4(0,0,0,result.w), result, i.intensityStrobeGOBOSpinSpeed.x * i.intensityStrobeGOBOSpinSpeed.x * 2) : result;
 		#ifdef VRSL_DMX
 			result = (i.intensityStrobeGOBOSpinSpeed.x <= _IntensityCutoff && dmxEnabled == 1) ? half4(0,0,0,result.w) : result;
 			//Fixture lens is now apart of Volumetrics, calculation for lens strenght is here
-			//half maxBrightness = lerp(1.0, _LensMaxBrightness)
 			#if !defined(WASH)
 			half4 r2 = i.uv.x < 0.001 ? 10 * result * (_LensMaxBrightness * i.intensityStrobeGOBOSpinSpeed.x): result;
 			#else

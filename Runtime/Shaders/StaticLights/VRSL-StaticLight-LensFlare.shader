@@ -18,9 +18,6 @@ Shader "VRSL/Standard Static/Lens Flare"
         _DMXChannel ("DMX Fixture Number/Sector (Per 13 Channels)", Int) = 0
         _FixtureMaxIntensity ("Maximum Light Intensity",Range (0,15)) = 1
         [Toggle] _UseRawGrid("Use Raw Grid For Light Intensity", Int) = 0
-		// [NoScaleOffset] _Udon_DMXGridRenderTexture("DMX Grid Render Texture (RAW Unsmoothed)", 2D) = "white" {}
-		// [NoScaleOffset] _Udon_DMXGridRenderTextureMovement("DMX Grid Render Texture (To Control Lights)", 2D) = "white" {}
-		// [NoScaleOffset] _Udon_DMXGridStrobeTimer("DMX Grid Render Texture (For Strobe Timings", 2D) = "white" {}
         _CurveMod ("Light Intensity Curve Modifier", Range (-3,8)) = 5.0
 
 		 [Toggle] _EnableStrobe ("Enable Strobe", Int) = 0
@@ -89,8 +86,6 @@ Shader "VRSL/Standard Static/Lens Flare"
             #pragma shader_feature _1CH_MODE _4CH_MODE _5CH_MODE _13CH_MODE
             #define VRSL_DMX
             #define VRSL_FLARE
-            // make fog work
-           // #pragma multi_compile_fog
             #pragma multi_compile_instancing
 
             #include "UnityCG.cginc"
@@ -106,7 +101,6 @@ Shader "VRSL/Standard Static/Lens Flare"
             struct v2f
             {
                 float2 uv : TEXCOORD0;
-               // UNITY_FOG_COORDS(1)
                 float4 vertex : SV_POSITION;
                 float4 screenPos : TEXCOORD1;
                 float4 worldDirection : TEXCOORD2;
@@ -122,11 +116,7 @@ Shader "VRSL/Standard Static/Lens Flare"
 
             #define COUNT 8 //you can edit to any number(e.g. 1~32), the lower the faster. Keeping this number a const can enable many compiler optimizations
 
-            //sampler2D _CameraDepthTexture;
             #include "Packages/com.valenvrc.vvrsl/Runtime/Shaders/Shared/VRSL-Defines.cginc"
-           // sampler2D _MainTex;
-//            float4 _MainTex_ST;
-            //half4 _Emission;
             half _ColorSat, _ScaleFactor, _ReferenceDistance, _UVScale;
             float _LightSourceViewSpaceRadius;
             float _DepthOcclusionTestZBias;
@@ -185,8 +175,6 @@ Shader "VRSL/Standard Static/Lens Flare"
                 float e = 1.0e-10;
                 return float3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
             }
-            //#include "../Basic Surface Shaders/VRSL-StandardSurface-Functions.cginc"
-
             v2f vert (appdata v)
             {
                 v2f o;
@@ -316,14 +304,6 @@ Shader "VRSL/Standard Static/Lens Flare"
                     o.vertex = visibilityResult01 < divider ? 0 : o.vertex;
                     o.color.a *= visibilityResult01;
                 #endif
-                // if(_ShouldDoFlicker)
-                // {
-                //     float flickerMul = 0;
-                //     //TODO: expose more control to noise? (send me an issue in GitHub, if anyone need this)
-                //     flickerMul += saturate(sin(_Time.y * _FlickerAnimSpeed * 1.0000)) * (1-_FlickResultIntensityLowestPoint) + _FlickResultIntensityLowestPoint;
-                //     flickerMul += saturate(sin(_Time.y * _FlickerAnimSpeed * 0.6437)) * (1-_FlickResultIntensityLowestPoint) + _FlickResultIntensityLowestPoint;   
-                //     visibilityResult01 *= saturate(flickerMul/2);
-                // }
                 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 //apply all combinations(visibilityResult01) to vertex color
                 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -344,8 +324,6 @@ Shader "VRSL/Standard Static/Lens Flare"
                 
 
                 
-                // float3 hsvFC = RGB2HSV(o.color.xyz);
-                // hsvFC.y = 0.0;
                 float4 e2 = float4(1,1,1,o.color.w);
 
                 
@@ -358,7 +336,6 @@ Shader "VRSL/Standard Static/Lens Flare"
                 #if _ALPHATEST_ON && !SHADER_API_GLES3
                     o.screenPos = ComputeScreenPos(o.vertex);
                 #endif
-              //  UNITY_TRANSFER_FOG(o,o.vertex);
                 return o;
             }
 
@@ -380,8 +357,6 @@ Shader "VRSL/Standard Static/Lens Flare"
                     };
                     int index = (int)((uint(pos.x) % 4) * 4 + uint(pos.y) % 4);
                     float4 col = saturate(tex2D(_MainTex, i.uv ));
-                   // col *= i.maskX;
-                    //clip((col.a) - DITHER_THRESHOLDS[index]);
                     clip((((col.r + col.g + col.b)/3) * (_ClippingThreshold * 10)) - DITHER_THRESHOLDS[index]);
                     UNITY_APPLY_FOG(i.fogCoord, col);
                     return col * i.dmx;

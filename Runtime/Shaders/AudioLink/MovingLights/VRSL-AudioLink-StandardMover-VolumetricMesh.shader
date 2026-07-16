@@ -13,8 +13,6 @@ Shader "VRSL/AudioLink/Standard Mover/Volumetric"
 		 _TextureColorSampleX ("X coordinate to sample the texture from", Range(0,1)) = 0.5
 		 _TextureColorSampleY ("Y coordinate to sample the texture from", Range(0,1)) = 0.5
 		 
-		 //[HideInInspector]_FinalStrobeFreq ("Final Strobe Frequency", Float) = 0
-		 //[HideInInspector]_NewTimer("New Timer From Udon For Strobe", Float) = 0
 
 		 [HideInInspector]_FixtureBaseRotationY("Mover Pan Offset (Blue + Green)", Range(-540,540)) = 0
 		 [HideInInspector]_FixtureRotationX("Mover Tilt Offset (Blue)", Range(-180,180)) = 0
@@ -43,10 +41,7 @@ Shader "VRSL/AudioLink/Standard Mover/Volumetric"
 		_ConeLength("Cone Length", Range(1,10)) = 1
 		_MaxConeLength("Max Cone Length", Range(1,10)) = 1
 		_ConeSync ("Cone Scale Sync", Range(1,10)) = 0.2
-		// _BlockLengthX("OSC Block Base Distance X", Float) = 0.019231
-		// _BlockLengthY("OSC Block Base Distance Y", Float) = 0
 		[Enum(UnityEngine.Rendering.BlendMode)] _BlendSrc ("Source Blend mode", Float) = 2
-		//[Enum(UnityEngine.Rendering.BlendMode)] _BlendDst ("Destination Blend mode", Float) = 1
 		[Enum(UnityEngine.Rendering.BlendOp)] _BlendOp ("Blend Operation", Float) = 0
 		//[Space(16)]
 
@@ -99,7 +94,6 @@ Shader "VRSL/AudioLink/Standard Mover/Volumetric"
 		_BlindingStrength("Blinding Strength", Range(0,1)) = 1
 		_BlindingAngleMod("Blinding Angle Modification", Range(-1, 1)) = 0
 		_IntersectionMod("Intersection Modification", Range(0.00001, 10)) = 1
-		//_IntensityCutoff("Intensity Minimum Cut Off", Range (0, 1)) = 0.2
 		[Toggle]_GoboBeamSplitEnable("Enable Splitting the beam on Gobos 2-6", Int) = 0
 		_StripeSplit ("Stripe Split GOBO2", Range(0, 30)) = 0
 		_StripeSplitStrength ("Stripe Split Strength G0B02", Range(0, 1)) = 0
@@ -143,8 +137,6 @@ Shader "VRSL/AudioLink/Standard Mover/Volumetric"
 		 _ThemeColorTarget ("Choose Theme Color", Int) = 0
 
 
-		//[Toggle] _UseWorldNorm("Use World Normal vs View Normal", Float) = 0
-		//[KeywordEnum(None, UseDNTexture)] _DNEnabler ("Enable Depth Normal Texture", Float) = 0
 
 	}
     SubShader
@@ -170,7 +162,6 @@ Shader "VRSL/AudioLink/Standard Mover/Volumetric"
 			CGPROGRAM
 			#pragma vertex vert
 			#pragma fragment frag
-			//#pragma multi_compile_fog
 			#pragma multi_compile_local _ _MAGIC_NOISE_ON_MED _MAGIC_NOISE_ON_HIGH
 			#pragma multi_compile_local _ _USE_DEPTH_LIGHT
 			#pragma multi_compile_local _ _POTATO_MODE_ON
@@ -221,8 +212,6 @@ Shader "VRSL/AudioLink/Standard Mover/Volumetric"
 				float2 uv2 : TEXCOORD13;
 				float4 worldDirection : TEXCOORD14;
 				float coneWidth : TEXCOORD15;
-				//float3 intensityStrobeGOBOSpinSpeed : TEXCOORD15;
-				//float4 rgbColor : TEXCOORD16;
 
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 				UNITY_VERTEX_OUTPUT_STEREO

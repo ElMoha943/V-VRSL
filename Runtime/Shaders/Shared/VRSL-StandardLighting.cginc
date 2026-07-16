@@ -10,18 +10,7 @@ float4 CustomStandardLightingBRDF(
     #endif
     )
 {
-
-
-
-    //UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
     UNITY_SETUP_INSTANCE_ID(i);
-    // UNITY_SETUP_INSTANCE_ID(i);
-    // if(((i.uv.x) == 0.0 && (i.uv.y) == 0.0 || _PureEmissiveToggle == 1))
-    // {
-    //     //Color Light Bulb Itself
-    //     float strobe = IF(isStrobe() == 1, GetStrobeOutput(getChannelSectorX()), 1);
-    //     return IF(isDMX() == 1, (getEmissionColor() * GetDMXColor(getChannelSectorX())) * strobe, getEmissionColor() * strobe);
-    // }
 
     float3 fixtureColorMask = ceil(i.color.rgb);
     float fixtureColorBand = ceil(i.color.g * 10.0);
@@ -68,8 +57,6 @@ float4 CustomStandardLightingBRDF(
         UnityGI gi = FragmentGI (s, occlusion, i.ambientOrLightmapUV, atten, mainLight);
 
         half4 c = UNITY_BRDF_PBS (s.diffColor, s.specColor, s.oneMinusReflectivity, s.smoothness, s.normalWorld, -s.eyeVec, gi.light, gi.indirect);
-        // c.rgb += DynamicLM(i.tex.xy);
-        // c.rgb += Emission(i.tex.xy);
         UNITY_EXTRACT_FOG_FROM_EYE_VEC(i);
         UNITY_APPLY_FOG(_unity_fogCoord, c.rgb);
 
@@ -97,7 +84,6 @@ float4 CustomStandardLightingBRDF(
             float4 metallicSmoothness = getMetallicSmoothness(metallicGlossMap);
 
             //DIFFUSE
-        //   fixed4 diffuse = texTP(_MainTex, _MainTex_ST, i.worldPos, i.objPos, i.btn[2], i.objNormal, _TriplanarFalloff, i.uv) * _Color;
             fixed4 diffuse = lerp(texTP(_MainTex, _MainTex_ST, i.worldPos, i.objPos, i.btn[2], i.objNormal, _TriplanarFalloff, i.uv) * _Color, _Color, lerp(0, i.color.r, i.color.b));
             fixed4 diffuseColor = diffuse; //Store for later use, we alter it after.
             diffuse.rgb *= (1-metallicSmoothness.x);

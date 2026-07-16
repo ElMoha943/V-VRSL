@@ -8,7 +8,6 @@
 #ifdef VRSL_DMX
 	half4 calculateRotations(appdata v, half4 input, int normalsCheck, half pan, half tilt)
 	{
-	//	input = IF(worldspacecheck == 1, half4(UnityObjectToWorldNormal(v.normal).x * -1.0, UnityObjectToWorldNormal(v.normal).y * -1.0, UnityObjectToWorldNormal(v.normal).z * -1.0, 1), input)
 		//CALCULATE BASE ROTATION. MORE FUN MATH. THIS IS FOR PAN.
 		half angleY = radians(getOffsetY() + pan);
 		half c, s;
@@ -39,23 +38,14 @@
 
 		//DO ROTATION
 
-
-		//#if defined(PROJECTION_YES)
-		//buffer[3] = GetTiltValue(sector);
-		//#endif
 		half angleX = radians(getOffsetX() + tilt);
 		sincos(angleX, s, c);
 		half3x3 rotateXMatrix = half3x3(1, 0, 0,
 										0, c, -s,
 										0, s, c);
 			
-		//half4 fixtureVertexPos = input;
-			
 		//INVERSION CHECK
 		rotateXMatrix = checkTiltInvertZ() == 1 ? transpose(rotateXMatrix) : rotateXMatrix;
-
-		//half4 localRotX = mul(rotateXMatrix, fixtureVertexPos);
-		//LOCALROTX IS NEW ROTATION
 
 
 
@@ -69,7 +59,6 @@
 
 		//apply LocalRotXY rotation then add back old origin
 		input.xyz = v.color.b == 1.0 ? localRotXY + newOrigin : input.xyz;
-		//input.xyz = v.color.b == 1.0 ? input.xyz + newOrigin : input.xyz;
 		
 		//appy LocalRotY rotation to lightfixture base;
 		input.xyz = v.color.g == 1.0 ? localRotY : input.xyz;
@@ -89,10 +78,6 @@
 			//INVERSION CHECK
 		rotateYMatrix = checkPanInvertY() == 1 ? transpose(rotateYMatrix) : rotateYMatrix;
 
-		//half4 localRotY = mul(rotateYMatrix, BaseAndFixturePos);
-		//LOCALROTY IS NEW ROTATION
-
-
 		half tiltOffset = 90.0;
 		tiltOffset = checkTiltInvertZ() == 1 ? -tiltOffset : tiltOffset;
 		//set new origin to do transform
@@ -106,11 +91,8 @@
 										0, cX, sX,
 										0, -sX, cX);
 
-		//half4 fixtureVertexPos = input;
-
 			//INVERSION CHECK
 		rotateXMatrix = checkTiltInvertZ() == 1 ? transpose(rotateXMatrix) : rotateXMatrix;
-		//half4 localRotX = mul(rotateXMatrix, fixtureVertexPos);
 
 		half3x3 rotateXYMatrix = mul(rotateXMatrix, rotateYMatrix);
 		half3 localRotXY = mul(rotateXYMatrix, input);
@@ -142,7 +124,6 @@ half4 ConeScale(appdata v, half4 input, half scalar)
 	#ifdef VRSL_DMX
 		half4 newOrigin = input.w * _FixtureRotationOrigin; 
 		input.xyz = input.xyz - newOrigin;
-		//scalar = -scalar;
 
 		half4x4 scaleMatrix 	= half4x4(scalar,	0,	0,	0,
 												0,	1,  0,	0,
@@ -156,7 +137,6 @@ half4 ConeScale(appdata v, half4 input, half scalar)
 	#ifdef VRSL_AUDIOLINK
 		half4 newOrigin = input.w * _FixtureRotationOrigin; 
 		input.xyz = input.xyz - newOrigin;
-		//scalar = -scalar;
 
 		half4x4 scaleMatrix 	= half4x4(scalar,	0,	0,	0,
 												0,	scalar,  0,	0,
@@ -172,10 +152,6 @@ half4 ConeScale(appdata v, half4 input, half scalar)
 	half4 CalculateConeWidth(appdata v, half4 input, half scalar, uint dmx)
 	{
 		#if defined(VOLUMETRIC_YES)
-
-			// if((ceil(v.color.r) > 0 && ceil(v.color.g) < 1 && ceil(v.color.b) > 0 ))
-			// {
-
 				//Set New Origin
 				half4 newOrigin = input.w * _FixtureRotationOrigin; 
 				input.xyz = input.xyz - newOrigin;
@@ -183,15 +159,10 @@ half4 ConeScale(appdata v, half4 input, half scalar)
 
 				// Do Transformation
 				
-				//input.xy = input.xy + v.normal.xy * distanceFromFixture;
-			//	v.tangent.y *= 0.1235;
 				#ifdef WASH
 					scalar *= 2.0;
 					scalar -= 2.50;
-					//scalar = clamp(scalar, 0.0, 50.0);
 				#endif
-				// if(v.color.r < 0.9)
-				// {
 					half distanceFromFixture = (v.uv.x) * (scalar);
 					distanceFromFixture = lerp(0, distanceFromFixture, pow(v.uv.x, _ConeSync));
 
@@ -205,11 +176,6 @@ half4 ConeScale(appdata v, half4 input, half scalar)
 				input.xyz = input.xyz + newOrigin;
 
 				return input;
-			// }
-			// else
-			// {
-			// 	return input;
-			// }
 		#endif
 
 		#if defined(PROJECTION_YES)
@@ -220,7 +186,6 @@ half4 ConeScale(appdata v, half4 input, half scalar)
 
 				// Do Transformation
 				half distanceFromFixture = (v.texcoord.x) * scalar;
-				//input.xy = input.xy + v.normal.xy * distanceFromFixture;
 				input.x = (input.x) + (v.normal.x) * distanceFromFixture;
 				input.z = (input.z) + (v.normal.z) * distanceFromFixture;
 
@@ -246,7 +211,6 @@ half4 ConeScale(appdata v, half4 input, half scalar)
 				#ifdef WASH
 					scalar *= 2.5;
 					scalar += 2.50;
-					//scalar = clamp(scalar, 0.0, 50.0);
 				#endif
 
 				//Set New Origin
@@ -276,7 +240,6 @@ half4 ConeScale(appdata v, half4 input, half scalar)
 
 				// Do Transformation
 				half distanceFromFixture = (v.texcoord.x) * scalar;
-				//input.xy = input.xy + v.normal.xy * distanceFromFixture;
 				input.x = (input.x) + (v.normal.x) * distanceFromFixture;
 				input.z = (input.z) + (v.normal.z) * distanceFromFixture;
 
@@ -358,7 +321,6 @@ v2f vert (appdata v)
 				v.vertex = ConeScale(v, v.vertex, _MinimumBeamRadius);
 			#endif
 		#endif
-		//calculate rotations for verts
 		v.vertex = calculateRotations(v, v.vertex, 0, oscPanValue, oscTiltValue);
 		#if defined(VOLUMETRIC_YES)
 			o.coneWidth = oscConeWidth + 1.5;
@@ -380,10 +342,6 @@ v2f vert (appdata v)
 			float2 originScreenUV = originScreenPos.xy / originScreenPos.w;
 			o.camAngleCamfade.x = saturate((1-distance(half2(0.5, 0.5), originScreenUV))-0.5);
 			
-			//camAngle = lerp(1, camAngle, len);
-			//o.blindingEffect = lerp(1, o.blindingEffect * 2.5, o.camAngleCamfade.x);
-		//	 #ifndef WASH
-				
 				#if defined(_ALPHATEST_ON) && !SHADER_API_GLES3
 					o.blindingEffect = clamp(0.6/len,1.0,20.0);
 					half endBlind = 1.0;
@@ -393,11 +351,6 @@ v2f vert (appdata v)
 					half endBlind = lerp(1.0, o.blindingEffect, 0.15);
 					o.blindingEffect = lerp(endBlind, o.blindingEffect * 2.2, o.camAngleCamfade.x);	
 				#endif
-			// #else
-			// 	o.blindingEffect = lerp(1, o.blindingEffect * 2.0, o.camAngleCamfade.x);
-			//#endif
-			//o.camAngle = camAngle;
-			//o.viewDir.yzw = objCamPos.xyz;
 		#endif
 
 		#if !defined(PROJECTION_YES) && !defined(VOLUMETRIC_YES)
@@ -407,17 +360,9 @@ v2f vert (appdata v)
 			v.normal = newNormals.xyz;
 		#endif
 
-		//calculate rotations for tangents, cast to half4 first with 0 as w
-		// half4 newTangent = half4(v.tangent.x, v.tangent.y, v.tangent.z, 0);
-		// newTangent = calculateRotations(v, newTangent, 1, oscPanValue, oscTiltValue);
-		// v.tangent = newTangent.xyz;
-
 		#if defined(FIXTURE_SHADOWCAST)
-			//o.pos = UnityObjectToClipPos(v.vertex);
 			o.pos = UnityClipSpaceShadowCasterPos(v.vertex, v.normal);
 			o.pos = UnityApplyLinearShadowBias(o.pos);
-			//o.normal = v.normal;
-			//TRANSFER_SHADOW_CASTER_NORMALOFFSET(o);
 			return o;
 		#endif
 
@@ -440,12 +385,10 @@ v2f vert (appdata v)
 			fixtureState = VRSL_LoadFixtureEmission(fixtureState);
 			fixtureState = VRSL_LoadFixtureIntensityControls(fixtureState);
 			
-			//UNITY_SETUP_INSTANCE_ID(v);
 			UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 			//move verts to clip space
 			o.pos = UnityObjectToClipPos(v.vertex);
 			o.emissionColor = fixtureState.emissionColor;
-			//o.uv = TRANSFORM_TEX(v.uv, _ProjectionMainTex);
 			//get screen space position of verts
 			o.screenPos = ComputeScreenPos(o.pos);
 			//Putting in the vertex position before the transformation seems to somewhat move the projection correctly, but is still incorrect...?
@@ -481,8 +424,6 @@ v2f vert (appdata v)
 				v.vertex = half4(0,0,0,0);
 				o.pos = UnityObjectToClipPos(v.vertex);
 			} 
-
-			//o.normal = v.normal;
 		#endif
 		
 		
@@ -499,18 +440,13 @@ v2f vert (appdata v)
 			fixtureState = VRSL_LoadFixtureGoboSpin(fixtureState);
 			fixtureState = VRSL_LoadFixtureIntensityControls(fixtureState);
 			o.pos = UnityObjectToClipPos(v.vertex);
-			//UNITY_INITIALIZE_OUTPUT(v2f, o);
-			//UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
-		//	o.viewDir = ObjSpaceViewDir(v.vertex);
 			o.screenPos = ComputeScreenPos (o.pos);
-			//o.uvClone = v.uv2;
 			#ifdef _HQ_MODE
 				o.uv2 = TRANSFORM_TEX(v.uv2, _NoiseTexHigh);
 			#else
 				o.uv2 = TRANSFORM_TEX(v.uv2, _NoiseTex);
 			#endif
 			o.uv = TRANSFORM_TEX(v.uv, _LightMainTex);
-			//o.uv = UnityStereoScreenSpaceUVAdjust(uv, sb)
 			COMPUTE_EYEDEPTH(o.screenPos.z);
 			UNITY_TRANSFER_FOG(o,o.vertex);
 			o.worldPos = mul(unity_ObjectToWorld, v.vertex);
@@ -519,14 +455,7 @@ v2f vert (appdata v)
 			o.worldDirection.xyz = o.worldPos.xyz - _WorldSpaceCameraPos;
 			// pack correction factor into direction w component to save space
 			o.worldDirection.w = dot(o.pos, VRSL_CalculateFrustumCorrection());
-			//o.color = v.color;
-			//o.worldPos = mul(unity_ObjectToWorld, v.vertex);
-			//o.objPos = v.vertex;
 			o.objNormal = normalize(v.normal);
-			//o.bitan = bitangent;
-
-			//o.tan = tangent;
-			//o.norm = worldNormal;
 			//GETTING DATA FROM DMX TEXTURE
 			o.intensityStrobeGOBOSpinSpeed = half4(fixtureState.intensity, fixtureState.strobe, fixtureState.goboSpinSpeed, fixtureState.goboSelection);
 			o.intensityStrobeGOBOSpinSpeed.x = isDMX() == 1 ? o.intensityStrobeGOBOSpinSpeed.x : 1.0;
@@ -542,12 +471,6 @@ v2f vert (appdata v)
 			} 
 		#endif
 
-		//Projection Part - Vertex Shader
-		// #if defined(PROJECTION_YES)
-
-
-		// #endif
-		
 		#if !defined(UNITY_PASS_SHADOWCASTER) && !defined(PROJECTION_YES) && !defined(VOLUMETRIC_YES)
 		fixtureState = VRSL_LoadFixtureLightState(fixtureState);
 		
@@ -599,8 +522,6 @@ v2f vert (appdata v)
 				v.vertex = ConeScale(v, v.vertex, _MinimumBeamRadius);
 			#endif
 		#endif
-		//calculate rotations for verts
-		//v.vertex = calculateRotations(v, v.vertex, 0);
 		#if defined(PROJECTION_YES)
 			fixtureState = VRSL_LoadFixtureIntensityControls(fixtureState);
 			fixtureState = VRSL_LoadFixtureEmission(fixtureState);
@@ -636,7 +557,6 @@ v2f vert (appdata v)
 			worldCam.y = unity_CameraToWorld[1][3];
 			worldCam.z = unity_CameraToWorld[2][3];
 			half3 objCamPos = mul(unity_WorldToObject, float4(worldCam, 1)).xyz;
-			//objCamPos = InvertVolumetricRotations(float4(objCamPos,1)).xyz;
 			half len = length(objCamPos.xy);
 			len *= len;
 			o.camAngleLen.y = len;
@@ -645,17 +565,12 @@ v2f vert (appdata v)
 			o.camAngleLen.x = saturate((1-distance(half2(0.5, 0.5), originScreenUV))-0.5);
 			o.camAngleLen.x = pow(o.camAngleLen.x, 0.5);
 			o.blindingEffect = clamp(0.6/len,1.0,8.0);
-			//camAngle = lerp(1, camAngle, len);
-
-			
 			#ifndef WASH
 				half endBlind = lerp(1.0, o.blindingEffect, 0.35);
 				o.blindingEffect = lerp(endBlind, o.blindingEffect * 2.2, o.camAngleLen.x);
 			#else
 				o.blindingEffect = lerp(1, o.blindingEffect * 2.0, o.camAngleLen.x);
 			#endif
-			//o.camAngle = camAngle;
-			//o.viewDir.yzw = objCamPos.xyz;
 		#endif
 
 		#if !defined(PROJECTION_YES) && !defined(VOLUMETRIC_YES)
@@ -673,7 +588,6 @@ v2f vert (appdata v)
 
 		#if defined(PROJECTION_YES) 
 			
-			//UNITY_SETUP_INSTANCE_ID(v);
 			UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 			o.projectionRotationSinCos = CalculateProjectionRotationSinCos(0.0, 0.0);
 			half projectionChooser = round(instancedGOBOSelection());
@@ -692,10 +606,7 @@ v2f vert (appdata v)
 			o.ray = UnityObjectToViewPos(v.vertex).xyz;
 			//invert z axis so that it projects from camera properly
 			o.ray *= half3(1,1,-1);
-			//saving vertex color incase needing to perform rotation calculation in fragment shader
 			o.color = v.color;
-			//o.sector.x = (half)sector;
-
 			half3 worldPos = mul(unity_ObjectToWorld, v.vertex).xyz;
 
 			//For Mirror Depth Correction
@@ -715,8 +626,6 @@ v2f vert (appdata v)
 					o.pos = UnityObjectToClipPos(v.vertex);
 				}
 			#endif		
-
-			//o.normal = v.normal;
 		#endif
 		
 		
@@ -741,7 +650,6 @@ v2f vert (appdata v)
 				o.uv2 = TRANSFORM_TEX(v.uv2, _NoiseTex);
 			#endif
 			o.uv = TRANSFORM_TEX(v.uv, _LightMainTex);
-			//o.uv = UnityStereoScreenSpaceUVAdjust(uv, sb)
 			#if _USE_DEPTH_LIGHT
 				COMPUTE_EYEDEPTH(o.screenPos.z);
 			#endif
@@ -757,7 +665,6 @@ v2f vert (appdata v)
 				o.worldDirection = half4(0,0,0,0);
 			#endif
 			o.color = v.color;
-			//o.worldPos = mul(unity_ObjectToWorld, v.vertex);
 			o.objPos = v.vertex;
 			o.objNormal = v.normal;
 			o.stripeInfo = GetStripeInfo(instancedGOBOSelection());
@@ -848,9 +755,6 @@ fixed4 frag (v2f i) : SV_Target
 	{
 		SHADOW_CASTER_FRAGMENT(i);
 	}
-
-	// #elif defined (VOLUMETRIC_YES)
-	// 	return VolumetricLightingBRDF(i);
 	#elif defined (PROJECTION_YES)
 		return ProjectionFrag(i);
 

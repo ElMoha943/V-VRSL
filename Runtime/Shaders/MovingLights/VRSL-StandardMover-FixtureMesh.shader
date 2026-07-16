@@ -68,9 +68,6 @@ Shader "VRSL/Standard Mover/Fixture"
 #pragma multi_compile_fwdbase
 #pragma multi_compile_instancing
 #pragma shader_feature_local _LIGHTING_MODEL
-//REMOVE THIS WHEN FINISHED DEBUGGING
-//#pragma target 4.5
-
 #define GEOMETRY
 
 #ifndef UNITY_PASS_FORWARDBASE

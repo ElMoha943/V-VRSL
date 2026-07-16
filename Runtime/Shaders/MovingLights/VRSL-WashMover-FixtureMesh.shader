@@ -67,9 +67,6 @@ Shader "VRSL/Wash Mover/Fixture"
 #pragma multi_compile_fwdbase
 #pragma multi_compile_instancing
 #pragma shader_feature_local _LIGHTING_MODEL
-//REMOVE THIS WHEN FINISHED DEBUGGING
-//#pragma target 4.5
-
 #define GEOMETRY
 
 #ifndef UNITY_PASS_FORWARDBASE
@@ -162,7 +159,6 @@ Shader "VRSL/Wash Mover/Fixture"
 		    float4 color : COLOR;
 			UNITY_VERTEX_INPUT_INSTANCE_ID
 			UNITY_VERTEX_OUTPUT_STEREO
-			//SHADOW_COORDS(11)
 		};
 		#include "../Shared/VRSL-Defines.cginc"
 		#include "../Shared/VRSL-DMXFunctions.cginc"

@@ -3,16 +3,12 @@ Shader "VRSL/AudioLink/Wash Mover/Projection"
 
 	Properties
 	{
-		//[Header (INSTANCED PROPERITES)]
 		 [HideInInspector][Toggle] _PanInvert ("Invert Mover Pan", Int) = 0
 		 [HideInInspector][Toggle] _TiltInvert ("Invert Mover Tilt", Int) = 0
 		_RenderTextureMultiplier("Render Texture Multiplier", Range(1,10)) = 1
-		 //[HideInInspector]_FinalStrobeFreq ("Final Strobe Frequency", Float) = 0
-		 //[HideInInspector]_NewTimer("New Timer From Udon For Strobe", Float) = 0
 		 [HideInInspector]_FixtureBaseRotationY("Mover Pan Offset (Blue + Green)", Range(-540,540)) = 0
 		 [HideInInspector]_FixtureRotationX("Mover Tilt Offset (Blue)", Range(-180,180)) = 0
 		 [HideInInspector]_ProjectionSelection ("GOBO Selection", Range(1,6)) = 1
-		 //[HideInInspector]_StrobeFreq("Strobe Frequency", Range(0,25)) = 1
 		 [HideInInspector][Toggle] _EnableSpin("Enable Auto Spinning", Float) = 0
 
 		[Header(Audio Section)]
@@ -39,11 +35,8 @@ Shader "VRSL/AudioLink/Wash Mover/Projection"
 		_ConeWidth("Cone Width", Range(0,5.5)) = 0
 		_ConeLength("Cone Length", Range(1,10)) = 1
 		_ConeSync ("Cone Scale Sync", Range(1,2)) = 1
-		// _BlockLengthX("OSC Block Base Distance X", Float) = 0.019231
-		// _BlockLengthY("OSC Block Base Distance Y", Float) = 0
 
 		[Enum(UnityEngine.Rendering.BlendMode)] _BlendSrc ("Source Blend mode", Float) = 2
-		//[Enum(UnityEngine.Rendering.BlendMode)] _BlendDst ("Destination Blend mode", Float) = 1
 		[Enum(UnityEngine.Rendering.BlendOp)] _BlendOp ("Blend Operation", Float) = 0
 		//[Space(16)]
 
@@ -56,20 +49,11 @@ Shader "VRSL/AudioLink/Wash Mover/Projection"
 
 
 		_FixtureRotationOrigin("Fixture Pivot Origin", Float) = (0, 0.014709, -1.02868, 0)
-		// [Toggle] _UseRawGrid("Use Raw Grid For Light Intensity And Color", Int) = 0
-		// [NoScaleOffset] _OSCGridRenderTextureRAW("OSC Grid Render Texture (RAW Unsmoothed)", 2D) = "white" {}
-		// [NoScaleOffset] _OSCGridRenderTexture("OSC Grid Render Texture (To Control Lights)", 2D) = "white" {}
-		// [NoScaleOffset] _OSCGridStrobeTimer ("OSC Grid Render Texture (For Strobe Timings", 2D) = "white" {}
-		//[Toggle] _EnableAudioReact ("Enable AudioLink Audio React", Int) = 0
-		//[NoScaleOffset] _AudioSpectrum("AudioSpectrum", 2D) = "black" {}
 		_MaxMinPanAngle("Max/Min Pan Angle (-x, x)", Float) = 180
 		_MaxMinTiltAngle("Max/Min Tilt Angle (-y, y)", Float) = 180
 
 		_FixtureMaxIntensity ("Maximum Cone Intensity",Range (0,0.5)) = 0.5
 
-		// [Header(Divide)]
-		// _Divide ("Divide", Range(0, 30)) = 0
-		// _DividePower ("Divide Strength", Range(0, 1)) = 0
 
 		//[Space(24)]
 		//[Header(PROJECTION GOBO SETTINGS)]
@@ -86,15 +70,10 @@ Shader "VRSL/AudioLink/Wash Mover/Projection"
 
 		[NoScaleOffset] _ProjectionMainTex ("Projection Texture GOBO 1", 2D) = "white"{}
 		_ProjectionUVMod ("Projection UV Scale Modifier ", Range(0.01,10)) = 0
-		//[NoScaleOffset] _ProjectionTex2 ("Projection Texture GOBO 2", 2D) = "white"{}
 		_ProjectionUVMod2 ("Projection UV Scale Modifier ", Range(0.01,10)) = 0
-		//[NoScaleOffset] _ProjectionTex3 ("Projection Texture GOBO 3", 2D) = "white"{}
 		_ProjectionUVMod3 ("Projection UV Scale Modifier ", Range(0.01,10)) = 0
-		//[NoScaleOffset] _ProjectionTex4 ("Projection Texture GOBO 4", 2D) = "white"{}
 		_ProjectionUVMod4 ("Projection UV Scale Modifier ", Range(0.01,10)) = 0
-		//[NoScaleOffset] _ProjectionTex5 ("Projection Texture GOBO 5", 2D) = "white"{}
 		_ProjectionUVMod5 ("Projection UV Scale Modifier ", Range(0.01,10)) = 0
-		// [NoScaleOffset] _ProjectionTex6 ("Projection Texture GOBO 6", 2D) = "white"{}
 		_ProjectionUVMod6 ("Projection UV Scale Modifier ", Range(0.01,10)) = 0	
 		_ProjectionUVMod7 ("Projection UV Scale Modifier ", Range(0.01,10)) = 0	
 		_ProjectionUVMod8 ("Projection UV Scale Modifier ", Range(0.01,10)) = 0	
@@ -152,10 +131,8 @@ Shader "VRSL/AudioLink/Wash Mover/Projection"
             #pragma fragment frag
 			#pragma multi_compile_local _ _ALPHATEST_ON
 			#pragma shader_feature_local _MULTISAMPLEDEPTH
-			//#pragma multi_compile_fog
 			#pragma multi_compile_instancing
 			#pragma instancing_options assumeuniformscaling
-			//#pragma multi_compile _DNENABLER_NONE _DNENABLER_USEDNTEXTURE
 			#define PROJECTION_YES //To identify the pass in the vert/frag shaders
 			#define PROJECTION_MOVER
 			#define WASH

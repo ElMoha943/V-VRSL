@@ -61,8 +61,6 @@
                 float depth = VRSL_ProjectionLinear01Depth(sceneZ, direction.w);
                 float3 objectOrigin = mul(unity_ObjectToWorld, float4(0.0,0.0,0.0,1.0) ).xyz;
                 //get object origin in world space.
-                //float3 fragViewPos = float4(i.ray * depth, 1);
-
                 float3 wpos = VRSL_ProjectionWorldPosition(depth, i.ray);
                 float3 projPos = VRSL_ProjectionObjectPosition(wpos);
                 float distanceFromOrigin = length(objectOrigin - wpos);
@@ -72,33 +70,22 @@
                 #endif
                 float UVscale = VRSL_ProjectionReciprocalFalloff(distanceFromOrigin, _ProjectionDistanceFallOff, _ProjectionUVMod, _FeatherOffset);
 
-                //float3 calculatedWorldNormal = getCalculatedWorldNormal(projPos);
-
                 float2 uvCoords = (((float2((projPos.x), projPos.y) * UVscale)));
-                //uvCoords = mul(uvCoords, projPos.z);
                 //Get coordinate plane in object space
 
                 uvCoords.x += _XOffset;
                 uvCoords.y += _YOffset;
                 uvCoords.x *= _ModX;
                 uvCoords.y *= _ModY;
-                //uvCoords = normalize(mul(float4(uvCoords, 0.0, 0.0), unity_ObjectToWorld)).xy;
-
                 clip(uvCoords);
                 //Discard any pixels that are outside of the traditional 0-1 UV bounds.
 
                 float4 tex = tex2D(_ProjectionMainTex, uvCoords); 
-                //tex = float4(tex.x, tex.y, tex.z, pow(tex.w * distanceFromOrigin, -1));
-                //tex = pow(tex * distanceFromOrigin, 1);
-                //calculatedWorldNormal = UnpackNormal(tex2D(_SceneNormals, oldUVcoords));
                 // Create create xy coordinate plane based on object space, make sure it scales based on the 
                 // distance from the intersection
 
                 clip(1.0 - uvCoords);
                 float4 col = tex;
-                 //float4 col = tex * float4(n,1);
-
-                //clip(projPos.z);
                 #ifdef VRSL_AUDIOLINK
                     float strobe = 1.0;
                     col *= audioReaction;

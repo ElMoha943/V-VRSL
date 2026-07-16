@@ -76,11 +76,6 @@
             #endif
 
 
-            // half a = 1.8;
-            // #ifdef WASH
-            //     a = 3.0;
-            // #endif
-            // return result * (clamp(coneWidth, -2.0, 4) + a);
             half conewidthControl = coneWidth/4.25;
             #ifndef WASH
                 return result * lerp(0.325, 1, (conewidthControl));
@@ -116,10 +111,6 @@
                     half gi = i.audioGlobalFinalConeIntensity.y;
                     half fi = i.audioGlobalFinalConeIntensity.z;
                     half coneWidth = i.audioGlobalFinalConeIntensity.w;
-                    // if((all(i.rgbColor <= half4(0.01,0.01,0.01,1)) || i.intensityStrobeWidth.x <= 0.01) && isOSC() == 1)
-                    // {
-                    //     return (0,0,0,0);
-                    // }
                     if(audioReaction <= 0.005 || gi <= 0.005 || fi <= 0.005 || all(emissionTint<= half4(0.005, 0.005, 0.005, 1.0)))
                     {
                         return half4(0,0,0,0);
@@ -144,7 +135,6 @@
                 //CREDIT TO DJ LUKIS FOR MIRROR DEPTH CORRECTION
                 float perspectiveDivide = 1.0f / i.pos.w;
                 float4 depthdirect = i.worldDirection * perspectiveDivide;
-                //float2 altScreenPos = i.screenPos.xy * perspectiveDivide;
 
 
                 float sceneZ = VRSL_SampleProjectionDepth(screenposUV);

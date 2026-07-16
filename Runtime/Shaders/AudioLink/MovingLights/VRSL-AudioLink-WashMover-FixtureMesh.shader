@@ -3,15 +3,10 @@ Shader "VRSL/AudioLink/Standard Mover/Fixture"
 	Properties
 	{
 		[Enum(Legacy, 0, GGX, 1)]_LightingModel("Lighting Model", Int) = 0
-		//[Header (INSTANCED PROPERITES)]
 		 [HideInInspector][Toggle] _PanInvert ("Invert Mover Pan", Int) = 0
 		 [HideInInspector][Toggle] _TiltInvert ("Invert Mover Tilt", Int) = 0
 		_RenderTextureMultiplier("Render Texture Multiplier", Range(1,10)) = 1
 
-		 //[HideInInspector]_FinalStrobeFreq ("Final Strobe Frequency", Float) = 0
-		 //[HideInInspector]_NewTimer("New Timer From Udon For Strobe", Float) = 0
-
-		 //[Toggle] _EnableStrobe ("Enable Strobe", Int) = 0
 		 [HideInInspector]_FixtureBaseRotationY("Mover Pan Offset (Blue + Green)", Range(-540,540)) = 0
 		 [HideInInspector]_FixtureRotationX("Mover Tilt Offset (Blue)", Range(-180,180)) = 0
 		 [HideInInspector]_ProjectionSelection ("GOBO Selection", Range(0,6)) = 0
@@ -28,7 +23,6 @@ Shader "VRSL/AudioLink/Standard Mover/Fixture"
          _AudioSpectrum("AudioSpectrum", 2D) = "black" {}
 		 [Toggle]_UseTraditionalSampling("Use Traditional Texture Sampling", Int) = 0
 
-		//[Header (BASIC CONTROLS)]
 		_FinalIntensity("Final Intensity", Range(0,1)) = 1
 		_GlobalIntensity("Global Intensity", Range(0,1)) = 1
 		_GlobalIntensityBlend("Global Intensity Blend", Range(0,1)) = 1
@@ -48,58 +42,21 @@ Shader "VRSL/AudioLink/Standard Mover/Fixture"
 		 _TextureColorSampleX ("X coordinate to sample the texture from", Range(0,1)) = 0.5
 		 _TextureColorSampleY ("Y coordinate to sample the texture from", Range(0,1)) = 0.5
 
-		// _BlockLengthX("OSC Block Base Distance X", Float) = 0.019231
-		// _BlockLengthY("OSC Block Base Distance Y", Float) = 0
-
-		// [Enum(UnityEngine.Rendering.BlendMode)] _BlendSrc ("Source Blend mode", Float) = 2
-		// [Enum(UnityEngine.Rendering.BlendMode)] _BlendDst ("Destination Blend mode", Float) = 1
-		// [Enum(UnityEngine.Rendering.BlendOp)] _BlendOp ("Blend Operation", Float) = 0
-		//[Space(16)]
-
-		//[Header(MOVER CONTROLS)]
-
-
 		_FixtureRotationOrigin("Fixture Pivot Origin", Float) = (0, 0.014709, -1.02868, 0)
-		// [Toggle] _UseRawGrid("Use Raw Grid For Light Intensity And Color", Int) = 0
-		// [NoScaleOffset] _OSCGridRenderTextureRAW("OSC Grid Render Texture (RAW Unsmoothed)", 2D) = "white" {}
-		// [NoScaleOffset] _OSCGridRenderTexture("OSC Grid Render Texture (To Control Lights)", 2D) = "white" {}
-		// [NoScaleOffset] _OSCGridStrobeTimer ("OSC Grid Render Texture (For Strobe Timings", 2D) = "white" {}
 		_MaxMinPanAngle("Max/Min Pan Angle (-x, x)", Float) = 180
 		_MaxMinTiltAngle("Max/Min Tilt Angle (-y, y)", Float) = 180
 		_FixtureMaxIntensity ("Maximum Cone Intensity",Range (0,0.5)) = 0.5
 	
-		//_Fade ("Fade mod", Range(0, 6)) = 1.5
-
-
 		[Toggle] _EnableThemeColorSampling ("Enable Theme Color Sampling", Int) = 0
 		 _ThemeColorTarget ("Choose Theme Color", Int) = 0
 
-	//	[Space(16)]
-
-
-
-	//	[Toggle] _UseWorldNorm("Use World Normal vs View Normal", Float) = 0
-		//[KeywordEnum(None, UseDNTexture)] _DNEnabler ("Enable Depth Normal Texture", Float) = 0
-	//	_ModX ("Projection UV X Stretch", Range(-2, 2)) = 1
-	//	_ModY ("Projection UV Y Stretch", Range(-2, 2)) = 1
-		
-
-
-		//[Space(48)]
-		//[Header(MAIN)]
 	[Enum(Unity Default, 0, Non Linear, 1)]_LightProbeMethod("Light Probe Sampling", Int) = 0
-		// [Enum(UVs, 0, Triplanar World, 1, Triplanar Object, 2)]_TextureSampleMode("Texture Mode", Int) = 0
-		// _TriplanarFalloff("Triplanar Blend", Range(0.5,1)) = 1
 		_MainTex("Main Texture", 2D) = "white" {}
 	_Color("Color", Color) = (1,1,1,1)
 
-		//[Space(16)]
-//	[Header(NORMALS)]
 	_BumpMap("Normal Map", 2D) = "bump" {}
 	_BumpScale("Normal Scale", Range(-1,1)) = 1
 
-		//[Space(16)]
-	//[Header(METALLIC)]
 	_MetallicGlossMap("Metallic Map", 2D) = "white" {}
 	_Metallic("Metallic", Range(0,1)) = 0
 	_Glossiness("Smoothness", Range(0,1)) = 0
@@ -115,16 +72,6 @@ Shader "VRSL/AudioLink/Standard Mover/Fixture"
 		
 		Tags{ "Queue" = "AlphaTest+1" "RenderType" = "Opaque" }
 
-		// Stencil
-        //     {
-				
-        //         Ref 142
-        //         Comp GEqual
-        //         Pass Replace
-		// 		//ZFail Replace
-
-        //     }
-
 		Pass
 	{
 		Tags{ "LightMode" = "ForwardBase" }
@@ -134,9 +81,6 @@ Shader "VRSL/AudioLink/Standard Mover/Fixture"
 	#pragma multi_compile_fwdbase
 	#pragma multi_compile_instancing
 	#pragma shader_feature_local _LIGHTING_MODEL
-	//REMOVE THIS WHEN FINISHED DEBUGGING
-	//#pragma target 4.5
-
 	#define GEOMETRY
 	#define FIXTURE_EMIT
 	#define VRSL_AUDIOLINK
@@ -179,11 +123,9 @@ Shader "VRSL/AudioLink/Standard Mover/Fixture"
 		#endif
 		float4 color : COLOR;
 		UNITY_VERTEX_INPUT_INSTANCE_ID
-		// SHADOW_COORDS(11)
 		UNITY_VERTEX_OUTPUT_STEREO
 	};
 
-//#include "../Shared/VRSL-AudioLink-Defines.cginc"
 #include "Packages/com.valenvrc.vvrsl/Runtime/Shaders/Shared/VRSL-Defines.cginc"
 #include "../Shared/VRSL-AudioLink-Functions.cginc"
 #include "Packages/com.valenvrc.vvrsl/Runtime/Shaders/Shared/VRSL-LightingFunctions.cginc"
@@ -192,7 +134,6 @@ Shader "VRSL/AudioLink/Standard Mover/Fixture"
 
 	ENDCG
 	}
-	//UsePass "Legacy Shaders/VertexLit/SHADOWCASTER"
 	Pass
         {
             Tags {"LightMode"="ShadowCaster"}
