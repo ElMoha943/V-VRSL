@@ -143,10 +143,6 @@ Shader "VRSL/AudioLink/Standard Mover/Fixture"
 	#ifndef UNITY_PASS_FORWARDBASE
 	#define UNITY_PASS_FORWARDBASE
 	#endif
-	//DEBUGGING BUFFER
-	RWStructuredBuffer<float> buffer : register(u1);
-	RWStructuredBuffer<float4> buffer4 : register(u2);
-
 	#include "UnityCG.cginc"
 	#include "Lighting.cginc"
 	#include "AutoLight.cginc"

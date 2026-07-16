@@ -1,5 +1,5 @@
 ﻿//Since this is shared, and the output structs/input structs are all slightly differently named in each shader template, just handle them all here.
-#define IF(a, b, c) lerp(b, c, step((fixed) (a), 0));
+#include "VRSL-FixtureSurfaceHelpers.cginc"
 float4 CustomStandardLightingBRDF(
     #if defined(GEOMETRY)
         v2f i
@@ -139,68 +139,26 @@ float4 CustomStandardLightingBRDF(
         #ifdef VRSL_DMX
             if(((i.uv.x) == 0.0 && (i.uv.y) == 0.0 || _PureEmissiveToggle == 1))
             {
-                float strobe = IF(isStrobe() == 1, i.intensityStrobe.y, 1);
-                float4 emission = IF(isDMX() == 1, (getEmissionColor() * i.rgbColor) * strobe, getEmissionColor() * strobe);
-
-                emission *=(_FixtureMaxIntensity)*1500;
-                emission = clamp(emission, 0, _LensMaxBrightness*100);
-                half limit = 0.025;
-                if((all(i.rgbColor >=half4(limit,limit,limit,1)) || i.intensityStrobe.x >= limit) && isDMX() == 1)
-                {
-                    float4 potentialBrightness = emission * _FixutreIntensityMultiplier; 
-                    emission = lerp(emission, potentialBrightness, pow(i.intensityStrobe.x, 1.9));          
-                }
-                else
-                {
-                    if(isDMX() == 1)
-                    {
-                        emission = half4(0,0,0,1.0f);                   
-                    }
-                }
-                emission = lerp((half4(0,0,0,emission.w)), emission, getGlobalIntensity());
-                emission = lerp((half4(0,0,0,emission.w)), emission, getFinalIntensity());
-                emission = emission * _UniversalIntensity;   
-                lighting += emission;
+                lighting += VRSL_GetDMXFixtureEmission(i.rgbColor, i.intensityStrobe.x, i.intensityStrobe.y);
 
                 return float4(lighting, al);
             }
             else
             {
-                lighting += (tex2D(_DecorativeEmissiveMap, i.uv) * _DecorativeEmissiveMapStrength);
+                lighting += VRSL_GetDecorativeFixtureEmission(i.uv);
                 return float4(lighting, al);
             }
         #endif
         #ifdef VRSL_AUDIOLINK
             if(((i.uv.x) == 0.0 && (i.uv.y) == 0.0 || _PureEmissiveToggle == 1))
             {
-                float4 emission = getEmissionColor();
-                float intensities = getGlobalIntensity() * getFinalIntensity() * _UniversalIntensity;
-                emission *=(_FixtureMaxIntensity)*1500;
-                emission = clamp(emission, 0, (_LensMaxBrightness*100 * intensities));
-                half limit = 0.025;
-
-                #ifndef RAW
-                    emission = lerp((half4(0,0,0,emission.w)), emission, GetAudioReactAmplitude());
-                #endif
-                emission = lerp((half4(0,0,0,emission.w)), emission, intensities);
-
-                #ifdef WASH
-                emission = i.uv1.y > 0.0 ? saturate(emission) - 0.25 : emission;
-                #endif
-                lighting = emission;
-                
-                float lightingAVG = (lighting.x + lighting.y + lighting.z)/3;
-                #ifdef RAW
-                    lighting = lerp(lighting,float3(lightingAVG, lightingAVG, lightingAVG), pow(_Saturation,2));
-                #else
-                    lighting = lerp(lighting,float3(lightingAVG, lightingAVG, lightingAVG), pow(_Saturation,1));
-                #endif
+                lighting = VRSL_GetMovingAudioFixtureEmission(i.uv1.y);
 
                 return float4(lighting, al);
             }
             else
             {
-                lighting += (tex2D(_DecorativeEmissiveMap, i.uv) * _DecorativeEmissiveMapStrength);
+                lighting += VRSL_GetDecorativeFixtureEmission(i.uv);
                 return float4(lighting, al);
             }
         #endif

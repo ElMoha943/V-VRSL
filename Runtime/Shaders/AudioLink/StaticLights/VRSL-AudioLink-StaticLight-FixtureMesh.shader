@@ -76,6 +76,7 @@ Shader "VRSL/AudioLink/Standard Static/Fixture"
          #include "Packages/com.valenvrc.vvrsl/Runtime/Shaders/Shared/VRSL-Defines.cginc"
          half _CurveMod;
          #include "../Shared/VRSL-AudioLink-Functions.cginc"
+         #include "Packages/com.valenvrc.vvrsl/Runtime/Shaders/Shared/VRSL-FixtureSurfaceHelpers.cginc"
 
 
         void surf (Input IN, inout SurfaceOutputStandard o)
@@ -90,9 +91,7 @@ Shader "VRSL/AudioLink/Standard Static/Fixture"
             e = clamp(e, half4(0,0,0,1), half4(_FixtureMaxIntensity*2,_FixtureMaxIntensity*2,_FixtureMaxIntensity*2,1));
             e *= tex2D(_EmissionMask, IN.uv_MainTex).r;
             e*= _FixutreIntensityMultiplier;
-            o.Emission = (e.rgb * _FixtureMaxIntensity) * GetAudioReactAmplitude();
-            o.Emission = (o.Emission * getGlobalIntensity()) * getFinalIntensity();
-            o.Emission = o.Emission * _UniversalIntensity;
+            o.Emission = VRSL_ApplyAudioFixtureControls(e.rgb * _FixtureMaxIntensity);
             // Metallic and smoothness come from slider variables
             o.Metallic = _Metallic;
             o.Smoothness = _Glossiness;
