@@ -337,11 +337,11 @@ v2f vert (appdata v)
 	UNITY_INITIALIZE_OUTPUT(v2f, o); //DON'T INITIALIZE OR IT WILL BREAK PROJECTION
 	UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
     UNITY_TRANSFER_INSTANCE_ID(v, o);
-	VRSLFixtureState fixtureState;
+	VRSLFixtureState fixtureState = VRSL_CreateFixtureState();
 	
 	////////////////////////////////////////START DMX VERTEX//////////////////////////////////////////////////////////////////////
 	#ifdef VRSL_DMX
-		VRSL_LoadFixtureTransformState(fixtureState);
+		fixtureState = VRSL_LoadFixtureTransformState(fixtureState);
 		uint dmx = fixtureState.channel;
 		half oscConeWidth = fixtureState.coneWidth;
 		half oscPanValue = fixtureState.pan;
@@ -436,10 +436,10 @@ v2f vert (appdata v)
 		#endif
 
 		#if defined(PROJECTION_YES) 
-			VRSL_LoadFixtureLightState(fixtureState);
-			VRSL_LoadFixtureGoboSelection(fixtureState);
-			VRSL_LoadFixtureEmission(fixtureState);
-			VRSL_LoadFixtureIntensityControls(fixtureState);
+			fixtureState = VRSL_LoadFixtureLightState(fixtureState);
+			fixtureState = VRSL_LoadFixtureGoboSelection(fixtureState);
+			fixtureState = VRSL_LoadFixtureEmission(fixtureState);
+			fixtureState = VRSL_LoadFixtureIntensityControls(fixtureState);
 			
 			//UNITY_SETUP_INSTANCE_ID(v);
 			UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
@@ -471,7 +471,7 @@ v2f vert (appdata v)
 			#ifdef WASH
 				fixtureState.goboSpinSpeed = 0.0;
 			#else
-				VRSL_LoadFixtureGoboSpin(fixtureState);
+				fixtureState = VRSL_LoadFixtureGoboSpin(fixtureState);
 			#endif
 			o.goboPlusSpinPanTilt = half4(fixtureState.goboSelection, fixtureState.goboSpinSpeed, fixtureState.pan, fixtureState.tilt);
 			o.rgbColor = fixtureState.color;
@@ -493,10 +493,10 @@ v2f vert (appdata v)
 
 		//Volumetric Part - Vertex Shader
 		#if defined(VOLUMETRIC_YES)
-			VRSL_LoadFixtureLightState(fixtureState);
-			VRSL_LoadFixtureGoboSelection(fixtureState);
-			VRSL_LoadFixtureGoboSpin(fixtureState);
-			VRSL_LoadFixtureIntensityControls(fixtureState);
+			fixtureState = VRSL_LoadFixtureLightState(fixtureState);
+			fixtureState = VRSL_LoadFixtureGoboSelection(fixtureState);
+			fixtureState = VRSL_LoadFixtureGoboSpin(fixtureState);
+			fixtureState = VRSL_LoadFixtureIntensityControls(fixtureState);
 			o.pos = UnityObjectToClipPos(v.vertex);
 			//UNITY_INITIALIZE_OUTPUT(v2f, o);
 			//UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
@@ -548,7 +548,7 @@ v2f vert (appdata v)
 		// #endif
 		
 		#if !defined(UNITY_PASS_SHADOWCASTER) && !defined(PROJECTION_YES) && !defined(VOLUMETRIC_YES)
-		VRSL_LoadFixtureLightState(fixtureState);
+		fixtureState = VRSL_LoadFixtureLightState(fixtureState);
 		
 		o.color = v.color;
 		o.worldPos = mul(unity_ObjectToWorld, v.vertex);
@@ -587,7 +587,7 @@ v2f vert (appdata v)
 	////////////////////////////////////////START AUDIOLINK VERTEX//////////////////////////////////////////////////////////////////////
 
 	#ifdef VRSL_AUDIOLINK
-		VRSL_LoadFixtureTransformState(fixtureState);
+		fixtureState = VRSL_LoadFixtureTransformState(fixtureState);
 		v.vertex = CalculateConeWidth(v, v.vertex, fixtureState.coneWidth);
 		v.vertex = CalculateProjectionScaleRange(v, v.vertex, _ProjectionRange);
 
@@ -601,13 +601,13 @@ v2f vert (appdata v)
 		//calculate rotations for verts
 		//v.vertex = calculateRotations(v, v.vertex, 0);
 		#if defined(PROJECTION_YES)
-			VRSL_LoadFixtureIntensityControls(fixtureState);
-			VRSL_LoadFixtureEmission(fixtureState);
+			fixtureState = VRSL_LoadFixtureIntensityControls(fixtureState);
+			fixtureState = VRSL_LoadFixtureEmission(fixtureState);
 			#ifdef RAW
 				o.globalFinalIntensity.x = fixtureState.globalIntensity;
 				o.globalFinalIntensity.y = fixtureState.finalIntensity;
 			#else
-				VRSL_LoadFixtureAudioState(fixtureState);
+				fixtureState = VRSL_LoadFixtureAudioState(fixtureState);
 				o.audioGlobalFinalConeIntensity.x = fixtureState.audioAmplitude;
 				o.audioGlobalFinalConeIntensity.y = fixtureState.globalIntensity;
 				o.audioGlobalFinalConeIntensity.z = fixtureState.finalIntensity;
@@ -617,13 +617,13 @@ v2f vert (appdata v)
 			o.emissionColor = fixtureState.emissionColor;
 		#endif
 		#if defined(VOLUMETRIC_YES)
-			VRSL_LoadFixtureIntensityControls(fixtureState);
-			VRSL_LoadFixtureEmission(fixtureState);
+			fixtureState = VRSL_LoadFixtureIntensityControls(fixtureState);
+			fixtureState = VRSL_LoadFixtureEmission(fixtureState);
 			#ifdef RAW
 				o.globalFinalIntensity.x = fixtureState.globalIntensity;
 				o.globalFinalIntensity.y = fixtureState.finalIntensity;
 			#else
-				VRSL_LoadFixtureAudioState(fixtureState);
+				fixtureState = VRSL_LoadFixtureAudioState(fixtureState);
 				o.audioGlobalFinalIntensity.x = fixtureState.audioAmplitude;
 				o.audioGlobalFinalIntensity.y = fixtureState.globalIntensity;
 				o.audioGlobalFinalIntensity.z = fixtureState.finalIntensity;

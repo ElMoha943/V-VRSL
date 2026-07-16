@@ -20,56 +20,83 @@ struct VRSLFixtureState
     half4 emissionColor;
 };
 
+VRSLFixtureState VRSL_CreateFixtureState()
+{
+    VRSLFixtureState state;
+    state.channel = 0;
+    state.pan = 0.0;
+    state.tilt = 0.0;
+    state.coneWidth = 0.0;
+    state.intensity = 1.0;
+    state.strobe = 1.0;
+    state.goboSelection = 0.0;
+    state.goboSpinSpeed = 0.0;
+    state.audioAmplitude = 1.0;
+    state.globalIntensity = 1.0;
+    state.finalIntensity = 1.0;
+    state.color = half4(1.0, 1.0, 1.0, 1.0);
+    state.emissionColor = half4(1.0, 1.0, 1.0, 1.0);
+    return state;
+}
+
 #ifdef VRSL_DMX
-void VRSL_LoadFixtureTransformState(inout VRSLFixtureState state)
+VRSLFixtureState VRSL_LoadFixtureTransformState(VRSLFixtureState state)
 {
     state.channel = getDMXChannel();
     state.coneWidth = getDMXConeWidth(state.channel);
     state.pan = GetPanValue(state.channel);
     state.tilt = GetTiltValue(state.channel);
+    return state;
 }
 
-void VRSL_LoadFixtureLightState(inout VRSLFixtureState state)
+VRSLFixtureState VRSL_LoadFixtureLightState(VRSLFixtureState state)
 {
     state.intensity = GetDMXIntensity(state.channel, 1.0);
     state.strobe = GetStrobeOutput(state.channel);
     state.color = GetDMXColor(state.channel);
+    return state;
 }
 
-void VRSL_LoadFixtureGoboSelection(inout VRSLFixtureState state)
+VRSLFixtureState VRSL_LoadFixtureGoboSelection(VRSLFixtureState state)
 {
     state.goboSelection = getDMXGoboSelection(state.channel);
+    return state;
 }
 
-void VRSL_LoadFixtureGoboSpin(inout VRSLFixtureState state)
+VRSLFixtureState VRSL_LoadFixtureGoboSpin(VRSLFixtureState state)
 {
     state.goboSpinSpeed = getGoboSpinSpeed(state.channel);
+    return state;
 }
 #endif
 
 #ifdef VRSL_AUDIOLINK
-void VRSL_LoadFixtureTransformState(inout VRSLFixtureState state)
+VRSLFixtureState VRSL_LoadFixtureTransformState(VRSLFixtureState state)
 {
     state.coneWidth = getConeWidth();
+    return state;
 }
 
 #ifndef RAW
-void VRSL_LoadFixtureAudioState(inout VRSLFixtureState state)
+VRSLFixtureState VRSL_LoadFixtureAudioState(VRSLFixtureState state)
 {
     state.audioAmplitude = GetAudioReactAmplitude();
+    return state;
 }
 #endif
 #endif
 
-void VRSL_LoadFixtureIntensityControls(inout VRSLFixtureState state)
+VRSLFixtureState VRSL_LoadFixtureIntensityControls(VRSLFixtureState state)
 {
     state.globalIntensity = getGlobalIntensity();
     state.finalIntensity = getFinalIntensity();
+    return state;
 }
 
-void VRSL_LoadFixtureEmission(inout VRSLFixtureState state)
+VRSLFixtureState VRSL_LoadFixtureEmission(VRSLFixtureState state)
 {
     state.emissionColor = getEmissionColor();
+    return state;
 }
 
 #endif
