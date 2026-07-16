@@ -205,8 +205,9 @@ Shader "VRSL/Standard Mover/Projection"
                  float4 screenPos : TEXCOORD4;
 				 float4 color : COLOR;
 				 float4 worldDirection : TEXCOORD6;
-				 float3 intensityStrobeWidth : TEXCOORD9;
-				 float4 goboPlusSpinPanTilt : TEXCOORD11;
+				 float4 intensityStrobeWidth : TEXCOORD9;
+				 half4 projectionRotationSinCos : TEXCOORD10;
+				 half2 projectionUVRotationSinCos : TEXCOORD11;
 				 float4 rgbColor : TEXCOORD12;
 				 float4 emissionColor : TEXCOORD13;
 				 UNITY_VERTEX_INPUT_INSTANCE_ID

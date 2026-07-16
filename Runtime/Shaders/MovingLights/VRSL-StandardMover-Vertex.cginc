@@ -400,10 +400,12 @@ v2f vert (appdata v)
 			//o.viewDir.yzw = objCamPos.xyz;
 		#endif
 
-		//calculate rotations for normals, cast to half4 first with 0 as w
-		half4 newNormals = half4(v.normal.x, v.normal.y, v.normal.z, 0);
-		newNormals = calculateRotations(v, newNormals, 1, oscPanValue, oscTiltValue);
-		v.normal = newNormals.xyz;
+		#if !defined(PROJECTION_YES) && !defined(VOLUMETRIC_YES)
+			//calculate rotations for normals, cast to half4 first with 0 as w
+			half4 newNormals = half4(v.normal.x, v.normal.y, v.normal.z, 0);
+			newNormals = calculateRotations(v, newNormals, 1, oscPanValue, oscTiltValue);
+			v.normal = newNormals.xyz;
+		#endif
 
 		//calculate rotations for tangents, cast to half4 first with 0 as w
 		// half4 newTangent = half4(v.tangent.x, v.tangent.y, v.tangent.z, 0);
@@ -420,7 +422,7 @@ v2f vert (appdata v)
 		#endif
 
 		//original surface shader related code
-		#if !defined(VOLUMETRIC_YES) && !defined(FIXTURE_SHADOWCAST)
+		#if !defined(PROJECTION_YES) && !defined(VOLUMETRIC_YES) && !defined(FIXTURE_SHADOWCAST)
 			half3 worldNormal = UnityObjectToWorldNormal(v.normal);
 			half3 tangent = UnityObjectToWorldDir(v.tangent);
 			half3 bitangent = cross(tangent, worldNormal);
@@ -459,13 +461,20 @@ v2f vert (appdata v)
 			// pack correction factor into direction w component to save space
 			o.worldDirection.w = dot(o.pos, VRSL_CalculateFrustumCorrection());
 			//GET DMX/DMX VALUES
-			o.intensityStrobeWidth = half3(fixtureState.intensity, fixtureState.strobe, fixtureState.coneWidth);
+			o.intensityStrobeWidth = half4(fixtureState.intensity, fixtureState.strobe, fixtureState.coneWidth, fixtureState.goboSelection);
 			#ifdef WASH
 				fixtureState.goboSpinSpeed = 0.0;
 			#else
 				fixtureState = VRSL_LoadFixtureGoboSpin(fixtureState);
 			#endif
-			o.goboPlusSpinPanTilt = half4(fixtureState.goboSelection, fixtureState.goboSpinSpeed, fixtureState.pan, fixtureState.tilt);
+			o.projectionRotationSinCos = CalculateProjectionRotationSinCos(fixtureState.pan, fixtureState.tilt);
+			half projectionChooser = isDMX() == 1 ? round(fixtureState.goboSelection) : round(instancedGOBOSelection());
+			half projectionUVAngle = _ProjectionRotation;
+			if(isGOBOSpin() == 1 && projectionChooser > 1.0)
+			{
+				projectionUVAngle = degrees(fixtureState.goboSpinSpeed);
+			}
+			o.projectionUVRotationSinCos = CalculateProjectionUVRotationSinCos(projectionUVAngle);
 			o.rgbColor = fixtureState.color;
 			if(((all(o.rgbColor <= half4(0.01,0.01,0.01,1)) || o.intensityStrobeWidth.x <= 0.01) && isDMX() == 1) || fixtureState.globalIntensity <= 0.005 || fixtureState.finalIntensity <= 0.005 || all(o.emissionColor <= half4(0.005, 0.005, 0.005, 1.0)))
 			{
@@ -649,20 +658,20 @@ v2f vert (appdata v)
 			//o.viewDir.yzw = objCamPos.xyz;
 		#endif
 
-		//calculate rotations for normals, cast to half4 first with 0 as w
-		half4 newNormals = half4(v.normal.x, v.normal.y, v.normal.z, 0);
-		//newNormals = calculateRotations(v, newNormals, 1);
-		v.normal = newNormals.xyz;
+		#if !defined(PROJECTION_YES) && !defined(VOLUMETRIC_YES)
+			//calculate rotations for normals, cast to half4 first with 0 as w
+			half4 newNormals = half4(v.normal.x, v.normal.y, v.normal.z, 0);
+			v.normal = newNormals.xyz;
 
-		//calculate rotations for tangents, cast to half4 first with 0 as w
-		half4 newTangent = half4(v.tangent.x, v.tangent.y, v.tangent.z, 0);
-		//newTangent = calculateRotations(v, newTangent, 1);
-		v.tangent = newTangent.xyz;
+			//calculate rotations for tangents, cast to half4 first with 0 as w
+			half4 newTangent = half4(v.tangent.x, v.tangent.y, v.tangent.z, 0);
+			v.tangent = newTangent.xyz;
 
-		//original surface shader related code
-		half3 worldNormal = UnityObjectToWorldNormal(v.normal);
-		half3 tangent = UnityObjectToWorldDir(v.tangent);
-		half3 bitangent = cross(tangent, worldNormal);
+			//original surface shader related code
+			half3 worldNormal = UnityObjectToWorldNormal(v.normal);
+			half3 tangent = UnityObjectToWorldDir(v.tangent);
+			half3 bitangent = cross(tangent, worldNormal);
+		#endif
 
 
 		#if !defined(PROJECTION_YES) && !defined(VOLUMETRIC_YES)
@@ -674,6 +683,15 @@ v2f vert (appdata v)
 			
 			//UNITY_SETUP_INSTANCE_ID(v);
 			UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
+			o.projectionRotationSinCos = CalculateProjectionRotationSinCos(0.0, 0.0);
+			half projectionChooser = round(instancedGOBOSelection());
+			half projectionUVAngle = _ProjectionRotation;
+			if(isGOBOSpin() == 1 && projectionChooser > 1.0)
+			{
+				half goboSpinSpeed = checkPanInvertY() == 1 ? -getGoboSpinSpeed() : getGoboSpinSpeed();
+				projectionUVAngle = _Time.w * (10.0 * goboSpinSpeed);
+			}
+			o.projectionUVRotationSinCos = CalculateProjectionUVRotationSinCos(projectionUVAngle);
 			//move verts to clip space
 			o.pos = UnityObjectToClipPos(v.vertex);
 			//get screen space position of verts
@@ -751,7 +769,7 @@ v2f vert (appdata v)
 			o.objPos = v.vertex;
 			o.objNormal = v.normal;
 			o.stripeInfo = GetStripeInfo(instancedGOBOSelection());
-			o.norm = worldNormal;
+			o.norm = UnityObjectToWorldNormal(v.normal);
 			#ifdef RAW
 				if(o.globalFinalIntensity.x <= 0.005 || o.globalFinalIntensity.y <= 0.005 || all(o.emissionColor.xyz <= half4(0.005, 0.005, 0.005, 1.0)))
 				{

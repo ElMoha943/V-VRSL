@@ -189,6 +189,8 @@ Shader "VRSL/AudioLink/Standard Mover/Projection"
 				 float4 color : COLOR;
 				 float4 worldDirection : TEXCOORD6;
 				 float4 emissionColor : TEXCOORD9;
+				 half4 projectionRotationSinCos : TEXCOORD10;
+				 half2 projectionUVRotationSinCos : TEXCOORD11;
 				 UNITY_VERTEX_INPUT_INSTANCE_ID
 				 UNITY_VERTEX_OUTPUT_STEREO
              };

@@ -34,4 +34,47 @@ inline float3 VRSL_ProjectionObjectPosition(float3 worldPosition)
     return mul(unity_WorldToObject, float4(worldPosition, 1.0)).xyz;
 }
 
+inline half3 VRSL_RotateProjectionPosition(half3 position, half3 origin, half4 rotationSinCos)
+{
+    position -= origin;
+
+    half panSin = rotationSinCos.x;
+    half panCos = rotationSinCos.y;
+    half tiltSin = rotationSinCos.z;
+    half tiltCos = rotationSinCos.w;
+
+    half rotatedX = panCos * position.x + panSin * position.y;
+    half rotatedY = -panSin * position.x + panCos * position.y;
+    half rotatedZ = position.z;
+
+    position.x = rotatedX;
+    position.y = tiltCos * rotatedY + tiltSin * rotatedZ;
+    position.z = -tiltSin * rotatedY + tiltCos * rotatedZ;
+    return position + origin;
+}
+
+inline half2 VRSL_RotateProjectionUV(half2 uv, half2 rotationSinCos)
+{
+    uv -= half2(0.5, 0.5);
+    uv = mul(uv, half2x2(
+        rotationSinCos.y, -rotationSinCos.x,
+        rotationSinCos.x, rotationSinCos.y));
+    return uv + half2(0.5, 0.5);
+}
+
+inline float VRSL_ProjectionFadeMultiplier(float uvDistance, float fadeScale, float fadeCurve)
+{
+    return 1.0 - saturate(pow(uvDistance * fadeScale, fadeCurve));
+}
+
+inline float VRSL_ProjectionReciprocalFalloff(float distanceFromOrigin, float constantTerm, float linearTerm, float quadraticTerm)
+{
+    return rcp(constantTerm + linearTerm * distanceFromOrigin + quadraticTerm * distanceFromOrigin * distanceFromOrigin);
+}
+
+inline float VRSL_ProjectionDistanceFadeMultiplier(float distanceFromOrigin, float fadePosition)
+{
+    return 1.0 - smoothstep(distanceFromOrigin, 0.0, fadePosition);
+}
+
 #endif

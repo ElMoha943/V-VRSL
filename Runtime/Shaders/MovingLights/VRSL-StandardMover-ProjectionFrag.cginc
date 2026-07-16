@@ -1,10 +1,8 @@
 #include "../Shared/VRSL-RenderHelpers.cginc"
 #include "../Shared/VRSL-ProjectionHelpers.cginc"
 
-#define IF(a, b, c) lerp(b, c, step((fixed) (a), 0));
-
 //Huge, huge thanks and shoutout to Uncomfy on the VRC Shader Discord for helping me figure this out <3
-        half4 InvertRotations (half4 input, half panValue, half tiltValue)
+        half4 CalculateProjectionRotationSinCos(half panValue, half tiltValue)
         {
             half sX, cX, sY, cY;
 
@@ -16,24 +14,10 @@
             #endif
 
             sincos(angleY, sY, cY);
-            half4x4 rotateYMatrix = half4x4(cY, sY, 0, 0,
-                -sY, cY, 0, 0,
-                0, 0, 1, 0,
-                0, 0, 0, 1);
-            half4 BaseAndFixturePos = input;
-
-            	//INVERSION CHECK
-            rotateYMatrix = IF(checkPanInvertY() == 1, transpose(rotateYMatrix), rotateYMatrix);
-
-            //half4 localRotY = mul(rotateYMatrix, BaseAndFixturePos);
-            //LOCALROTY IS NEW ROTATION
-
+            sY = checkPanInvertY() == 1 ? -sY : sY;
 
             half tiltOffset = 90.0;
-            tiltOffset = IF(checkTiltInvertZ() == 1, -tiltOffset, tiltOffset);
-            //set new origin to do transform
-            half4 newOrigin = input.w * _FixtureRotationOrigin;
-            input.xyz -= newOrigin;
+            tiltOffset = checkTiltInvertZ() == 1 ? -tiltOffset : tiltOffset;
 
             #ifdef VRSL_DMX
                 half angleX = radians(getOffsetX() + (tiltValue + tiltOffset));
@@ -42,38 +26,17 @@
                 half angleX = radians(0 + (tiltOffset));
             #endif
             sincos(angleX, sX, cX);
+            sX = checkTiltInvertZ() == 1 ? -sX : sX;
 
-            half4x4 rotateXMatrix = half4x4(1, 0, 0, 0,
-                0, cX, sX, 0,
-                0, -sX, cX, 0,
-                0, 0, 0, 1);
-
-            //half4 fixtureVertexPos = input;
-
-            	//INVERSION CHECK
-            rotateXMatrix = IF(checkTiltInvertZ() == 1, transpose(rotateXMatrix), rotateXMatrix);
-            //half4 localRotX = mul(rotateXMatrix, fixtureVertexPos);
-
-            half4x4 rotateXYMatrix = mul(rotateXMatrix, rotateYMatrix);
-            half4 localRotXY = mul(rotateXYMatrix, input);
-
-            input.xyz = localRotXY;
-            input.xyz += newOrigin;
-            return input;
+            return half4(sY, cY, sX, cX);
         }
 
-        half2 RotateUV(half2 input, half angle)
+        half2 CalculateProjectionUVRotationSinCos(half angle)
         {
-            half2 newOrigin = half2(0.5, 0.5);
-            input -= newOrigin;
             half sinAngle;
             half cosAngle;
             sincos(radians(angle), sinAngle, cosAngle);
-            half2x2 rotationMatrix = half2x2(cosAngle, -sinAngle, sinAngle, cosAngle);
-            input = mul(input, rotationMatrix);
-            input += newOrigin;
-            return input;
-
+            return half2(sinAngle, cosAngle);
         }
 
 
@@ -83,18 +46,16 @@
             uv*= half2(0.25, 0.5);
 
             #ifdef WASH
-            projChooser = 1.0;
-            #endif
-            
-            addition = IF(projChooser == 1.0, half2(0.0, 0.5) , addition);
-            #if !defined(WASH)
-                addition = IF(projChooser == 2.0, half2(0.25, 0.5), addition);
-                addition = IF(projChooser == 3.0, half2(0.5, 0.5), addition);
-                addition = IF(projChooser == 4.0, half2(0.75, 0.5), addition);
-                addition = IF(projChooser == 5.0, half2(0.0, 0.0) , addition);
-                addition = IF(projChooser == 6.0, half2(0.25, 0.0), addition);
-                addition = IF(projChooser == 7.0, half2(0.5, 0.0), addition);
-                addition = IF(projChooser == 8.0, half2(0.75, 0.0), addition);
+                addition = half2(0.0, 0.5);
+            #else
+                if(projChooser == 1.0) addition = half2(0.0, 0.5);
+                else if(projChooser == 2.0) addition = half2(0.25, 0.5);
+                else if(projChooser == 3.0) addition = half2(0.5, 0.5);
+                else if(projChooser == 4.0) addition = half2(0.75, 0.5);
+                else if(projChooser == 5.0) addition = half2(0.0, 0.0);
+                else if(projChooser == 6.0) addition = half2(0.25, 0.0);
+                else if(projChooser == 7.0) addition = half2(0.5, 0.0);
+                else if(projChooser == 8.0) addition = half2(0.75, 0.0);
             #endif
             uv.x += addition.x;
             uv.y += addition.y;
@@ -102,17 +63,16 @@
         }
         half ChooseProjectionScalar(half coneWidth, half projChooser)
         {
-            //half chooser = IF(isDMX() == 1, selection, instancedGOBOSelection());
             half result = _ProjectionUVMod;
-            result = IF((projChooser) == 1.0, (_ProjectionUVMod * _MinimumBeamRadius), result);
+            if(projChooser == 1.0) result = _ProjectionUVMod * _MinimumBeamRadius;
             #if !defined(WASH)
-            result = IF((projChooser) == 2.0, _ProjectionUVMod2 * _MinimumBeamRadius, result);
-            result = IF((projChooser) == 3.0, _ProjectionUVMod3 * _MinimumBeamRadius, result);
-            result = IF((projChooser) == 4.0, _ProjectionUVMod4 * _MinimumBeamRadius, result);
-            result = IF((projChooser) == 5.0, _ProjectionUVMod5 * _MinimumBeamRadius, result);
-            result = IF((projChooser) == 6.0, _ProjectionUVMod6 * _MinimumBeamRadius, result);
-            result = IF((projChooser) == 7.0, _ProjectionUVMod7 * _MinimumBeamRadius, result);
-            result = IF((projChooser) == 8.0, _ProjectionUVMod8 * _MinimumBeamRadius, result);
+            else if(projChooser == 2.0) result = _ProjectionUVMod2 * _MinimumBeamRadius;
+            else if(projChooser == 3.0) result = _ProjectionUVMod3 * _MinimumBeamRadius;
+            else if(projChooser == 4.0) result = _ProjectionUVMod4 * _MinimumBeamRadius;
+            else if(projChooser == 5.0) result = _ProjectionUVMod5 * _MinimumBeamRadius;
+            else if(projChooser == 6.0) result = _ProjectionUVMod6 * _MinimumBeamRadius;
+            else if(projChooser == 7.0) result = _ProjectionUVMod7 * _MinimumBeamRadius;
+            else if(projChooser == 8.0) result = _ProjectionUVMod8 * _MinimumBeamRadius;
             #endif
 
 
@@ -173,9 +133,7 @@
 
 
                 #ifdef VRSL_DMX
-                    half panValue = i.goboPlusSpinPanTilt.z;
-                    half tiltValue = i.goboPlusSpinPanTilt.w;
-                    uint selection = round(i.goboPlusSpinPanTilt.x);
+                    uint selection = round(i.intensityStrobeWidth.w);
                 #endif
 
                  //Calculating projection
@@ -228,7 +186,7 @@
 
 
                 #ifdef VRSL_DMX
-                    float projChooser = IF(isDMX() == 1, selection, instancedGOBOSelection());
+                    float projChooser = isDMX() == 1 ? selection : instancedGOBOSelection();
                 #endif
                 #ifdef VRSL_AUDIOLINK
                     float projChooser = round(instancedGOBOSelection());
@@ -237,12 +195,14 @@
 
                 //Get distance of intersection from the origin in world space
                 #ifdef VRSL_DMX
-                    float UVscale = rcp(distanceFromOrigin * ChooseProjectionScalar(coneWidth, projChooser));
+                    float projectionScalar = ChooseProjectionScalar(coneWidth, projChooser);
+                    float UVscale = VRSL_ProjectionReciprocalFalloff(distanceFromOrigin, 0.0, projectionScalar, 0.0);
                     distanceFromOrigin = lerp(distanceFromOrigin*0.6 +0.65,distanceFromOrigin, saturate(coneWidth));
                 #endif
                 #ifdef VRSL_AUDIOLINK
                     distanceFromOrigin = lerp(distanceFromOrigin*0.6 +0.65,distanceFromOrigin, saturate(coneWidth));
-                    float UVscale = rcp(distanceFromOrigin * ChooseProjectionScalar(coneWidth, projChooser));
+                    float projectionScalar = ChooseProjectionScalar(coneWidth, projChooser);
+                    float UVscale = VRSL_ProjectionReciprocalFalloff(distanceFromOrigin, 0.0, projectionScalar, 0.0);
                 #endif
                 // inverse that distance so that it gets smaller as it gets closer, 
                 // multiply it by modifier parameter incase things get wonky.
@@ -250,16 +210,11 @@
 
 
                 //position of the intersection fragment in the cone's object space
-                #ifdef VRSL_DMX
-                    projPos = InvertRotations(float4(projPos,1.0), panValue, tiltValue);
-                #endif
-                #ifdef VRSL_AUDIOLINK
-                    projPos = InvertRotations(float4(projPos,1.0), 0, 0);
-                #endif
+                projPos = VRSL_RotateProjectionPosition(projPos, _FixtureRotationOrigin.xyz, i.projectionRotationSinCos);
 
 
 
-                float2 uvCoords = (((float2((projPos.x), projPos.y) * UVscale)));
+                float2 uvCoords = projPos.xy * UVscale;
 
                 uvCoords.x += 0.5;
                 uvCoords.y += 0.5;
@@ -267,23 +222,13 @@
 
                 half2 uvOrigin = half2(0.5, 0.5);
                 
-                #ifdef VRSL_DMX
-                    _SpinSpeed = IF(checkPanInvertY() == 1, -_SpinSpeed, _SpinSpeed);
-                    _SpinSpeed = IF(isDMX() == 1, _SpinSpeed, _SpinSpeed);
-                    uvCoords = IF(isGOBOSpin() == 1 && projChooser > 1.0, RotateUV(uvCoords,  degrees(i.goboPlusSpinPanTilt.y)), RotateUV(uvCoords, _ProjectionRotation));
-                #endif
-                #ifdef VRSL_AUDIOLINK
-                    half goboSpinSpeed = IF(checkPanInvertY() == 1, -getGoboSpinSpeed(), getGoboSpinSpeed());
-                    uvCoords = IF(isGOBOSpin() == 1 && projChooser > 1.0, RotateUV(uvCoords, _Time.w * ( 10* goboSpinSpeed)), RotateUV(uvCoords, _ProjectionRotation));
-                #endif
-
-               // uvCoords = IF(isGOBOSpin() == 1 && projChooser > 1.0, RotateUV(uvCoords, _Time.w * ( 10* _SpinSpeed)), RotateUV(uvCoords, _ProjectionRotation));
+                uvCoords = VRSL_RotateProjectionUV(uvCoords, i.projectionUVRotationSinCos);
                 
                 clip(uvCoords);
 
                 //Discard any pixels that are outside of the traditional 0-1 UV bounds.
                 float4 tex = ChooseProjection(uvCoords, projChooser);
-                float distFromUVOrigin = (abs(distance(uvCoords, uvOrigin)));
+                float distFromUVOrigin = distance(uvCoords, uvOrigin);
                 // Create create xy coordinate plane based on object space, make sure it scales based on the 
                 // distance from the intersection
 
@@ -295,40 +240,39 @@
                 clip(projPos.z);
                 //Projection Fade
                 #if defined(_ALPHATEST_ON) && !SHADER_API_GLES3
-                    col = lerp(col, half4(0,0,0,0), clamp(pow(distFromUVOrigin * (_ProjectionFade-1.0),_ProjectionFadeCurve),0.0,1.0));
+                    col *= VRSL_ProjectionFadeMultiplier(distFromUVOrigin, _ProjectionFade - 1.0, _ProjectionFadeCurve);
                 #else
-                    col = lerp(col, half4(0,0,0,0), clamp(pow(distFromUVOrigin * _ProjectionFade,_ProjectionFadeCurve),0.0,1.0));
+                    col *= VRSL_ProjectionFadeMultiplier(distFromUVOrigin, _ProjectionFade, _ProjectionFadeCurve);
                 #endif
 
 
                 #ifdef VRSL_DMX
-                    half strobe = IF(isStrobe() == 1, i.intensityStrobeWidth.y, 1);
-                    col = IF(isDMX() == 1 & _EnableStaticEmissionColor == 0, col * i.rgbColor, col);
+                    half strobe = isStrobe() == 1 ? i.intensityStrobeWidth.y : 1.0;
+                    if(isDMX() == 1 && _EnableStaticEmissionColor == 0)
+                    {
+                        col *= i.rgbColor;
+                    }
                 #endif
                 #ifdef VRSL_AUDIOLINK
                     half strobe = 1.0;
                 #endif
 
                 
-                //col = IF(_EnableStaticEmissionColor == 1, col * half4(_StaticEmission.r * _RedMultiplier,_StaticEmission.g * _GreenMultiplier,_StaticEmission.b * _BlueMultiplier,_StaticEmission.a), col);
-                
-                  
-                
-
                 // project plane on to the world normals in object space in the z direction of the object origin.
-                half projectionIntesnity = _ProjectionIntensity;
+                half projectionIntensity = _ProjectionIntensity;
                 #if defined(_ALPHATEST_ON) && !SHADER_API_GLES3
-                    projectionIntesnity +=4.0;
+                    projectionIntensity += 4.0;
                 #endif
-                col = ((col * emissionTint * UVscale * projectionIntesnity)) * strobe; 
-                col *= rcp(_ProjectionDistanceFallOff * distanceFromOrigin * distanceFromOrigin);
+                col *= emissionTint * UVscale * projectionIntensity * strobe;
+                col *= VRSL_ProjectionReciprocalFalloff(distanceFromOrigin, 0.0, 0.0, _ProjectionDistanceFallOff);
                 #ifdef VRSL_AUDIOLINK
                      col = col * audioReaction;
                 #endif
                 col.rgb *= gi * fi;
-                //half saturation = saturate(RGB2HSV(col)).y;  
-                //col = IF(_EnableStaticEmissionColor == 1, lerp(half4(0,0,0,0), col, saturation), col);
-                col = IF( _EnableStaticEmissionColor == 1, half4(col.r * _RedMultiplier, col.g * _GreenMultiplier, col.b * _BlueMultiplier, col.a), col);
+                if(_EnableStaticEmissionColor == 1)
+                {
+                    col.rgb *= half3(_RedMultiplier, _GreenMultiplier, _BlueMultiplier);
+                }
                 col *= _UniversalIntensity;
                 #if defined(_ALPHATEST_ON) && !SHADER_API_GLES3
 					clip(col.a - ditherThreshold);

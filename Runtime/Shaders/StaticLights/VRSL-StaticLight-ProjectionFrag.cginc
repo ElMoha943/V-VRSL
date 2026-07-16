@@ -70,7 +70,7 @@
                 #if _ALPHATEST_ON && !SHADER_API_GLES3
                     f += 1.0;
                 #endif
-                float UVscale = rcp(_ProjectionDistanceFallOff + (distanceFromOrigin * _ProjectionUVMod) + (_FeatherOffset * distanceFromOrigin * distanceFromOrigin));
+                float UVscale = VRSL_ProjectionReciprocalFalloff(distanceFromOrigin, _ProjectionDistanceFallOff, _ProjectionUVMod, _FeatherOffset);
 
                 //float3 calculatedWorldNormal = getCalculatedWorldNormal(projPos);
 
@@ -113,7 +113,7 @@
 
                 
                 float4 result = ((col * UVscale  * _ProjectionMaxIntensity) * emissionTint) * strobe;
-                col = (((lerp(result,float4(0,0,0,0), smoothstep(distanceFromOrigin, 0, f))) * gi) * fi) * _UniversalIntensity;
+                col = result * VRSL_ProjectionDistanceFadeMultiplier(distanceFromOrigin, f) * gi * fi * _UniversalIntensity;
                 
                 #if defined(_ALPHATEST_ON) && !SHADER_API_GLES3
                     col *= _AlphaProjectionIntensity;
