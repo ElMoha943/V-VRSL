@@ -360,9 +360,6 @@ v2f vert (appdata v)
 		#endif
 		//calculate rotations for verts
 		v.vertex = calculateRotations(v, v.vertex, 0, oscPanValue, oscTiltValue);
-		#if defined(PROJECTION_YES)
-			o.projectionorigin = calculateRotations(v, _ProjectionRangeOrigin, 0, oscPanValue, oscTiltValue);
-		#endif
 		#if defined(VOLUMETRIC_YES)
 			o.coneWidth = oscConeWidth + 1.5;
 			float3 worldCam;
@@ -455,17 +452,12 @@ v2f vert (appdata v)
 			o.ray *= half3(1,1,-1);
 			//saving vertex color incase needing to perform rotation calculation in fragment shader
 			o.color = v.color;
-			o.dmx.x = (half)dmx;
-
-			o.worldPos = mul(unity_ObjectToWorld, v.vertex);
+			half3 worldPos = mul(unity_ObjectToWorld, v.vertex).xyz;
 
 			//For Mirror Depth Correction
-			o.worldDirection.xyz = o.worldPos.xyz - _WorldSpaceCameraPos;
+			o.worldDirection.xyz = worldPos - _WorldSpaceCameraPos;
 			// pack correction factor into direction w component to save space
 			o.worldDirection.w = dot(o.pos, VRSL_CalculateFrustumCorrection());
-			//o.viewDir = normalize(mul(UNITY_MATRIX_MV, v.vertex).xyz); // get normalized view dir
-			o.viewDir = normalize(UnityObjectToViewPos(v.vertex.xyz));
-			o.viewDir /= o.viewDir.z; // rescale vector so z is 1.0
 			//GET DMX/DMX VALUES
 			o.intensityStrobeWidth = half3(fixtureState.intensity, fixtureState.strobe, fixtureState.coneWidth);
 			#ifdef WASH
@@ -694,15 +686,12 @@ v2f vert (appdata v)
 			o.color = v.color;
 			//o.sector.x = (half)sector;
 
-			o.worldPos = mul(unity_ObjectToWorld, v.vertex);
+			half3 worldPos = mul(unity_ObjectToWorld, v.vertex).xyz;
 
 			//For Mirror Depth Correction
-			o.worldDirection.xyz = o.worldPos.xyz - _WorldSpaceCameraPos;
+			o.worldDirection.xyz = worldPos - _WorldSpaceCameraPos;
 			// pack correction factor into direction w component to save space
 			o.worldDirection.w = dot(o.pos, VRSL_CalculateFrustumCorrection());
-			//o.viewDir = normalize(mul(UNITY_MATRIX_MV, v.vertex).xyz);
-			o.viewDir = normalize(UnityObjectToViewPos(v.vertex.xyz)); // get normalized view dir
-			o.viewDir /= o.viewDir.z; // rescale vector so z is 1.0
 			#ifdef RAW
 				if(o.globalFinalIntensity.x <= 0.005 || o.globalFinalIntensity.y <= 0.005 || all(o.emissionColor.xyz <= half4(0.005, 0.005, 0.005, 1.0)))
 				{

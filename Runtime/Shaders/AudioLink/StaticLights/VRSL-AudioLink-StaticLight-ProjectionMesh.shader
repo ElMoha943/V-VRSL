@@ -136,7 +136,6 @@ Shader "VRSL/AudioLink/Standard Static/Projection"
 			
             #pragma vertex vert
             #pragma fragment frag
-			#pragma multi_compile_fog
 			#pragma multi_compile_instancing
 			#pragma multi_compile_local _ _ALPHATEST_ON
 			#pragma shader_feature_local _MULTISAMPLEDEPTH
@@ -161,14 +160,10 @@ Shader "VRSL/AudioLink/Standard Static/Projection"
              struct v2f
              {
                  float4 pos : SV_POSITION;
-                 float2 uv : TEXCOORD0;
                  float3 ray : TEXCOORD2;
                  float4 screenPos : TEXCOORD4;
 				 float4 color : COLOR;
-				 float3 normal : TEXCOORD3;	
-				 float4 projectionorigin : TEXCOORD5;
 				 float4 worldDirection : TEXCOORD6;
-				 float4 worldPos : TEXCOORD7;
 				 float4 emissionColor : TEXCOORD8;
 				 float3 audioGlobalFinalIntensity: TEXCOORD1;
 				 UNITY_VERTEX_INPUT_INSTANCE_ID
@@ -213,7 +208,6 @@ Shader "VRSL/AudioLink/Standard Static/Projection"
 		o.audioGlobalFinalIntensity.z = getFinalIntensity();
 		o.emissionColor = getEmissionColor();
 		v.vertex = CalculateProjectionScaleRange(v, v.vertex, _ProjectionRange);
-		o.projectionorigin = CalculateProjectionScaleRange(v, _ProjectionRangeOrigin, _ProjectionRange);
 		//move verts to clip space
 		o.pos = UnityObjectToClipPos(v.vertex);
 
@@ -225,9 +219,9 @@ Shader "VRSL/AudioLink/Standard Static/Projection"
 		o.ray *= float3(1,1,-1);
 		//saving vertex color incase needing to perform rotation calculation in fragment shader
 		o.color = v.color;
-		o.worldPos = mul(unity_ObjectToWorld, v.vertex);
+		float3 worldPos = mul(unity_ObjectToWorld, v.vertex).xyz;
 		//For Mirror Depth Correction
-		o.worldDirection.xyz = o.worldPos.xyz - _WorldSpaceCameraPos;
+		o.worldDirection.xyz = worldPos - _WorldSpaceCameraPos;
 		// pack correction factor into direction w component to save space
 		o.worldDirection.w = dot(o.pos, VRSL_CalculateFrustumCorrection());
 		if(o.audioGlobalFinalIntensity.x <= 0.005 || o.audioGlobalFinalIntensity.y <= 0.005 || o.audioGlobalFinalIntensity.z <= 0.005 || all(o.emissionColor.xyz <= float4(0.005, 0.005, 0.005, 1.0)))

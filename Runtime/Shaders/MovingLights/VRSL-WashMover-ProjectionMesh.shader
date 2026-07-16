@@ -200,16 +200,10 @@ Shader "VRSL/Wash Mover/Projection"
              struct v2f
              {
                  float4 pos : SV_POSITION;
-                 float2 uv : TEXCOORD0;
                  float3 ray : TEXCOORD2;
                  float4 screenPos : TEXCOORD4;
 				 float4 color : COLOR;
-				 float3 normal : TEXCOORD3;	
-				 float2 dmx: TEXCOORD10;
-				 float4 projectionorigin : TEXCOORD5;
 				 float4 worldDirection : TEXCOORD6;
-				 float4 worldPos : TEXCOORD7;
-				 float3 viewDir : TEXCOORD8;
 				 float3 intensityStrobeWidth : TEXCOORD9;
 				 float4 goboPlusSpinPanTilt : TEXCOORD11;
 				 float4 rgbColor : TEXCOORD12;

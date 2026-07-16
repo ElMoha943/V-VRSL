@@ -1,25 +1,9 @@
 // Upgrade NOTE: replaced '_Object2World' with 'unity_ObjectToWorld'
 
 #include "../Shared/VRSL-RenderHelpers.cginc"
+#include "../Shared/VRSL-ProjectionHelpers.cginc"
 
 #define IF(a, b, c) lerp(b, c, step((fixed) (a), 0));
-
-        float3 getWpos(float depth, float3 ray)
-        {
-                float4 vpos = float4(ray * depth, 1);
-                // scale ray by linearized depth, which gives us the position of the ray 
-                // intersection with the depth buffer in view space. This is the point of intersection in view space.
-                
-                float3 wpos = (mul(unity_CameraToWorld, vpos).xyz);
-                //convert view space coordinate to world space coordinate. 
-                //Wpos is now coordinates for intersection.
-                return wpos;
-        }
-
-        float3 getProjPos(float3 wpos)
-        {
-            return (mul(unity_WorldToObject,float4(wpos.x, wpos.y, wpos.z, 1)));
-        }
 
         fixed4 ProjectionFrag(v2f i) : SV_Target
         {
@@ -65,19 +49,7 @@
                 //CREDIT TO DJ LUKIS FOR MIRROR DEPTH CORRECTION
                 float perspectiveDivide = 1.0f / i.pos.w;
                 float4 direction = i.worldDirection * perspectiveDivide;
-                float2 altScreenPos = i.screenPos.xy * perspectiveDivide;
-
-
-                #if _MULTISAMPLEDEPTH
-                    float2 texelSize = _CameraDepthTexture_TexelSize.xy;
-                    float d1 = SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, screenposUV + float2(1.0, 0.0) * texelSize);
-                    float d2 = SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, screenposUV + float2(-1.0, 0.0) * texelSize);
-                    float d3 = SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, screenposUV + float2(0.0, 1.0) * texelSize);
-                    float d4 = SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, screenposUV + float2(0.0, -1.0) * texelSize);
-                    float sceneZ = min(d1, min(d2, min(d3, d4)));
-                #else
-                    float sceneZ = SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, screenposUV);
-                #endif
+                float sceneZ = VRSL_SampleProjectionDepth(screenposUV);
 
                 #if UNITY_REVERSED_Z
                     if (sceneZ == 0)
@@ -86,35 +58,24 @@
                     if (sceneZ == 1)
                 #endif
                         return float4(0,0,0,1);
-                //Convert to Corrected LinearEyeDepth by DJ Lukis
-                float depth = VRSL_CorrectedLinearEyeDepth(sceneZ, direction.w);
-
-                //Convert from Corrected Linear Eye Depth to Linear01Depth
-                //Credit: https://www.cyanilux.com/tutorials/depth/#eye-depth
-                depth = (1.0 - (depth * _ZBufferParams.w)) / (depth * _ZBufferParams.z);
-                //Convert to Linear01Depth
-                depth = Linear01Depth(depth);
+                float depth = VRSL_ProjectionLinear01Depth(sceneZ, direction.w);
                 float3 objectOrigin = mul(unity_ObjectToWorld, float4(0.0,0.0,0.0,1.0) ).xyz;
                 //get object origin in world space.
                 //float3 fragViewPos = float4(i.ray * depth, 1);
 
-                float3 wpos = getWpos(depth, i.ray);
-                float3 projPos = getProjPos(wpos);
+                float3 wpos = VRSL_ProjectionWorldPosition(depth, i.ray);
+                float3 projPos = VRSL_ProjectionObjectPosition(wpos);
                 float distanceFromOrigin = length(objectOrigin - wpos);
-                float attenuationDist = length(objectOrigin - wpos);
                 float f = _Fade;
                 #if _ALPHATEST_ON && !SHADER_API_GLES3
                     f += 1.0;
                 #endif
-                float attenuation = 1.0 / (_ProjectionDistanceFallOff + f * attenuationDist + _FeatherOffset * (attenuationDist * attenuationDist));
-
-                float UVscale = 1/(_ProjectionDistanceFallOff + (distanceFromOrigin * _ProjectionUVMod) + (_FeatherOffset * (distanceFromOrigin * distanceFromOrigin)));
+                float UVscale = rcp(_ProjectionDistanceFallOff + (distanceFromOrigin * _ProjectionUVMod) + (_FeatherOffset * distanceFromOrigin * distanceFromOrigin));
 
                 //float3 calculatedWorldNormal = getCalculatedWorldNormal(projPos);
 
                 float2 uvCoords = (((float2((projPos.x), projPos.y) * UVscale)));
                 //uvCoords = mul(uvCoords, projPos.z);
-                float2 oldUVcoords = uvCoords;
                 //Get coordinate plane in object space
 
                 uvCoords.x += _XOffset;
@@ -129,7 +90,6 @@
                 float4 tex = tex2D(_ProjectionMainTex, uvCoords); 
                 //tex = float4(tex.x, tex.y, tex.z, pow(tex.w * distanceFromOrigin, -1));
                 //tex = pow(tex * distanceFromOrigin, 1);
-                float distFromUVOrigin = (abs(distance(uvCoords, half2(0,0))));
                 //calculatedWorldNormal = UnpackNormal(tex2D(_SceneNormals, oldUVcoords));
                 // Create create xy coordinate plane based on object space, make sure it scales based on the 
                 // distance from the intersection
@@ -153,7 +113,6 @@
 
                 
                 float4 result = ((col * UVscale  * _ProjectionMaxIntensity) * emissionTint) * strobe;
-                float fadeRange = (saturate(1-(pow(10, distanceFromOrigin - 2))));
                 col = (((lerp(result,float4(0,0,0,0), smoothstep(distanceFromOrigin, 0, f))) * gi) * fi) * _UniversalIntensity;
                 
                 #if defined(_ALPHATEST_ON) && !SHADER_API_GLES3

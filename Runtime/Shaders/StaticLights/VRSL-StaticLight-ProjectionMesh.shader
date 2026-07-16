@@ -135,15 +135,10 @@ Shader "VRSL/Standard Static/Projection"
              struct v2f
              {
                  float4 pos : SV_POSITION;
-                 float2 uv : TEXCOORD0;
                  float3 ray : TEXCOORD2;
                  float4 screenPos : TEXCOORD4;
 				 float4 color : COLOR;
-				 float3 normal : TEXCOORD3;	
-				 float2 dmx: TEXCOORD10;
-				 float4 projectionorigin : TEXCOORD5;
 				 float4 worldDirection : TEXCOORD6;
-				 float4 worldPos : TEXCOORD7;
 				 float2 intensityStrobe : TEXCOORD11;
 				 float4 rgbColor : TEXCOORD12;
 				 float4 emissionColor : TEXCOORD13;
@@ -200,7 +195,6 @@ Shader "VRSL/Standard Static/Projection"
 		o.globalFinalIntensity.y = getFinalIntensity();
 
 		v.vertex = CalculateProjectionScaleRange(v, v.vertex, _ProjectionRange);
-		o.projectionorigin = CalculateProjectionScaleRange(v, _ProjectionRangeOrigin, _ProjectionRange);
 		//move verts to clip space
 		o.pos = UnityObjectToClipPos(v.vertex);
 
@@ -212,9 +206,9 @@ Shader "VRSL/Standard Static/Projection"
 		o.ray *= float3(1,1,-1);
 		//saving vertex color incase needing to perform rotation calculation in fragment shader
 		o.color = v.color;
-		o.worldPos = mul(unity_ObjectToWorld, v.vertex);
+		float3 worldPos = mul(unity_ObjectToWorld, v.vertex).xyz;
 		//For Mirror Depth Correction
-		o.worldDirection.xyz = o.worldPos.xyz - _WorldSpaceCameraPos;
+		o.worldDirection.xyz = worldPos - _WorldSpaceCameraPos;
 		// pack correction factor into direction w component to save space
 		o.worldDirection.w = dot(o.pos, VRSL_CalculateFrustumCorrection());
 		if(((all(o.rgbColor <= float4(0.05,0.05,0.05,1)) || o.intensityStrobe.x <= 0.05) && isDMX() == 1) || o.globalFinalIntensity.x <= 0.005 || o.globalFinalIntensity.y <= 0.005 || all(o.emissionColor <= float4(0.005, 0.005, 0.005, 1.0)))

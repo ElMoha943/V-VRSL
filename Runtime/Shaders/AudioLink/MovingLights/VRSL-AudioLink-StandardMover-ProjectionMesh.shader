@@ -183,21 +183,12 @@ Shader "VRSL/AudioLink/Standard Mover/Projection"
              struct v2f
              {
                  float4 pos : SV_POSITION;
-                 float2 uv : TEXCOORD0;
 				 float4 audioGlobalFinalConeIntensity : TEXCOORD1;
                  float3 ray : TEXCOORD2;
                  float4 screenPos : TEXCOORD4;
 				 float4 color : COLOR;
-				 float3 normal : TEXCOORD3;	
-				 //float2 sector: TEXCOORD10;
-				 float4 projectionorigin : TEXCOORD5;
 				 float4 worldDirection : TEXCOORD6;
-				 float4 worldPos : TEXCOORD7;
-				 float3 viewDir : TEXCOORD8;
 				 float4 emissionColor : TEXCOORD9;
-				 //float3 intensityStrobeWidth : TEXCOORD9;
-				 //float4 goboPlusSpinPanTilt : TEXCOORD11;
-				 //float4 rgbColor : TEXCOORD12;
 				 UNITY_VERTEX_INPUT_INSTANCE_ID
 				 UNITY_VERTEX_OUTPUT_STEREO
              };

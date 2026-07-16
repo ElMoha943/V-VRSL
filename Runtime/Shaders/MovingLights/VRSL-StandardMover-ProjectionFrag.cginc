@@ -1,25 +1,7 @@
 #include "../Shared/VRSL-RenderHelpers.cginc"
+#include "../Shared/VRSL-ProjectionHelpers.cginc"
 
 #define IF(a, b, c) lerp(b, c, step((fixed) (a), 0));
-
-        float3 getWpos(float depth, float3 ray)
-        {
-                float4 vpos = float4(ray * depth, 1);
-                
-                
-                // scale ray by linearized depth, which gives us the position of the ray 
-                // intersection with the depth buffer in view space. This is the point of intersection in view space.
-                
-                float3 wpos = (mul(unity_CameraToWorld, vpos).xyz);
-                //convert view space coordinate to world space coordinate. 
-                //Wpos is now coordinates for intersection.
-                return wpos;
-        }
-
-        float3 getProjPos(float3 wpos)
-        {
-            return (mul(unity_WorldToObject,float4(wpos.x, wpos.y, wpos.z, 1)));
-        }
 
 //Huge, huge thanks and shoutout to Uncomfy on the VRC Shader Discord for helping me figure this out <3
         half4 InvertRotations (half4 input, half panValue, half tiltValue)
@@ -33,8 +15,7 @@
                 half angleY = radians(0);
             #endif
 
-            sY = sin(angleY);
-            cY = cos(angleY);
+            sincos(angleY, sY, cY);
             half4x4 rotateYMatrix = half4x4(cY, sY, 0, 0,
                 -sY, cY, 0, 0,
                 0, 0, 1, 0,
@@ -60,8 +41,7 @@
             #ifdef VRSL_AUDIOLINK
                 half angleX = radians(0 + (tiltOffset));
             #endif
-            sX = sin((angleX));
-            cX = cos((angleX));
+            sincos(angleX, sX, cX);
 
             half4x4 rotateXMatrix = half4x4(1, 0, 0, 0,
                 0, cX, sX, 0,
@@ -86,10 +66,10 @@
         {
             half2 newOrigin = half2(0.5, 0.5);
             input -= newOrigin;
-            half sinX = sin (radians(angle));
-            half cosX = cos (radians(angle));
-            half sinY = sin (radians(angle));
-            half2x2 rotationMatrix = half2x2( cosX, -sinX, sinY, cosX);
+            half sinAngle;
+            half cosAngle;
+            sincos(radians(angle), sinAngle, cosAngle);
+            half2x2 rotationMatrix = half2x2(cosAngle, -sinAngle, sinAngle, cosAngle);
             input = mul(input, rotationMatrix);
             input += newOrigin;
             return input;
@@ -209,17 +189,7 @@
                 //float2 altScreenPos = i.screenPos.xy * perspectiveDivide;
 
 
-                //
-               // #if _MULTISAMPLEDEPTH
-                    float2 texelSize = _CameraDepthTexture_TexelSize.xy;
-                    float d1 = SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, screenposUV + float2(1.0, 0.0) * texelSize);
-                    float d2 = SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, screenposUV + float2(-1.0, 0.0) * texelSize);
-                    float d3 = SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, screenposUV + float2(0.0, 1.0) * texelSize);
-                    float d4 = SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, screenposUV + float2(0.0, -1.0) * texelSize);
-                    float sceneZ = min(d1, min(d2, min(d3, d4)));
-             //   #else
-              //      float sceneZ = SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, screenposUV);
-               // #endif
+                float sceneZ = VRSL_SampleProjectionDepth(screenposUV);
 
                 #if UNITY_REVERSED_Z
                     if (sceneZ == 0)
@@ -230,12 +200,7 @@
                         return float4(0,0,0,1);
 
                 
-				float depth = VRSL_CorrectedLinearEyeDepth(sceneZ, depthdirect.w);
-
-                //Convert from Corrected Linear Eye Depth to Linear01Depth
-                //Credit: https://www.cyanilux.com/tutorials/depth/#eye-depth
-                depth = (1.0 - (depth * _ZBufferParams.w)) / (depth * _ZBufferParams.z);
-                depth = Linear01Depth(depth);
+                float depth = VRSL_ProjectionLinear01Depth(sceneZ, depthdirect.w);
 
                  
                 //lienarize the depth
@@ -243,15 +208,15 @@
                 float3 objectOrigin = mul(unity_ObjectToWorld, half4(0.0,0.0,0.0,1.0) ).xyz;
                 //get object origin in world space.
 
-                float3 projectionOriginWorld = mul(unity_ObjectToWorld,_ProjectionRangeOrigin);
-                
-                float3 wpos = getWpos(depth, i.ray);
+                float3 wpos = VRSL_ProjectionWorldPosition(depth, i.ray);
                 //convert view space coordinate to world space coordinate. 
                 //Wpos is now coordinates for intersection.
 
                 //get the projection in object space
-                float3 oPos = mul(unity_WorldToObject, float4(wpos,1)).xyz;
-                if((distance(oPos, _FixtureRotationOrigin) < _ProjectionCutoff) || distance(oPos, float4(0,0,0,0)) < _ProjectionOriginCutoff)
+                float3 oPos = VRSL_ProjectionObjectPosition(wpos);
+                float3 fixtureDelta = oPos - _FixtureRotationOrigin.xyz;
+                if((dot(fixtureDelta, fixtureDelta) < (_ProjectionCutoff * _ProjectionCutoff)) ||
+                    (dot(oPos, oPos) < (_ProjectionOriginCutoff * _ProjectionOriginCutoff)))
                 {
                     //check the distance of rotation origin to the set cutoff value.
                     //if distance is less that the set value, discard the pixel.
@@ -259,7 +224,7 @@
                     discard;
                 }
 
-                float distanceFromOrigin = abs(distance(objectOrigin , wpos));
+                float distanceFromOrigin = distance(objectOrigin, wpos);
 
 
                 #ifdef VRSL_DMX
@@ -272,16 +237,16 @@
 
                 //Get distance of intersection from the origin in world space
                 #ifdef VRSL_DMX
-                    float UVscale = 1/(0 + (distanceFromOrigin * (ChooseProjectionScalar(coneWidth, projChooser)) + (0 * (distanceFromOrigin * distanceFromOrigin))));
+                    float UVscale = rcp(distanceFromOrigin * ChooseProjectionScalar(coneWidth, projChooser));
                     distanceFromOrigin = lerp(distanceFromOrigin*0.6 +0.65,distanceFromOrigin, saturate(coneWidth));
                 #endif
                 #ifdef VRSL_AUDIOLINK
                     distanceFromOrigin = lerp(distanceFromOrigin*0.6 +0.65,distanceFromOrigin, saturate(coneWidth));
-                    float UVscale = 1/(0 + ((distanceFromOrigin) * ChooseProjectionScalar(coneWidth, projChooser)));
+                    float UVscale = rcp(distanceFromOrigin * ChooseProjectionScalar(coneWidth, projChooser));
                 #endif
                 // inverse that distance so that it gets smaller as it gets closer, 
                 // multiply it by modifier parameter incase things get wonky.
-                float3 projPos = getProjPos(wpos);
+                float3 projPos = oPos;
 
 
                 //position of the intersection fragment in the cone's object space
@@ -300,8 +265,7 @@
                 uvCoords.y += 0.5;
                 //Get coordinate plane
 
-                half2 uvOrigin = half2(0,0);
-                uvOrigin = (half2(0,0) * UVscale) * (clamp(coneWidth+0.5, -1.0, 4) + 1.6) + 0.5;
+                half2 uvOrigin = half2(0.5, 0.5);
                 
                 #ifdef VRSL_DMX
                     _SpinSpeed = IF(checkPanInvertY() == 1, -_SpinSpeed, _SpinSpeed);
@@ -329,8 +293,6 @@
                 half4 col = tex;
 
                 clip(projPos.z);
-                float projectionDistance = abs(distance(i.projectionorigin.xyz, projPos.xyz));
-
                 //Projection Fade
                 #if defined(_ALPHATEST_ON) && !SHADER_API_GLES3
                     col = lerp(col, half4(0,0,0,0), clamp(pow(distFromUVOrigin * (_ProjectionFade-1.0),_ProjectionFadeCurve),0.0,1.0));
@@ -359,12 +321,11 @@
                     projectionIntesnity +=4.0;
                 #endif
                 col = ((col * emissionTint * UVscale * projectionIntesnity)) * strobe; 
-                col = col * (1/(_ProjectionDistanceFallOff * (distanceFromOrigin * distanceFromOrigin)));
+                col *= rcp(_ProjectionDistanceFallOff * distanceFromOrigin * distanceFromOrigin);
                 #ifdef VRSL_AUDIOLINK
                      col = col * audioReaction;
                 #endif
-                col = lerp(half4(0,0,0,col.w), col, gi);
-                col = lerp(half4(0,0,0,col.w), col, fi);
+                col.rgb *= gi * fi;
                 //half saturation = saturate(RGB2HSV(col)).y;  
                 //col = IF(_EnableStaticEmissionColor == 1, lerp(half4(0,0,0,0), col, saturation), col);
                 col = IF( _EnableStaticEmissionColor == 1, half4(col.r * _RedMultiplier, col.g * _GreenMultiplier, col.b * _BlueMultiplier, col.a), col);
