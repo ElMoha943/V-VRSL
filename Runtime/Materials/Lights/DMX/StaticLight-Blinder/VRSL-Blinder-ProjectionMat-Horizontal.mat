@@ -107,7 +107,6 @@ Material:
     - _DMXChannel: 0
     - _DistFade: 0.7
     - _EnableAudioReact: 0
-    - _EnableCompatibilityMode: 0
     - _EnableDMX: 0
     - _EnableOSC: 0
     - _EnableSpin: 0

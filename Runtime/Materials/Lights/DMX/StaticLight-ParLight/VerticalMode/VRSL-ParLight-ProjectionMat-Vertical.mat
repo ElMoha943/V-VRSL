@@ -105,7 +105,6 @@ Material:
     - _ConeWidth: 0
     - _DMXChannel: 0
     - _DistFade: 0.7
-    - _EnableCompatibilityMode: 0
     - _EnableDMX: 0
     - _EnableOSC: 0
     - _EnableSpin: 0

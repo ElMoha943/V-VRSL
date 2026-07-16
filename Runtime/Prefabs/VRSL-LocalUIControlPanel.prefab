@@ -5266,12 +5266,6 @@ MonoBehaviour:
   - {fileID: 8600000, guid: 42aa50059d38ab44a95ee1cb7a7c5d5b, type: 2}
   - {fileID: 8600000, guid: cc132e098e98e24448b3171b5f9834d8, type: 2}
   - {fileID: 8600000, guid: 57baa88f99df79f428add8e6e1c79597, type: 2}
-  DMX_CRTS_Legacy:
-  - {fileID: 8600000, guid: 3bcce6f0fa9c3d4499ca3015b073785e, type: 2}
-  - {fileID: 8600000, guid: 85ba02ef33f4e4c4a94d9085f48ec5c1, type: 2}
-  - {fileID: 8600000, guid: 6e9260e8140b1ea4a97d6cc9a137efca, type: 2}
-  - {fileID: 8600000, guid: a0e2ea8d6ec133f4fb7ad6f74d904820, type: 2}
-  - {fileID: 8600000, guid: 12347cc9d183cff41b75a6e1d133bff6, type: 2}
   AudioLink_CRTs:
   - {fileID: 8600000, guid: f51fa799ef0abde489235f40fc0328ef, type: 2}
   - {fileID: 8600000, guid: a4ea854836fbd3747b614c334c0182d8, type: 2}

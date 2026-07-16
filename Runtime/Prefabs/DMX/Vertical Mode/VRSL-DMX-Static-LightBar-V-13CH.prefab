@@ -144,10 +144,6 @@ MonoBehaviour:
   dmxChannel: 1
   dmxUniverse: 1
   nineUniverseMode: 0
-  useLegacySectorMode: 0
-  singleChannelMode: 0
-  sector: 0
-  Channel: 0
   legacyGoboRange: 0
   globalIntensity: 1
   finalIntensity: 1

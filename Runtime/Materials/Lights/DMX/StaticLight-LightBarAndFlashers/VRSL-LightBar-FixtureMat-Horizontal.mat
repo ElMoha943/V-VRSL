@@ -152,7 +152,6 @@ Material:
     - _DstBlend: 0
     - _EnableAlphaDMX: 0
     - _EnableAudioReact: 0
-    - _EnableCompatibilityMode: 0
     - _EnableDMX: 0
     - _EnableDMXAlpha: 0
     - _EnableOSC: 0

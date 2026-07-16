@@ -93,7 +93,6 @@ Material:
     - _DepthOcclusionTestZBias: -0.001
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
-    - _EnableCompatibilityMode: 0
     - _EnableDMX: 0
     - _EnableOSC: 0
     - _EnableStrobe: 0

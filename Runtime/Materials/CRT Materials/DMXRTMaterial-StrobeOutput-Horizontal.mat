@@ -12,8 +12,7 @@ Material:
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
-  m_InvalidKeywords:
-  - _DISABLESTROBE_ON
+  m_InvalidKeywords: []
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -71,14 +70,13 @@ Material:
     - _DetailNormalMapScale: 1
     - _DisableStrobe: 0
     - _DstBlend: 0
-    - _EnableCompatibilityMode: 0
     - _GlossMapScale: 1
     - _Glossiness: 0.5
     - _GlossyReflections: 1
     - _MaxStrobeFreq: 27
     - _Metallic: 0
     - _Mode: 0
-    - _NineUniverseMode: 0
+    - _NineUniverseMode: 1
     - _OcclusionStrength: 1
     - _Parallax: 0.02
     - _SmoothnessTextureChannel: 0

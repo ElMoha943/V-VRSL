@@ -1,5 +1,7 @@
 // Upgrade NOTE: replaced '_Object2World' with 'unity_ObjectToWorld'
 
+#include "../Shared/VRSL-RenderHelpers.cginc"
+
 #define IF(a, b, c) lerp(b, c, step((fixed) (a), 0));
 
         float3 getWpos(float depth, float3 ray)
@@ -18,13 +20,6 @@
         {
             return (mul(unity_WorldToObject,float4(wpos.x, wpos.y, wpos.z, 1)));
         }
-
-        inline float CorrectedLinearEyeDepth(float z, float B)
-        {
-            return 1.0 / (z/UNITY_MATRIX_P._34 + B);
-        }
-
-
 
         fixed4 ProjectionFrag(v2f i) : SV_Target
         {
@@ -57,16 +52,7 @@
             #endif
 
             #if _ALPHATEST_ON && !SHADER_API_GLES3
-                float2 pos = i.screenPos.xy / i.screenPos.w;
-                pos *= _ScreenParams.xy;
-                float DITHER_THRESHOLDS[16] =
-                {
-                    1.0 / 17.0,  9.0 / 17.0,  3.0 / 17.0, 11.0 / 17.0,
-                    13.0 / 17.0,  5.0 / 17.0, 15.0 / 17.0,  7.0 / 17.0,
-                    4.0 / 17.0, 12.0 / 17.0,  2.0 / 17.0, 10.0 / 17.0,
-                    16.0 / 17.0,  8.0 / 17.0, 14.0 / 17.0,  6.0 / 17.0
-                };
-                int index = (int)((uint(pos.x) % 4) * 4 + uint(pos.y) % 4);
+                float ditherThreshold = VRSL_GetDitherThreshold(i.screenPos);
             #endif
             
             if(i.color.g != 0)
@@ -101,7 +87,7 @@
                 #endif
                         return float4(0,0,0,1);
                 //Convert to Corrected LinearEyeDepth by DJ Lukis
-                float depth = CorrectedLinearEyeDepth(sceneZ, direction.w);
+                float depth = VRSL_CorrectedLinearEyeDepth(sceneZ, direction.w);
 
                 //Convert from Corrected Linear Eye Depth to Linear01Depth
                 //Credit: https://www.cyanilux.com/tutorials/depth/#eye-depth
@@ -172,8 +158,8 @@
                 
                 #if defined(_ALPHATEST_ON) && !SHADER_API_GLES3
                     col *= _AlphaProjectionIntensity;
-                    clip(col.a - DITHER_THRESHOLDS[index]);
-                    clip((((col.r + col.g + col.b)/3) * (_ClippingThreshold)) - DITHER_THRESHOLDS[index]);
+                    clip(col.a - ditherThreshold);
+                    clip((((col.r + col.g + col.b)/3) * (_ClippingThreshold)) - ditherThreshold);
                     return col;
                 #else
                     return col;

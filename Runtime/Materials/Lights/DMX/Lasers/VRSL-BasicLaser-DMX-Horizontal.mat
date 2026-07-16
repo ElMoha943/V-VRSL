@@ -95,8 +95,8 @@ Material:
     - _DetailNormalMapScale: 1
     - _DistFade: 0
     - _DstBlend: 0
-    - _EnableCompatibilityMode: 0
     - _EnableDMX: 0
+    - _EnableFineChannels: 0
     - _EnableOSC: 0
     - _EnableVerticalMode: 0
     - _EndFade: 3

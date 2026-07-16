@@ -80,8 +80,8 @@ Material:
     - _DMXChannel: 0
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
-    - _EnableCompatibilityMode: 0
     - _EnableDMX: 0
+    - _EnableFineChannels: 0
     - _EnableOSC: 0
     - _EnableVerticalMode: 1
     - _EndFade: 3

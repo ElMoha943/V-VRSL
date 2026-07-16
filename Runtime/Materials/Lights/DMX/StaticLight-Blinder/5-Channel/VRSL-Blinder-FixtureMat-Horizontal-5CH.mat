@@ -145,7 +145,6 @@ Material:
     - _DetailNormalMapScale: 1
     - _DistFade: 0.7
     - _DstBlend: 0
-    - _EnableCompatibilityMode: 0
     - _EnableDMX: 1
     - _EnableOSC: 1
     - _EnableSpin: 0

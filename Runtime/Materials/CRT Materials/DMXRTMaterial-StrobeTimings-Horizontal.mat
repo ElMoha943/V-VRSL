@@ -42,7 +42,7 @@ Material:
     - _LowFrequency: 25
     - _MaxStrobeFreq: 185
     - _MedFrequency: 45
-    - _NineUniverseMode: 0
+    - _NineUniverseMode: 1
     - _SmoothValue: 0.5
     - _StrobeType: 1
     m_Colors: []

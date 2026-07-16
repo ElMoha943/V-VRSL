@@ -147,7 +147,6 @@ Material:
     - _EnableAudioLink: 0
     - _EnableColorChord: 0
     - _EnableColorTextureSample: 0
-    - _EnableCompatibilityMode: 0
     - _EnableDMX: 0
     - _EnableFineChannels: 0
     - _EnableOSC: 1

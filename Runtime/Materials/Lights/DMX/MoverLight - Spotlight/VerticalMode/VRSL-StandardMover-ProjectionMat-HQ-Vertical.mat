@@ -132,7 +132,6 @@ Material:
     - _Divide: 11.6
     - _DividePower: 0.079
     - _EnableAudioReact: 0
-    - _EnableCompatibilityMode: 0
     - _EnableDMX: 0
     - _EnableOSC: 0
     - _EnableSpin: 1

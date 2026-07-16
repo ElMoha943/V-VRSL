@@ -143,7 +143,6 @@ Material:
     - _DistFade: 0.5
     - _Divide: 11.6
     - _DividePower: 0.043
-    - _EnableCompatibilityMode: 0
     - _EnableDMX: 0
     - _EnableExtraChannels: 0
     - _EnableOSC: 1
