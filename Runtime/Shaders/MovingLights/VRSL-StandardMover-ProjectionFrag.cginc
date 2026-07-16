@@ -1,9 +1,4 @@
-//CREDIT TO DJ LUKIS FOR MIRROR DEPTH CORRECTION
-inline float CorrectedLinearEyeDepth(float z, float B)
-{
-	return 1.0 / (z/UNITY_MATRIX_P._34 + B);
-}
-
+#include "../Shared/VRSL-RenderHelpers.cginc"
 
 #define IF(a, b, c) lerp(b, c, step((fixed) (a), 0));
 
@@ -192,17 +187,8 @@ inline float CorrectedLinearEyeDepth(float z, float B)
                 #endif
 
 
-                #if _ALPHATEST_ON && !SHADER_API_GLES3
-                    float2 pos = i.screenPos.xy / i.screenPos.w;
-                    pos *= _ScreenParams.xy;
-                    half DITHER_THRESHOLDS[16] =
-                    {
-                        1.0 / 17.0,  9.0 / 17.0,  3.0 / 17.0, 11.0 / 17.0,
-                        13.0 / 17.0,  5.0 / 17.0, 15.0 / 17.0,  7.0 / 17.0,
-                        4.0 / 17.0, 12.0 / 17.0,  2.0 / 17.0, 10.0 / 17.0,
-                        16.0 / 17.0,  8.0 / 17.0, 14.0 / 17.0,  6.0 / 17.0
-                    };
-                    int index = (int)((uint(pos.x) % 4) * 4 + uint(pos.y) % 4);
+				#if _ALPHATEST_ON && !SHADER_API_GLES3
+					half ditherThreshold = (half)VRSL_GetDitherThreshold(i.screenPos);
 		        #endif
 
 
@@ -244,7 +230,7 @@ inline float CorrectedLinearEyeDepth(float z, float B)
                         return float4(0,0,0,1);
 
                 
-                float depth = CorrectedLinearEyeDepth(sceneZ, depthdirect.w);
+				float depth = VRSL_CorrectedLinearEyeDepth(sceneZ, depthdirect.w);
 
                 //Convert from Corrected Linear Eye Depth to Linear01Depth
                 //Credit: https://www.cyanilux.com/tutorials/depth/#eye-depth
@@ -384,8 +370,8 @@ inline float CorrectedLinearEyeDepth(float z, float B)
                 col = IF( _EnableStaticEmissionColor == 1, half4(col.r * _RedMultiplier, col.g * _GreenMultiplier, col.b * _BlueMultiplier, col.a), col);
                 col *= _UniversalIntensity;
                 #if defined(_ALPHATEST_ON) && !SHADER_API_GLES3
-                    clip(col.a - DITHER_THRESHOLDS[index]);
-                    clip((((col.r + col.g + col.b)/3) * (_ClippingThreshold)) - DITHER_THRESHOLDS[index]);
+					clip(col.a - ditherThreshold);
+					clip((((col.r + col.g + col.b)/3) * (_ClippingThreshold)) - ditherThreshold);
                     return col;
                 #else
                     return col;

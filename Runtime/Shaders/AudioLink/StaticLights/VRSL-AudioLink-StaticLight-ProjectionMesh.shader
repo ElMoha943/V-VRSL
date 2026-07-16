@@ -199,14 +199,6 @@ Shader "VRSL/AudioLink/Standard Static/Projection"
 	}
 
 	
-	inline float4 CalculateFrustumCorrection()
-	{
-		float x1 = -UNITY_MATRIX_P._31/(UNITY_MATRIX_P._11*UNITY_MATRIX_P._34);
-		float x2 = -UNITY_MATRIX_P._32/(UNITY_MATRIX_P._22*UNITY_MATRIX_P._34);
-		return float4(x1, x2, 0, UNITY_MATRIX_P._33/UNITY_MATRIX_P._34 + x1*UNITY_MATRIX_P._13 + x2*UNITY_MATRIX_P._23);
-	}
-
-
 	//VERTEX SHADER
 	v2f vert (appdata v)
 	{
@@ -237,7 +229,7 @@ Shader "VRSL/AudioLink/Standard Static/Projection"
 		//For Mirror Depth Correction
 		o.worldDirection.xyz = o.worldPos.xyz - _WorldSpaceCameraPos;
 		// pack correction factor into direction w component to save space
-		o.worldDirection.w = dot(o.pos, CalculateFrustumCorrection());
+		o.worldDirection.w = dot(o.pos, VRSL_CalculateFrustumCorrection());
 		if(o.audioGlobalFinalIntensity.x <= 0.005 || o.audioGlobalFinalIntensity.y <= 0.005 || o.audioGlobalFinalIntensity.z <= 0.005 || all(o.emissionColor.xyz <= float4(0.005, 0.005, 0.005, 1.0)))
 		{
 			v.vertex = float4(0,0,0,0);

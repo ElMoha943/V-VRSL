@@ -2,15 +2,8 @@
 
 #define IF(a, b, c) lerp(b, c, step((fixed) (a), 0));
 
-//CREDIT TO DJ LUKIS FOR MIRROR DEPTH CORRECTION
-inline float CorrectedLinearEyeDepth(float z, float B)
-{
-	#if UNITY_REVERSED_Z
-	if (z == 0)
-		return LinearEyeDepth(z);
-	#endif
-	return 1.0 / (z/UNITY_MATRIX_P._34 + B);
-}
+#include "../Shared/VRSL-RenderHelpers.cginc"
+
 half Fresnel(half3 Normal, half3 ViewDir, half Power)
 {
     return pow(max(0, dot(Normal, -ViewDir)), Power);
@@ -78,16 +71,7 @@ half4 VolumetricLightingBRDF(v2f i, fixed facePos)
 
 
 		#if _ALPHATEST_ON && !SHADER_API_GLES3
-		    float2 pos = i.screenPos.xy / i.screenPos.w;
-            pos *= _ScreenParams.xy;
-			half DITHER_THRESHOLDS[16] =
-			{
-				1.0 / 17.0,  9.0 / 17.0,  3.0 / 17.0, 11.0 / 17.0,
-				13.0 / 17.0,  5.0 / 17.0, 15.0 / 17.0,  7.0 / 17.0,
-				4.0 / 17.0, 12.0 / 17.0,  2.0 / 17.0, 10.0 / 17.0,
-				16.0 / 17.0,  8.0 / 17.0, 14.0 / 17.0,  6.0 / 17.0
-			};
-			int index = (int)((uint(pos.x) % 4) * 4 + uint(pos.y) % 4);
+			half ditherThreshold = (half)VRSL_GetDitherThreshold(i.screenPos);
 		#endif
 
 
@@ -147,7 +131,7 @@ half4 VolumetricLightingBRDF(v2f i, fixed facePos)
 			depth = lerp(UNITY_NEAR_CLIP_VALUE, 1, depth);
 			#endif
 			//Correct for mirrors as Eye Depth
-			depth = CorrectedLinearEyeDepth(depth, direction.w);
+			depth = VRSL_CorrectedLinearEyeDepth(depth, direction.w);
 			//Convert to Raw Depth
 			depth = (1.0 - (depth * _ZBufferParams.w)) / (depth * _ZBufferParams.z);
 			//Convert to Linear01 Deppth
@@ -518,8 +502,8 @@ half4 VolumetricLightingBRDF(v2f i, fixed facePos)
 
 		#if defined(_ALPHATEST_ON) && !SHADER_API_GLES3
 			result = result * lastGrad * gifi * 0.25;
-			clip(result.a - DITHER_THRESHOLDS[index]);
-			clip((((result.r + result.g + result.b)/3)) - DITHER_THRESHOLDS[index]);
+			clip(result.a - ditherThreshold);
+			clip((((result.r + result.g + result.b)/3)) - ditherThreshold);
 			return result;
 		#else
 			return result * lastGrad;

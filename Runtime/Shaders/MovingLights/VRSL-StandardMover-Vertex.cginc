@@ -3,6 +3,7 @@
 #define IF(a, b, c) lerp(b, c, step((fixed) (a), 0));
 
 #include "../Shared/VRSL-FixtureState.cginc"
+#include "../Shared/VRSL-RenderHelpers.cginc"
 
 #ifdef VRSL_DMX
 	half4 calculateRotations(appdata v, half4 input, int normalsCheck, half pan, half tilt)
@@ -296,13 +297,6 @@ half4 ConeScale(appdata v, half4 input, half scalar)
 
 
 
-inline float4 CalculateFrustumCorrection()
-{
-	float x1 = -UNITY_MATRIX_P._31/(UNITY_MATRIX_P._11*UNITY_MATRIX_P._34);
-	float x2 = -UNITY_MATRIX_P._32/(UNITY_MATRIX_P._22*UNITY_MATRIX_P._34);
-	return float4(x1, x2, 0, UNITY_MATRIX_P._33/UNITY_MATRIX_P._34 + x1*UNITY_MATRIX_P._13 + x2*UNITY_MATRIX_P._23);
-}
-
 half2 GetStripeInfo(uint goboSelection)
 {
 	switch(goboSelection)
@@ -468,7 +462,7 @@ v2f vert (appdata v)
 			//For Mirror Depth Correction
 			o.worldDirection.xyz = o.worldPos.xyz - _WorldSpaceCameraPos;
 			// pack correction factor into direction w component to save space
-			o.worldDirection.w = dot(o.pos, CalculateFrustumCorrection());
+			o.worldDirection.w = dot(o.pos, VRSL_CalculateFrustumCorrection());
 			//o.viewDir = normalize(mul(UNITY_MATRIX_MV, v.vertex).xyz); // get normalized view dir
 			o.viewDir = normalize(UnityObjectToViewPos(v.vertex.xyz));
 			o.viewDir /= o.viewDir.z; // rescale vector so z is 1.0
@@ -523,7 +517,7 @@ v2f vert (appdata v)
 			//For Mirror Depth Correction
 			o.worldDirection.xyz = o.worldPos.xyz - _WorldSpaceCameraPos;
 			// pack correction factor into direction w component to save space
-			o.worldDirection.w = dot(o.pos, CalculateFrustumCorrection());
+			o.worldDirection.w = dot(o.pos, VRSL_CalculateFrustumCorrection());
 			//o.color = v.color;
 			//o.worldPos = mul(unity_ObjectToWorld, v.vertex);
 			//o.objPos = v.vertex;
@@ -705,7 +699,7 @@ v2f vert (appdata v)
 			//For Mirror Depth Correction
 			o.worldDirection.xyz = o.worldPos.xyz - _WorldSpaceCameraPos;
 			// pack correction factor into direction w component to save space
-			o.worldDirection.w = dot(o.pos, CalculateFrustumCorrection());
+			o.worldDirection.w = dot(o.pos, VRSL_CalculateFrustumCorrection());
 			//o.viewDir = normalize(mul(UNITY_MATRIX_MV, v.vertex).xyz);
 			o.viewDir = normalize(UnityObjectToViewPos(v.vertex.xyz)); // get normalized view dir
 			o.viewDir /= o.viewDir.z; // rescale vector so z is 1.0
@@ -759,7 +753,7 @@ v2f vert (appdata v)
 			#if _USE_DEPTH_LIGHT
 				o.worldDirection.xyz = o.worldPos.xyz - _WorldSpaceCameraPos;
 				// pack correction factor into direction w component to save space
-				o.worldDirection.w = dot(o.pos, CalculateFrustumCorrection());
+				o.worldDirection.w = dot(o.pos, VRSL_CalculateFrustumCorrection());
 			#else
 				o.worldDirection = half4(0,0,0,0);
 			#endif
