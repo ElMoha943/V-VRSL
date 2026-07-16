@@ -23,13 +23,34 @@ float4 CustomStandardLightingBRDF(
     //     return IF(isDMX() == 1, (getEmissionColor() * GetDMXColor(getChannelSectorX())) * strobe, getEmissionColor() * strobe);
     // }
 
-    if ((((i.uv.x) == 0.9 && (i.uv.y) == 0.9) || (5.0 <= ceil(i.color.g * 10)) <= 7.0 && ceil(i.color.r) != 0 && ceil(i.color.b) != 0))
+    float3 fixtureColorMask = ceil(i.color.rgb);
+    float fixtureColorBand = ceil(i.color.g * 10.0);
+    bool isFixtureEmitter = ((i.uv.x) == 0.0 && (i.uv.y) == 0.0) || _PureEmissiveToggle == 1;
+
+    if ((((i.uv.x) == 0.9 && (i.uv.y) == 0.9) || (5.0 <= fixtureColorBand) <= 7.0 && fixtureColorMask.r != 0 && fixtureColorMask.b != 0))
     {
         discard;
         return float4(0,0,0,0);      
     }
 
-    else if((!(ceil(i.color.r) != 0 && ceil(i.color.g) != 1 && ceil(i.color.b) != 0)) || _PureEmissiveToggle != 0)
+    #ifdef VRSL_AUDIOLINK
+    UNITY_BRANCH
+    if(isFixtureEmitter)
+    {
+        // AudioLink emission replaces the surface result, so avoid evaluating PBR for these pixels.
+        #ifdef _LIGHTING_MODEL
+            UNITY_APPLY_DITHER_CROSSFADE(i.pos.xy);
+            UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
+            half al = Alpha(i.uv);
+        #else
+            half al = 1.0;
+        #endif
+
+        return float4(VRSL_FinalizeMovingAudioFixtureEmission(i.btn[0], i.uv1.y), al);
+    }
+    #endif
+
+    if((!(fixtureColorMask.r != 0 && fixtureColorMask.g != 1 && fixtureColorMask.b != 0)) || _PureEmissiveToggle != 0)
     {
         #ifdef _LIGHTING_MODEL
         UNITY_APPLY_DITHER_CROSSFADE(i.pos.xy);
@@ -137,7 +158,7 @@ float4 CustomStandardLightingBRDF(
         
         //LIGHT BULB COLOR/////////////////////////
         #ifdef VRSL_DMX
-            if(((i.uv.x) == 0.0 && (i.uv.y) == 0.0 || _PureEmissiveToggle == 1))
+            if(isFixtureEmitter)
             {
                 lighting += VRSL_GetDMXFixtureEmission(i.rgbColor, i.intensityStrobe.x, i.intensityStrobe.y);
 
@@ -150,17 +171,8 @@ float4 CustomStandardLightingBRDF(
             }
         #endif
         #ifdef VRSL_AUDIOLINK
-            if(((i.uv.x) == 0.0 && (i.uv.y) == 0.0 || _PureEmissiveToggle == 1))
-            {
-                lighting = VRSL_GetMovingAudioFixtureEmission(i.uv1.y);
-
-                return float4(lighting, al);
-            }
-            else
-            {
-                lighting += VRSL_GetDecorativeFixtureEmission(i.uv);
-                return float4(lighting, al);
-            }
+            lighting += VRSL_GetDecorativeFixtureEmission(i.uv);
+            return float4(lighting, al);
         #endif
         //////////////////////
         

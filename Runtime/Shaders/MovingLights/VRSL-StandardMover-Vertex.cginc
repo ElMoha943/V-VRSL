@@ -659,14 +659,6 @@ v2f vert (appdata v)
 		#endif
 
 		#if !defined(PROJECTION_YES) && !defined(VOLUMETRIC_YES)
-			//calculate rotations for normals, cast to half4 first with 0 as w
-			half4 newNormals = half4(v.normal.x, v.normal.y, v.normal.z, 0);
-			v.normal = newNormals.xyz;
-
-			//calculate rotations for tangents, cast to half4 first with 0 as w
-			half4 newTangent = half4(v.tangent.x, v.tangent.y, v.tangent.z, 0);
-			v.tangent = newTangent.xyz;
-
 			//original surface shader related code
 			half3 worldNormal = UnityObjectToWorldNormal(v.normal);
 			half3 tangent = UnityObjectToWorldDir(v.tangent);
@@ -785,13 +777,24 @@ v2f vert (appdata v)
 			#endif
 		#endif
 		
-		#if !defined(UNITY_PASS_SHADOWCASTER) && !defined(PROJECTION_YES) && !defined(VOLUMETRIC_YES)
+		#if defined(FIXTURE_EMIT) && !defined(UNITY_PASS_SHADOWCASTER) && !defined(PROJECTION_YES) && !defined(VOLUMETRIC_YES)
 		
 		o.color = v.color;
 		o.worldPos = mul(unity_ObjectToWorld, v.vertex);
 		o.btn[0] = bitangent;
 		o.btn[1] = tangent;
 		o.btn[2] = worldNormal;
+		if(((o.uv.x == 0.0) && (o.uv.y == 0.0)) || _PureEmissiveToggle == 1)
+		{
+			// The emissive fragment fast path does not consume the bitangent.
+			// Reuse that interpolator to evaluate fixture-wide AudioLink state per vertex.
+			float audioAmplitude = 1.0;
+			#ifndef RAW
+				fixtureState = VRSL_LoadFixtureAudioState(fixtureState);
+				audioAmplitude = fixtureState.audioAmplitude;
+			#endif
+			o.btn[0] = VRSL_GetMovingAudioFixtureEmissionBase(audioAmplitude);
+		}
 		#ifdef _LIGHTING_MODEL
 			o.eyeVec.xyz = NormalizePerVertexNormal(o.worldPos.xyz - _WorldSpaceCameraPos);
 			o.ambientOrLightmapUV = VertexGIForward(v, o.worldPos, o.btn[2]);

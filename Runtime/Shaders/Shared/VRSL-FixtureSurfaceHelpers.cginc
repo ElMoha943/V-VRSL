@@ -53,31 +53,37 @@ inline float3 VRSL_GetDMXFixtureEmission(float4 fixtureColor, float fixtureInten
 #endif
 
 #if defined(VRSL_AUDIOLINK)
-inline float3 VRSL_GetMovingAudioFixtureEmission(float washMask)
+inline float3 VRSL_GetMovingAudioFixtureEmissionBase(float audioAmplitude)
 {
     float fixtureIntensity = VRSL_GetAudioFixtureIntensity();
     float4 emission = getEmissionColor() * (_FixtureMaxIntensity * 1500.0);
     emission = clamp(emission, 0.0, _LensMaxBrightness * 100.0 * fixtureIntensity);
 
 #if !defined(RAW)
-    emission.rgb *= GetAudioReactAmplitude();
+    emission.rgb *= audioAmplitude;
 #endif
     emission.rgb *= fixtureIntensity;
+
+    return emission.rgb;
+}
+
+inline float3 VRSL_FinalizeMovingAudioFixtureEmission(float3 emission, float washMask)
+{
 
 #if defined(WASH)
     if(washMask > 0.0)
     {
-        emission.rgb = saturate(emission.rgb) - 0.25;
+        emission = saturate(emission) - 0.25;
     }
 #endif
 
-    float averageLighting = dot(emission.rgb, float3(0.333333, 0.333333, 0.333333));
+    float averageLighting = dot(emission, float3(0.333333, 0.333333, 0.333333));
 #if defined(RAW)
     float saturationBlend = _Saturation * _Saturation;
 #else
     float saturationBlend = _Saturation;
 #endif
-    return lerp(emission.rgb, averageLighting.xxx, saturationBlend);
+    return lerp(emission, averageLighting.xxx, saturationBlend);
 }
 #endif
 #endif
