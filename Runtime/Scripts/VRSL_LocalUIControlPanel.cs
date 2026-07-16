@@ -169,6 +169,8 @@ namespace VRSL
         const string KW_MAGIC_NOISE_ON_HIGH = "_MAGIC_NOISE_ON_HIGH";
         const string KW_HQ_MODE = "_HQ_MODE";
         const string KW_ALPHATEST_ON = "_ALPHATEST_ON";
+        const string KW_VOLUMETRIC_QUALITY_HIGH = "_VRSL_VOLUMETRIC_QUALITY_HIGH";
+        const string KW_VOLUMETRIC_QUALITY_LOW = "_VRSL_VOLUMETRIC_QUALITY_LOW";
 
         public bool VolumetricNoise
         {
@@ -472,14 +474,19 @@ namespace VRSL
 
         void _SyncVolumetricKeywords(Material target)
         {
-            if (target.HasProperty(KW_MAGIC_NOISE_ON_MED))
-            {
-                SetKeyword(target, KW_MAGIC_NOISE_ON_MED, (Mathf.FloorToInt(target.GetInt(KW_MAGIC_NOISE_ON_MED))) == 1);
-            }
-            if (target.HasProperty(KW_MAGIC_NOISE_ON_HIGH))
-            {
-                SetKeyword(target, KW_MAGIC_NOISE_ON_HIGH, (Mathf.FloorToInt(target.GetInt(KW_MAGIC_NOISE_ON_HIGH))) == 1);
-            }
+            int renderMode = Mathf.FloorToInt(target.GetInt("_RenderMode"));
+            bool highQuality = renderMode == 0;
+
+            SetKeyword(target, KW_VOLUMETRIC_QUALITY_HIGH, highQuality);
+            SetKeyword(target, KW_VOLUMETRIC_QUALITY_LOW, renderMode == 2);
+            SetKeyword(target, KW_HQ_MODE, false);
+            SetKeyword(target, KW_ALPHATEST_ON, false);
+
+            bool highNoise = target.HasProperty(KW_MAGIC_NOISE_ON_HIGH) && (Mathf.FloorToInt(target.GetInt(KW_MAGIC_NOISE_ON_HIGH)) == 1);
+            bool mediumNoise = target.HasProperty(KW_MAGIC_NOISE_ON_MED) && (Mathf.FloorToInt(target.GetInt(KW_MAGIC_NOISE_ON_MED)) == 1);
+            SetKeyword(target, KW_MAGIC_NOISE_ON_HIGH, highQuality && highNoise);
+            SetKeyword(target, KW_MAGIC_NOISE_ON_MED, !highQuality && mediumNoise);
+
             if (target.HasProperty(_UseDepthLightID))
             {
                 SetKeyword(target, KW_USE_DEPTH_LIGHT, (Mathf.FloorToInt(target.GetInt(_UseDepthLightID))) == 1);
@@ -487,10 +494,6 @@ namespace VRSL
             if (target.HasProperty(_PotatoModeID))
             {
                 SetKeyword(target, KW_POTATO_MODE_ON, (Mathf.FloorToInt(target.GetInt(_PotatoModeID))) == 1);
-            }
-            if (target.HasProperty("_HQMode"))
-            {
-                SetKeyword(target, KW_HQ_MODE, (Mathf.FloorToInt(target.GetInt("_HQMode"))) == 1);
             }
         }
 
@@ -908,18 +911,7 @@ namespace VRSL
                 {
                     if (mat == null) { continue; }
                     mat.SetInt(_PotatoModeID, potato);
-                    if (mat.HasProperty(KW_MAGIC_NOISE_ON_MED))
-                    {
-                        SetKeyword(mat, KW_MAGIC_NOISE_ON_MED, (Mathf.FloorToInt(mat.GetInt(KW_MAGIC_NOISE_ON_MED))) == 1);
-                    }
-                    if (mat.HasProperty(KW_MAGIC_NOISE_ON_HIGH))
-                    {
-                        SetKeyword(mat, KW_MAGIC_NOISE_ON_HIGH, (Mathf.FloorToInt(mat.GetInt(KW_MAGIC_NOISE_ON_HIGH))) == 1);
-                    }
-                    if (mat.HasProperty(_PotatoModeID))
-                    {
-                        SetKeyword(mat, KW_POTATO_MODE_ON, potato == 1);
-                    }
+                    _SyncVolumetricKeywords(mat);
                 }
             }
         }
@@ -1216,7 +1208,6 @@ namespace VRSL
                 if (volumetricQuality == VolumetricQualityModes.High)
                 {
                     target.SetOverrideTag("RenderType", "Transparent");
-                    target.DisableKeyword(KW_ALPHATEST_ON);
                     //target.SetInt("_BlendSrc", 1);
                     target.SetInt("_BlendDst", 1);
                     target.SetInt("_ZWrite", 0);
@@ -1230,7 +1221,6 @@ namespace VRSL
                 else if (volumetricQuality == VolumetricQualityModes.Medium)
                 {
                     target.SetOverrideTag("RenderType", "Transparent");
-                    target.DisableKeyword(KW_ALPHATEST_ON);
                     //target.SetInt("_BlendSrc", 1);
                     target.SetInt("_BlendDst", 1);
                     target.SetInt("_ZWrite", 0);
@@ -1244,7 +1234,6 @@ namespace VRSL
                 else
                 {
                     target.SetOverrideTag("RenderType", "Opaque");
-                    target.EnableKeyword(KW_ALPHATEST_ON);
                     //target.SetInt("_BlendSrc", 0);
                     target.SetInt("_BlendDst", 0);
                     target.SetInt("_ZWrite", 1);

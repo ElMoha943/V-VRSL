@@ -63,9 +63,9 @@ Shader "VRSL/AudioLink/Standard Mover/Volumetric"
 		_NoiseTexHigh ("NoiseTexHigh", 2D) = "white" {}
 		_NoisePower("Noise Strength", Range(0, 1)) = 1
 		_NoiseSeed ("Noise Seed", float) = 0
-		[Toggle]_MAGIC_NOISE_ON_HIGH ("Toggle Magic Noise", Int) = 1
-		[Toggle]_MAGIC_NOISE_ON_MED ("Toggle Magic Noise", Int) = 1
-		[Toggle]_2D_NOISE_ON ("Toggle 2D Noise", Int) = 1
+		[Toggle(_MAGIC_NOISE_ON_HIGH)]_MAGIC_NOISE_ON_HIGH ("Toggle Magic Noise", Int) = 1
+		[Toggle(_MAGIC_NOISE_ON_MED)]_MAGIC_NOISE_ON_MED ("Toggle Magic Noise", Int) = 1
+		[Toggle(_2D_NOISE_ON)]_2D_NOISE_ON ("Toggle 2D Noise", Int) = 1
 
 
 		_Noise2Stretch ("Outside Magic Noise Scale", Range(-10, 10)) = 1
@@ -123,9 +123,9 @@ Shader "VRSL/AudioLink/Standard Mover/Volumetric"
 
 		_MinimumBeamRadius ("Minimum Beam Radius", Range(0.001,1)) = 1
 
-		[Toggle]_UseDepthLight("Toggle The Requirement of the depth light to function.", Int) = 1
-		[Toggle]_PotatoMode("Reduces the overhead on the fragment shader by removing both noise components to extra texture sampling", Int) = 0
-		[Toggle]_HQMode("A higher quality volumetric mode (Experimental)", Int) = 0
+		[Toggle(_USE_DEPTH_LIGHT)]_UseDepthLight("Toggle The Requirement of the depth light to function.", Int) = 1
+		[Toggle(_POTATO_MODE_ON)]_PotatoMode("Reduces the overhead on the fragment shader by removing both noise components to extra texture sampling", Int) = 0
+		[Toggle(_VRSL_VOLUMETRIC_QUALITY_HIGH)]_HQMode("A higher quality volumetric mode (Experimental)", Int) = 0
 		[Toggle]_UseTraditionalSampling("Use Traditional Texture Sampling", Int) = 0
 
 		[Enum(Off,0,One,1)] _BlendDst ("Destination Blend mode", Float) = 1
@@ -171,13 +171,16 @@ Shader "VRSL/AudioLink/Standard Mover/Volumetric"
 			#pragma vertex vert
 			#pragma fragment frag
 			//#pragma multi_compile_fog
-			#pragma multi_compile_local _ _MAGIC_NOISE_ON_HIGH
-			#pragma multi_compile_local _ _MAGIC_NOISE_ON_MED
+			#pragma multi_compile_local _ _MAGIC_NOISE_ON_MED _MAGIC_NOISE_ON_HIGH
 			#pragma multi_compile_local _ _USE_DEPTH_LIGHT
 			#pragma multi_compile_local _ _POTATO_MODE_ON
-			#pragma multi_compile_local _ _HQ_MODE
 			#pragma multi_compile_local _ _2D_NOISE_ON
-			#pragma multi_compile_local _ _ALPHATEST_ON
+			#pragma multi_compile_local _ _VRSL_VOLUMETRIC_QUALITY_HIGH _VRSL_VOLUMETRIC_QUALITY_LOW
+			#if defined(_VRSL_VOLUMETRIC_QUALITY_HIGH)
+				#define _HQ_MODE
+			#elif defined(_VRSL_VOLUMETRIC_QUALITY_LOW)
+				#define _ALPHATEST_ON
+			#endif
 			#pragma multi_compile_instancing
 			#pragma instancing_options assumeuniformscaling
 			#define VOLUMETRIC_YES //To identify the pass in the vert/frag

@@ -1309,7 +1309,6 @@ public class VRSLInspector : ShaderGUI
             if(target.GetInt("_RenderMode") == 0)
             {
                 target.SetOverrideTag("RenderType", "Transparent");
-                target.DisableKeyword("_ALPHATEST_ON");  
                 //target.SetInt("_BlendSrc", 1);
                 target.SetInt("_BlendDst", 1);
                 target.SetInt("_ZWrite", 0);
@@ -1320,7 +1319,6 @@ public class VRSLInspector : ShaderGUI
             else if(target.GetInt("_RenderMode") == 1) 
             {
                 target.SetOverrideTag("RenderType", "Transparent");
-                target.DisableKeyword("_ALPHATEST_ON");  
                 //target.SetInt("_BlendSrc", 1);
                 target.SetInt("_BlendDst", 1);
                 target.SetInt("_ZWrite", 0);
@@ -1331,7 +1329,6 @@ public class VRSLInspector : ShaderGUI
             else
             {
                 target.SetOverrideTag("RenderType", "Opaque");
-                target.EnableKeyword("_ALPHATEST_ON");
                 //target.SetInt("_BlendSrc", 0);
                 target.SetInt("_BlendDst", 0);
                 target.SetInt("_ZWrite", 1);
@@ -1339,6 +1336,7 @@ public class VRSLInspector : ShaderGUI
                 target.SetInt("_HQMode", 0);
                 target.renderQueue = 2452;
             }
+            SetVolumetricQualityKeywords(target);
             GUILayout.Space(5);
             matEditor.ShaderProperty(_UseDepthLight, new GUIContent("Use Depth Light", "Enable/Disable the reliance of the depth light for this volumetric shader."));
             GUILayout.Space(5);
@@ -1473,13 +1471,11 @@ public class VRSLInspector : ShaderGUI
                     matEditor.ShaderProperty(_PotatoMode, new GUIContent("Potato Mode", "Reduces the overhead on the fragment shader by removing both noise components to extra texture sampling."));
                 }
                 
-                SetKeyword(target, "_MAGIC_NOISE_ON_HIGH", (Mathf.FloorToInt(target.GetInt("_MAGIC_NOISE_ON_HIGH"))) == 1 ? true : false);
-                SetKeyword(target, "_MAGIC_NOISE_ON_MED", (Mathf.FloorToInt(target.GetInt("_MAGIC_NOISE_ON_MED"))) == 1 ? true : false);
+                SetVolumetricMagicNoiseKeywords(target);
 
 
                 SetKeyword(target, "_USE_DEPTH_LIGHT", (Mathf.FloorToInt(target.GetInt("_UseDepthLight"))) == 1 ? true : false);
                 SetKeyword(target, "_POTATO_MODE_ON", (Mathf.FloorToInt(target.GetInt("_PotatoMode"))) == 1 ? true : false);
-                SetKeyword(target, "_HQ_MODE", (Mathf.FloorToInt(target.GetInt("_HQMode"))) == 1 ? true : false);
                 SetKeyword(target, "_2D_NOISE_ON", (Mathf.FloorToInt(target.GetInt("_2D_NOISE_ON"))) == 1 ? true : false);
 
 
@@ -1973,6 +1969,24 @@ public class VRSLInspector : ShaderGUI
         return "Shader: " + dmx + " " + lightType + ": " + shaderType;
 
     }
+
+        static void SetVolumetricQualityKeywords(Material mat)
+        {
+            int renderMode = Mathf.FloorToInt(mat.GetInt("_RenderMode"));
+            SetKeyword(mat, "_VRSL_VOLUMETRIC_QUALITY_HIGH", renderMode == 0);
+            SetKeyword(mat, "_VRSL_VOLUMETRIC_QUALITY_LOW", renderMode == 2);
+            mat.DisableKeyword("_HQ_MODE");
+            mat.DisableKeyword("_ALPHATEST_ON");
+        }
+
+        static void SetVolumetricMagicNoiseKeywords(Material mat)
+        {
+            bool highQuality = Mathf.FloorToInt(mat.GetInt("_RenderMode")) == 0;
+            bool highEnabled = Mathf.FloorToInt(mat.GetInt("_MAGIC_NOISE_ON_HIGH")) == 1;
+            bool mediumEnabled = Mathf.FloorToInt(mat.GetInt("_MAGIC_NOISE_ON_MED")) == 1;
+            SetKeyword(mat, "_MAGIC_NOISE_ON_HIGH", highQuality && highEnabled);
+            SetKeyword(mat, "_MAGIC_NOISE_ON_MED", !highQuality && mediumEnabled);
+        }
 
         public static void SetKeyword(Material mat, string keyword, bool status)
         {
